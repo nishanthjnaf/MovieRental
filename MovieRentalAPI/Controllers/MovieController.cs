@@ -1,79 +1,143 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
-using MovieRentalAPI.Services;
 
-    namespace MovieRentalAPI.Controllers
-
+namespace MovieRentalAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MovieController : ControllerBase
     {
-        [ApiController]
-        [Route("api/[controller]")]
-        public class MovieController : ControllerBase
+        private readonly IMovieServices _movieService;
+
+        public MovieController(IMovieServices movieService)
         {
-            private readonly IMovieServices _movieService;
-            public MovieController(IMovieServices movieService)
-            {
-                _movieService = movieService;
-            }
+            _movieService = movieService;
+        }
 
-
-            [HttpPost]
-            public async Task<ActionResult<CreateMovieResponseDto>> AddMovie(
-                CreateMovieRequestDto request)
+        [HttpPost]
+        public async Task<IActionResult> AddMovie(CreateMovieRequestDto request)
+        {
+            try
             {
                 var result = await _movieService.AddMovie(request);
                 return Ok(result);
             }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-            [HttpGet("{id}")]
-            public async Task<ActionResult<CreateMovieResponseDto>> GetMovie(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMovie(int id)
+        {
+            try
             {
                 var result = await _movieService.GetMovieById(id);
-                if (result == null)
-                    return NotFound("Movie not found");
                 return Ok(result);
             }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-            [HttpGet]
-            public async Task<ActionResult<IEnumerable<CreateMovieResponseDto>>> GetAllMovies()
+        [HttpGet]
+        public async Task<IActionResult> GetAllMovies()
+        {
+            try
             {
                 var result = await _movieService.GetAllMovies();
                 return Ok(result);
             }
-            [HttpGet("search")]
-            public async Task<IActionResult> SearchMovies(
-                   [FromQuery] MovieSearchRequestDto request)
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchMovies(
+            [FromQuery] MovieSearchRequestDto request)
+        {
+            try
             {
                 var result = await _movieService.SearchMovies(request);
                 return Ok(result);
             }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-            [HttpPut("{id}")]
-            public async Task<ActionResult<CreateMovieResponseDto>> UpdateMovie(
-                int id, CreateMovieRequestDto request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateMovie(
+            int id,
+            CreateMovieRequestDto request)
+        {
+            try
             {
                 var result = await _movieService.UpdateMovie(id, request);
-                if (result == null)
-                    return NotFound("Movie not found");
                 return Ok(result);
             }
-
-            [HttpDelete("{id}")]
-            public async Task<ActionResult> DeleteMovie(int id)
+            catch (BadRequestException ex)
             {
-                var success = await _movieService.DeleteMovie(id);
-                if (!success)
-                    return NotFound("Movie not found");
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMovie(int id)
+        {
+            try
+            {
+                await _movieService.DeleteMovie(id);
                 return Ok("Movie deleted successfully");
             }
-        [HttpGet("top-rented")]
-        public async Task<IActionResult> GetTopRentedMovies([FromQuery] int count = 5)
-        {
-            var result = await _movieService.GetTopRentedMovies(count);
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-            return Ok(result);
+        [HttpGet("top-rented")]
+        public async Task<IActionResult> GetTopRentedMovies(
+            [FromQuery] int count = 5)
+        {
+            try
+            {
+                var result =
+                    await _movieService.GetTopRentedMovies(count);
+
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
-    }
-
- 
+}

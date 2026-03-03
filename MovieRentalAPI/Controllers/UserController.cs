@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
-using MovieRentalAPI.Services;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -19,54 +19,75 @@ namespace MovieRentalAPI.Controllers
         [HttpGet("{userId}/rented-movies")]
         public async Task<IActionResult> GetRentedMovies(int userId)
         {
-            var result = await _userServices.GetAllRentedMovies(userId);
-
-            return Ok(result);
+            try
+            {
+                var result = await _userServices.GetAllRentedMovies(userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseDto>> GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
-            var user = await _userServices.GetUserById(id);
-
-            if (user == null)
-                return NotFound();
-
-            return Ok(user);
+            try
+            {
+                var user = await _userServices.GetUserById(id);
+                return Ok(user);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // ✅ Get All Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userServices.GetAllUsers();
-            return Ok(users);
+            try
+            {
+                var users = await _userServices.GetAllUsers();
+                return Ok(users);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // ✅ Update User
         [HttpPut("{id}")]
-        public async Task<ActionResult<UserResponseDto>> UpdateUser(
-            int id,
-            UpdateUserRequestDto request)
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserRequestDto request)
         {
-            var updated = await _userServices.UpdateUser(id, request);
-
-            if (updated == null)
-                return NotFound();
-
-            return Ok(updated);
+            try
+            {
+                var updated = await _userServices.UpdateUser(id, request);
+                return Ok(updated);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // ✅ Delete User
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var success = await _userServices.DeleteUser(id);
-
-            if (!success)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                await _userServices.DeleteUser(id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

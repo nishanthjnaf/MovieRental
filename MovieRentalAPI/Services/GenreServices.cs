@@ -1,4 +1,5 @@
-﻿using MovieRentalAPI.Interfaces;
+﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
 
@@ -19,6 +20,16 @@ namespace MovieRentalAPI.Services
 
         public async Task<GenreResponseDto> AddGenre(GenreRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new BadRequestException("Genre name is required");
+
+            var existingGenres = await _genreRepository.GetAll();
+
+            if (existingGenres != null &&
+                existingGenres.Any(g =>
+                    g.Name.ToLower() == request.Name.ToLower()))
+                throw new ConflictException("Genre already exists");
+
             var genre = new Genre
             {
                 Name = request.Name,
@@ -27,6 +38,9 @@ namespace MovieRentalAPI.Services
 
             var added = await _genreRepository.Add(genre);
 
+            if (added == null)
+                throw new Exception("Genre creation failed");
+
             return MapToResponse(added);
         }
 
@@ -34,58 +48,78 @@ namespace MovieRentalAPI.Services
         {
             var genres = await _genreRepository.GetAll();
 
-            if (genres == null)
-                return new List<GenreResponseDto>();
+            if (genres == null || !genres.Any())
+                throw new NotFoundException("No genres found");
 
             return genres.Select(MapToResponse);
         }
 
-        public async Task<GenreResponseDto?> GetGenreById(int id)
+        public async Task<GenreResponseDto> GetGenreById(int id)
         {
             var genre = await _genreRepository.Get(id);
-            return genre == null ? null : MapToResponse(genre);
+
+            if (genre == null)
+                throw new NotFoundException("Genre not found");
+
+            return MapToResponse(genre);
         }
 
-        public async Task<GenreResponseDto?> UpdateGenre(int id, GenreRequestDto request)
+        public async Task<GenreResponseDto> UpdateGenre(int id, GenreRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new BadRequestException("Genre name cannot be empty");
+
             var existing = await _genreRepository.Get(id);
 
             if (existing == null)
-                return null;
+                throw new NotFoundException("Genre not found");
 
             existing.Name = request.Name;
             existing.Description = request.Description;
 
             var updated = await _genreRepository.Update(id, existing);
 
-            return updated == null ? null : MapToResponse(updated);
+            if (updated == null)
+                throw new Exception("Genre update failed");
+
+            return MapToResponse(updated);
         }
 
         public async Task<bool> DeleteGenre(int id)
         {
+            var existing = await _genreRepository.Get(id);
+
+            if (existing == null)
+                throw new NotFoundException("Genre not found");
+
             var deleted = await _genreRepository.Delete(id);
-            return deleted != null;
+
+            if (deleted == null)
+                throw new Exception("Genre deletion failed");
+
+            return true;
         }
 
         public async Task<bool> AssignGenreToMovie(int movieId, int genreId)
         {
             var movie = await _movieRepository.Get(movieId);
+
+            if (movie == null)
+                throw new NotFoundException("Movie not found");
+
             var genre = await _genreRepository.Get(genreId);
 
-            if (movie == null || genre == null)
-                return false;
+            if (genre == null)
+                throw new NotFoundException("Genre not found");
 
             movie.Genres ??= new List<Genre>();
-            genre.Movies ??= new List<Movie>();
 
-            if (!movie.Genres.Contains(genre))
-            {
-                movie.Genres.Add(genre);
-                genre.Movies.Add(movie);
-            }
+            if (movie.Genres.Any(g => g.Id == genreId))
+                throw new ConflictException("Genre already assigned to this movie");
+
+            movie.Genres.Add(genre);
 
             await _movieRepository.Update(movieId, movie);
-            await _genreRepository.Update(genreId, genre);
 
             return true;
         }
@@ -95,8 +129,11 @@ namespace MovieRentalAPI.Services
             var genre = await _genreRepository
                 .GetWithInclude(genreId, g => g.Movies);
 
-            if (genre?.Movies == null)
-                return new List<CreateMovieResponseDto>();
+            if (genre == null)
+                throw new NotFoundException("Genre not found");
+
+            if (genre.Movies == null || !genre.Movies.Any())
+                throw new NotFoundException("No movies found for this genre");
 
             return genre.Movies.Select(m => new CreateMovieResponseDto
             {

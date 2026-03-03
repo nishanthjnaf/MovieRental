@@ -1,4 +1,5 @@
-﻿using MovieRentalAPI.Interfaces;
+﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
 
@@ -22,17 +23,24 @@ namespace MovieRentalAPI.Services
 
         public async Task<WatchlistResponseDto> AddToWatchlist(WatchlistRequestDto request)
         {
-            var user = await _userRepo.Get(request.UserId);
-            var movie = await _movieRepo.Get(request.MovieId);
+            if (request.UserId <= 0 || request.MovieId <= 0)
+                throw new BadRequestException("Invalid user or movie id");
 
-            if (user == null || movie == null)
-                throw new Exception("Invalid User or Movie");
+            var user = await _userRepo.Get(request.UserId);
+            if (user == null)
+                throw new NotFoundException("User not found");
+
+            var movie = await _movieRepo.Get(request.MovieId);
+            if (movie == null)
+                throw new NotFoundException("Movie not found");
 
             var existing = (await _watchlistRepo.GetAll())
-                ?.FirstOrDefault(w => w.UserId == request.UserId && w.MovieId == request.MovieId);
+                ?.FirstOrDefault(w =>
+                    w.UserId == request.UserId &&
+                    w.MovieId == request.MovieId);
 
             if (existing != null)
-                throw new Exception("Movie already in watchlist");
+                throw new ConflictException("Movie already exists in watchlist");
 
             var watchlist = new Watchlist
             {
@@ -41,6 +49,9 @@ namespace MovieRentalAPI.Services
             };
 
             var added = await _watchlistRepo.Add(watchlist);
+
+            if (added == null)
+                throw new Exception("Failed to add to watchlist");
 
             return new WatchlistResponseDto
             {
@@ -53,11 +64,18 @@ namespace MovieRentalAPI.Services
 
         public async Task<IEnumerable<WatchlistResponseDto>> GetUserWatchlist(int userId)
         {
+            var user = await _userRepo.Get(userId);
+            if (user == null)
+                throw new NotFoundException("User not found");
+
             var list = await _watchlistRepo.GetAll();
 
-            var userList = list
+            var userList = list?
                 .Where(w => w.UserId == userId)
                 .ToList();
+
+            if (userList == null || !userList.Any())
+                throw new NotFoundException("Watchlist is empty");
 
             var result = new List<WatchlistResponseDto>();
 
@@ -79,8 +97,17 @@ namespace MovieRentalAPI.Services
 
         public async Task<bool> RemoveFromWatchlist(int id)
         {
+            var existing = await _watchlistRepo.Get(id);
+
+            if (existing == null)
+                throw new NotFoundException("Watchlist item not found");
+
             var deleted = await _watchlistRepo.Delete(id);
-            return deleted != null;
+
+            if (deleted == null)
+                throw new Exception("Failed to remove watchlist item");
+
+            return true;
         }
     }
 }

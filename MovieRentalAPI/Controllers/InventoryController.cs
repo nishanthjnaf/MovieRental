@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
 
@@ -16,75 +17,113 @@ namespace MovieRentalAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<InventoryResponseDto>> AddInventory(
-            InventoryRequestDto request)
+        public async Task<IActionResult> AddInventory(InventoryRequestDto request)
         {
-            var result = await _inventoryService.AddInventory(request);
-            return Ok(result);
+            try
+            {
+                var result = await _inventoryService.AddInventory(request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<InventoryResponseDto>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _inventoryService.GetAllInventory();
-            return Ok(result);
+            try
+            {
+                var result = await _inventoryService.GetAllInventory();
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<InventoryResponseDto>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await _inventoryService.GetInventoryById(id);
-
-            if (result == null)
-                return NotFound("Inventory not found");
-
-            return Ok(result);
+            try
+            {
+                var result = await _inventoryService.GetInventoryById(id);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("movie/{movieId}")]
-        public async Task<ActionResult<InventoryResponseDto>> GetByMovie(int movieId)
+        public async Task<IActionResult> GetByMovie(int movieId)
         {
-            var result = await _inventoryService.GetInventoryByMovie(movieId);
-
-            if (result == null)
-                return NotFound("Inventory not found for this movie");
-
-            return Ok(result);
+            try
+            {
+                var result = await _inventoryService.GetInventoryByMovie(movieId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<InventoryResponseDto>> Update(
-            int id,
-            InventoryRequestDto request)
+        public async Task<IActionResult> Update(int id, InventoryRequestDto request)
         {
-            var result = await _inventoryService.UpdateInventory(id, request);
-
-            if (result == null)
-                return NotFound("Inventory not found");
-
-            return Ok(result);
+            try
+            {
+                var result = await _inventoryService.UpdateInventory(id, request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var success = await _inventoryService.DeleteInventory(id);
-
-            if (!success)
-                return NotFound("Inventory not found");
-
-            return Ok("Inventory deleted successfully");
+            try
+            {
+                await _inventoryService.DeleteInventory(id);
+                return Ok("Inventory deleted successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPatch("{id}/toggle")]
-        public async Task<ActionResult> ToggleAvailability(int id)
+        public async Task<IActionResult> ToggleAvailability(int id)
         {
-            var success = await _inventoryService.ToggleAvailability(id);
-
-            if (!success)
-                return NotFound("Inventory not found");
-
-            return Ok("Availability toggled successfully");
+            try
+            {
+                await _inventoryService.ToggleAvailability(id);
+                return Ok("Availability toggled successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

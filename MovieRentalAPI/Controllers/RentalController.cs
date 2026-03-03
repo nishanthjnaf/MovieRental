@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
-using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
 
 namespace MovieRentalAPI.Controllers
@@ -10,49 +10,86 @@ namespace MovieRentalAPI.Controllers
     public class RentalController : ControllerBase
     {
         private readonly IRentalService _rentalService;
-        private readonly IRepository<int, Movie> _movieRepository;
-        private readonly IRepository<int, RentalItem> _rentalItemRepository;
 
-        public RentalController(IRentalService rentalService, IRepository<int,Movie> movieRepository,IRepository<int,RentalItem> rentalItemRepository)
+        public RentalController(IRentalService rentalService)
         {
             _rentalService = rentalService;
-            _movieRepository= movieRepository;
-            _rentalItemRepository=rentalItemRepository;
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<RentalResponseDto>> CreateRental(
-            CreateRentalRequestDto request)
+        public async Task<ActionResult> CreateRental(CreateRentalRequestDto request)
         {
-            var result = await _rentalService.CreateRental(request);
-            
-            return Ok(result);
+            try
+            {
+                var result = await _rentalService.CreateRental(request);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message); // 404
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message); // 409
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message); // 400
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
+
 
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<RentalResponseDto>>> GetByUser(int userId)
+        public async Task<ActionResult> GetByUser(int userId)
         {
-            var result = await _rentalService.GetRentalsByUser(userId);
-            return Ok(result);
+            try
+            {
+                var result = await _rentalService.GetRentalsByUser(userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
+
         [HttpGet("active/{userId}")]
-        public async Task<ActionResult<IEnumerable<RentalItemResponseDto>>> GetActive(int userId)
+        public async Task<ActionResult> GetActive(int userId)
         {
-            var result = await _rentalService.GetActiveRentals(userId);
-            return Ok(result);
+            try
+            {
+                var result = await _rentalService.GetActiveRentals(userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
+
 
         [HttpPatch("end-item/{rentalItemId}")]
         public async Task<ActionResult> EndRentalItem(int rentalItemId)
         {
-            var success = await _rentalService.EndRentalItem(rentalItemId);
-
-            if (!success)
-                return NotFound("Rental item not found");
-
-            return Ok("Rental item ended successfully");
+            try
+            {
+                await _rentalService.EndRentalItem(rentalItemId);
+                return Ok("Rental item ended successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
     }
 }

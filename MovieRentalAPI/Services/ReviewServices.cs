@@ -1,4 +1,5 @@
-﻿using MovieRentalAPI.Interfaces;
+﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
 
@@ -22,11 +23,24 @@ namespace MovieRentalAPI.Services
 
         public async Task<ReviewResponseDto> AddReview(ReviewRequestDto request)
         {
-            var user = await _userRepo.Get(request.UserId);
-            var movie = await _movieRepo.Get(request.MovieId);
+            if (request.Rating < 1 || request.Rating > 5)
+                throw new BadRequestException("Rating must be between 1 and 5");
 
-            if (user == null || movie == null)
-                throw new Exception("Invalid User or Movie");
+            var user = await _userRepo.Get(request.UserId);
+            if (user == null)
+                throw new NotFoundException("User not found");
+
+            var movie = await _movieRepo.Get(request.MovieId);
+            if (movie == null)
+                throw new NotFoundException("Movie not found");
+
+            var existingReviews = await _reviewRepo.GetAll();
+
+            if (existingReviews != null &&
+                existingReviews.Any(r =>
+                    r.UserId == request.UserId &&
+                    r.MovieId == request.MovieId))
+                throw new ConflictException("You have already reviewed this movie");
 
             var review = new Review
             {
@@ -39,46 +53,82 @@ namespace MovieRentalAPI.Services
 
             var added = await _reviewRepo.Add(review);
 
+            if (added == null)
+                throw new Exception("Review creation failed");
+
             return MapToResponse(added);
         }
 
         public async Task<IEnumerable<ReviewResponseDto>> GetReviewsByMovie(int movieId)
         {
+            var movie = await _movieRepo.Get(movieId);
+            if (movie == null)
+                throw new NotFoundException("Movie not found");
+
             var reviews = await _reviewRepo.GetAll();
 
-            return reviews
+            var movieReviews = reviews?
                 .Where(r => r.MovieId == movieId)
-                .Select(MapToResponse);
+                .ToList();
+
+            if (movieReviews == null || !movieReviews.Any())
+                throw new NotFoundException("No reviews found for this movie");
+
+            return movieReviews.Select(MapToResponse);
         }
 
         public async Task<IEnumerable<ReviewResponseDto>> GetReviewsByUser(int userId)
         {
+            var user = await _userRepo.Get(userId);
+            if (user == null)
+                throw new NotFoundException("User not found");
+
             var reviews = await _reviewRepo.GetAll();
 
-            return reviews
+            var userReviews = reviews?
                 .Where(r => r.UserId == userId)
-                .Select(MapToResponse);
+                .ToList();
+
+            if (userReviews == null || !userReviews.Any())
+                throw new NotFoundException("No reviews found for this user");
+
+            return userReviews.Select(MapToResponse);
         }
 
-        public async Task<ReviewResponseDto?> UpdateReview(int id, ReviewRequestDto request)
+        public async Task<ReviewResponseDto> UpdateReview(int id, ReviewRequestDto request)
         {
+            if (request.Rating < 1 || request.Rating > 5)
+                throw new BadRequestException("Rating must be between 1 and 5");
+
             var existing = await _reviewRepo.Get(id);
 
             if (existing == null)
-                return null;
+                throw new NotFoundException("Review not found");
 
             existing.Rating = request.Rating;
             existing.Comment = request.Comment;
 
             var updated = await _reviewRepo.Update(id, existing);
 
-            return updated == null ? null : MapToResponse(updated);
+            if (updated == null)
+                throw new Exception("Review update failed");
+
+            return MapToResponse(updated);
         }
 
         public async Task<bool> DeleteReview(int id)
         {
+            var existing = await _reviewRepo.Get(id);
+
+            if (existing == null)
+                throw new NotFoundException("Review not found");
+
             var deleted = await _reviewRepo.Delete(id);
-            return deleted != null;
+
+            if (deleted == null)
+                throw new Exception("Review deletion failed");
+
+            return true;
         }
 
         private ReviewResponseDto MapToResponse(Review r)

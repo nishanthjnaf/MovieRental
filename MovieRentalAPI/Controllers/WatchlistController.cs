@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
 
@@ -19,26 +20,51 @@ namespace MovieRentalAPI.Controllers
         public async Task<IActionResult> AddToWatchlist(
             [FromBody] WatchlistRequestDto request)
         {
-            var result = await _service.AddToWatchlist(request);
-            return Ok(result);
+            try
+            {
+                var result = await _service.AddToWatchlist(request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserWatchlist(int userId)
         {
-            var result = await _service.GetUserWatchlist(userId);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetUserWatchlist(userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(int id)
         {
-            var success = await _service.RemoveFromWatchlist(id);
-
-            if (!success)
-                return NotFound();
-
-            return Ok("Removed from watchlist");
+            try
+            {
+                await _service.RemoveFromWatchlist(id);
+                return Ok("Removed from watchlist successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

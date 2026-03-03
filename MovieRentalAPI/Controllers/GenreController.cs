@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
 
@@ -16,68 +17,113 @@ namespace MovieRentalAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddGenre(GenreRequestDto request)
+        public async Task<IActionResult> AddGenre(GenreRequestDto request)
         {
-            var result = await _genreService.AddGenre(request);
-            return Ok(result);
+            try
+            {
+                var result = await _genreService.AddGenre(request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllGenres()
+        public async Task<IActionResult> GetAllGenres()
         {
-            var result = await _genreService.GetAllGenres();
-            return Ok(result);
+            try
+            {
+                var result = await _genreService.GetAllGenres();
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetGenre(int id)
+        public async Task<IActionResult> GetGenre(int id)
         {
-            var result = await _genreService.GetGenreById(id);
-
-            if (result == null)
-                return NotFound("Genre not found");
-
-            return Ok(result);
+            try
+            {
+                var result = await _genreService.GetGenreById(id);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateGenre(int id, GenreRequestDto request)
+        public async Task<IActionResult> UpdateGenre(int id, GenreRequestDto request)
         {
-            var result = await _genreService.UpdateGenre(id, request);
-
-            if (result == null)
-                return NotFound("Genre not found");
-
-            return Ok(result);
+            try
+            {
+                var result = await _genreService.UpdateGenre(id, request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteGenre(int id)
+        public async Task<IActionResult> DeleteGenre(int id)
         {
-            var success = await _genreService.DeleteGenre(id);
-
-            if (!success)
-                return NotFound("Genre not found");
-
-            return Ok("Genre deleted successfully");
+            try
+            {
+                await _genreService.DeleteGenre(id);
+                return Ok("Genre deleted successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost("{genreId}/assign/{movieId}")]
-        public async Task<ActionResult> AssignGenre(int genreId, int movieId)
+        public async Task<IActionResult> AssignGenre(int genreId, int movieId)
         {
-            var success = await _genreService.AssignGenreToMovie(movieId, genreId);
-
-            if (!success)
-                return NotFound("Movie or Genre not found");
-
-            return Ok("Genre assigned to movie");
+            try
+            {
+                await _genreService.AssignGenreToMovie(movieId, genreId);
+                return Ok("Genre assigned to movie");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpGet("{genreId}/movies")]
-        public async Task<ActionResult> GetMoviesByGenre(int genreId)
+        public async Task<IActionResult> GetMoviesByGenre(int genreId)
         {
-            var result = await _genreService.GetMoviesByGenre(genreId);
-            return Ok(result);
+            try
+            {
+                var result = await _genreService.GetMoviesByGenre(genreId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

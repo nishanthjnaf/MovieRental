@@ -9,7 +9,6 @@ namespace MovieRentalAPI.Services
 {
     public class UserServices : Repository<int, User>, IUserServices
     {
-       // private readonly IRepository<int, User> _userRepository;
         private readonly ITokenService _tokenService;
         private readonly IPasswordService _passwordService;
         private readonly IRepository<int, Rental> _rentalRepository;
@@ -17,65 +16,87 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, Movie> _movieRepository;
         private readonly IRepository<int, User> _userRepository;
 
-        public UserServices(MovieRentalContext context,
-                            IPasswordService passwordService,
-                            ITokenService tokenService, IRepository<int,Rental> rentalRepository, IRepository<int, Movie> movieRepository,IRepository<int,User> userRepository, IRepository<int, RentalItem> rentalitemRepository) : base(context)
+        public UserServices(
+            MovieRentalContext context,
+            IPasswordService passwordService,
+            ITokenService tokenService,
+            IRepository<int, Rental> rentalRepository,
+            IRepository<int, Movie> movieRepository,
+            IRepository<int, User> userRepository,
+            IRepository<int, RentalItem> rentalitemRepository)
+            : base(context)
         {
-            //_userRepository = userRepository;
             _tokenService = tokenService;
             _passwordService = passwordService;
-            _rentalRepository=rentalRepository;
-            _rentalitemRepository=rentalitemRepository;
-            _movieRepository=movieRepository;
+            _rentalRepository = rentalRepository;
+            _movieRepository = movieRepository;
             _userRepository = userRepository;
+            _rentalitemRepository = rentalitemRepository;
         }
 
         public async Task<CheckUserResponseDto> CheckUser(CheckUserRequestDto request)
         {
-            var user =await base.FirstOrDefaultAsync(u => u.Username == request.Username);
-            //var user = await _context.FindAsync(u => u.Name = request.Username);
+            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+                throw new BadRequestException("Username and password are required");
+
+            var user = await base.FirstOrDefaultAsync(u => u.Username == request.Username);
+
             if (user == null)
                 throw new UnAuthorizedException("Invalid username");
-            byte[] userPasswordHash = _passwordService.HashPassword(request.Password, user.PasswordHash, hashkey: out var newhash);
+
+            byte[] userPasswordHash =
+                _passwordService.HashPassword(request.Password, user.PasswordHash, out var newhash);
+
             for (int i = 0; i < userPasswordHash.Length; i++)
             {
                 if (userPasswordHash[i] != user.Password[i])
                     throw new UnAuthorizedException("Invalid password");
             }
-            var tokenpaload = new TokenPayloadDto
+
+            var tokenPayload = new TokenPayloadDto
             {
                 Username = user.Username,
                 Role = user.Role
             };
-            var token = _tokenService.CreateToken(tokenpaload);
+
+            var token = _tokenService.CreateToken(tokenPayload);
+
             return new CheckUserResponseDto
             {
-                Username=request.Username,
+                Username = user.Username,
                 Token = token
             };
         }
 
         public async Task<RegisterUserResponseDto> RegisterUser(RegisterUserRequestDto request)
         {
-            var existingUser = await base.FirstOrDefaultAsync(u => u.Username == request.Username); 
+            if (string.IsNullOrWhiteSpace(request.Username) ||
+                string.IsNullOrWhiteSpace(request.Password) ||
+                string.IsNullOrWhiteSpace(request.Email))
+                throw new BadRequestException("Invalid registration details");
+
+            var existingUser =
+                await base.FirstOrDefaultAsync(u => u.Username == request.Username);
+
             if (existingUser != null)
-                throw new Exception("Username already exists");
+                throw new ConflictException("Username already exists");
 
             byte[] passwordHash =
                 _passwordService.HashPassword(request.Password, null, out var key);
 
-            User user = new User
+            var user = new User
             {
                 Username = request.Username,
                 Password = passwordHash,
                 PasswordHash = key,
                 Role = "Customer",
-                Name=request.Name,
-                Email=request.Email,
-                Phone=request.Phone
+                Name = request.Name,
+                Email = request.Email,
+                Phone = request.Phone
             };
 
             var addedUser = await base.Add(user);
+
             if (addedUser == null)
                 throw new Exception("User registration failed");
 
@@ -85,14 +106,20 @@ namespace MovieRentalAPI.Services
                 Message = "User registered successfully"
             };
         }
+
         public async Task<IEnumerable<UserRentedMovieResponseDto>> GetAllRentedMovies(int userId)
         {
+            var user = await _userRepository.Get(userId);
+
+            if (user == null)
+                throw new NotFoundException("User not found");
+
             var rentals = (await _rentalRepository.GetAll())
                 ?.Where(r => r.UserId == userId)
                 .ToList();
 
             if (rentals == null || rentals.Count == 0)
-                return new List<UserRentedMovieResponseDto>();
+                throw new NotFoundException("No movie is rented so far");
 
             var rentalItems = await _rentalitemRepository.GetAll();
 
@@ -100,11 +127,12 @@ namespace MovieRentalAPI.Services
 
             foreach (var rental in rentals)
             {
-                var items = rentalItems
-                    ?.Where(i => i.RentalId == rental.Id)
+                var items = rentalItems?
+                    .Where(i => i.RentalId == rental.Id)
                     .ToList();
 
-                if (items == null) continue;
+                if (items == null || items.Count == 0)
+                    continue;
 
                 foreach (var item in items)
                 {
@@ -127,12 +155,13 @@ namespace MovieRentalAPI.Services
 
             return result;
         }
-        public async Task<UserResponseDto?> GetUserById(int id)
+
+        public async Task<UserResponseDto> GetUserById(int id)
         {
             var user = await _userRepository.Get(id);
 
             if (user == null)
-                return null;
+                throw new NotFoundException("User not found");
 
             return MapToResponse(user);
         }
@@ -141,32 +170,46 @@ namespace MovieRentalAPI.Services
         {
             var users = await _userRepository.GetAll();
 
-            if (users == null)
-                return new List<UserResponseDto>();
+            if (users == null || !users.Any())
+                throw new NotFoundException("No users found");
 
             return users.Select(MapToResponse);
         }
 
-        public async Task<UserResponseDto?> UpdateUser(int id, UpdateUserRequestDto request)
+        public async Task<UserResponseDto> UpdateUser(int id, UpdateUserRequestDto request)
         {
             var existing = await _userRepository.Get(id);
 
             if (existing == null)
-                return null;
+                throw new NotFoundException("User not found");
+
+            if (string.IsNullOrWhiteSpace(request.Username))
+                throw new BadRequestException("Username cannot be empty");
 
             existing.Username = request.Username;
             existing.Role = request.Role;
 
             var updated = await _userRepository.Update(id, existing);
 
-            return updated == null ? null : MapToResponse(updated);
+            if (updated == null)
+                throw new Exception("User update failed");
+
+            return MapToResponse(updated);
         }
 
         public async Task<bool> DeleteUser(int id)
         {
+            var existing = await _userRepository.Get(id);
+
+            if (existing == null)
+                throw new NotFoundException("User not found");
+
             var deleted = await _userRepository.Delete(id);
 
-            return deleted != null;
+            if (deleted == null)
+                throw new Exception("User deletion failed");
+
+            return true;
         }
 
         private UserResponseDto MapToResponse(User user)
@@ -176,8 +219,8 @@ namespace MovieRentalAPI.Services
                 Id = user.Id,
                 Username = user.Username,
                 Role = user.Role,
-                Email=user.Email,
-                Phone=user.Phone
+                Email = user.Email,
+                Phone = user.Phone
             };
         }
     }

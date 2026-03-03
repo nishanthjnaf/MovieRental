@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
 
@@ -18,44 +19,85 @@ namespace MovieRentalAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddReview([FromBody] ReviewRequestDto request)
         {
-            var result = await _service.AddReview(request);
-            return Ok(result);
+            try
+            {
+                var result = await _service.AddReview(request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("movie/{movieId}")]
         public async Task<IActionResult> GetReviewsByMovie(int movieId)
         {
-            var result = await _service.GetReviewsByMovie(movieId);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetReviewsByMovie(movieId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetReviewsByUser(int userId)
         {
-            var result = await _service.GetReviewsByUser(userId);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetReviewsByUser(userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateReview(int id, [FromBody] ReviewRequestDto request)
+        public async Task<IActionResult> UpdateReview(
+            int id,
+            [FromBody] ReviewRequestDto request)
         {
-            var result = await _service.UpdateReview(id, request);
-
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
+            try
+            {
+                var result = await _service.UpdateReview(id, request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {
-            var success = await _service.DeleteReview(id);
-
-            if (!success)
-                return NotFound();
-
-            return Ok("Review deleted");
+            try
+            {
+                await _service.DeleteReview(id);
+                return Ok("Review deleted successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

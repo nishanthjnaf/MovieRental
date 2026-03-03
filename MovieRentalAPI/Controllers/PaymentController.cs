@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
 
@@ -16,39 +17,68 @@ namespace MovieRentalAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<PaymentResponseDto>> MakePayment(
+        public async Task<IActionResult> MakePayment(
             MakePaymentRequestDto request)
         {
-            var result = await _paymentService.MakePayment(request);
-            return Ok(result);
+            try
+            {
+                var result = await _paymentService.MakePayment(request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("rental/{rentalId}")]
-        public async Task<ActionResult<PaymentResponseDto>> GetByRental(int rentalId)
+        public async Task<IActionResult> GetByRental(int rentalId)
         {
-            var result = await _paymentService.GetPaymentByRental(rentalId);
-
-            if (result == null)
-                return NotFound("Payment not found");
-
-            return Ok(result);
+            try
+            {
+                var result = await _paymentService.GetPaymentByRental(rentalId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
+
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<PaymentResponseDto>> GetByUser(int userId)
+        public async Task<IActionResult> GetByUser(int userId)
         {
-            var result = await _paymentService.GetPaymentByUser(userId);
-
-            if (result == null)
-                return NotFound("Payment not found");
-
-            return Ok(result);
+            try
+            {
+                var result = await _paymentService.GetPaymentByUser(userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PaymentResponseDto>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _paymentService.GetAllPayments();
-            return Ok(result);
+            try
+            {
+                var result = await _paymentService.GetAllPayments();
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

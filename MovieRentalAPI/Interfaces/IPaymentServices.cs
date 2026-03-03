@@ -7,7 +7,7 @@ namespace MovieRentalAPI.Interfaces
         Task<PaymentResponseDto> MakePayment(MakePaymentRequestDto request);
 
         Task<PaymentResponseDto?> GetPaymentByRental(int rentalId);
-        Task<PaymentResponseDto?> GetPaymentByUser(int userId);
+        Task<IEnumerable<PaymentResponseDto?>> GetPaymentByUser(int userId);
 
 
         Task<IEnumerable<PaymentResponseDto>> GetAllPayments();
