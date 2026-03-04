@@ -8,6 +8,8 @@
         public int DurationMinutes { get; set; }
         public string Language { get; set; } = String.Empty;
         public List<int>? GenreIds { get; set; }
+        public string? PosterPath { get; set; }
+        public string? TrailerUrl { get; set; }
 
     }
 }

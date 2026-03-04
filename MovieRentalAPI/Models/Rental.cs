@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MovieRentalAPI.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +11,8 @@ namespace MovieRentalAPI.Models
         public int Id { get; set; }
         public int UserId { get; set; }
         public DateTime RentalDate { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public RentalStatus Status { get; set; }
+        public string? PaymentId { get; set; }
         public float TotalAmount { get; set; }
 
         public User? User { get; set; }

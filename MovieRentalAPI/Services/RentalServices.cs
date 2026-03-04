@@ -2,6 +2,7 @@
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.Enums;
 
 namespace MovieRentalAPI.Services
 {
@@ -41,7 +42,7 @@ namespace MovieRentalAPI.Services
             {
                 UserId = request.UserId,
                 RentalDate = DateTime.UtcNow,
-                Status = "Active",
+                Status = RentalStatus.PaymentPending,
                 TotalAmount = 0
             };
 
@@ -88,14 +89,11 @@ namespace MovieRentalAPI.Services
 
                 await _rentalItemRepository.Add(rentalItem);
 
-                // Update inventory
                 inventory.IsAvailable = false;
                 await _inventoryRepository.Update(inventory.Id, inventory);
 
-                // Update total
                 totalAmount += inventory.RentalPrice * request.RentalDays;
 
-                // Increment rental count
                 movie.RentalCount++;
                 await _movieRepository.Update(movie.Id, movie);
             }
@@ -108,7 +106,7 @@ namespace MovieRentalAPI.Services
                 Id = addedRental.Id,
                 UserId = addedRental.UserId,
                 RentalDate = addedRental.RentalDate,
-                Status = addedRental.Status,
+                Status = (PaymentStatus)addedRental.Status,
                 TotalAmount = addedRental.TotalAmount
             };
         }
@@ -132,7 +130,7 @@ namespace MovieRentalAPI.Services
                 Id = r.Id,
                 UserId = r.UserId,
                 RentalDate = r.RentalDate,
-                Status = r.Status,
+                Status = (PaymentStatus)r.Status,
                 TotalAmount = r.TotalAmount
             });
         }

@@ -38,6 +38,8 @@ namespace MovieRentalAPI.Services
                 DurationMinutes = request.DurationMinutes,
                 Language = request.Language,
                 Genres = new List<Genre>(),
+                PosterPath = request.PosterPath,
+                TrailerUrl = request.TrailerUrl,
                 RentalCount = 0
             };
 
@@ -97,6 +99,8 @@ namespace MovieRentalAPI.Services
             existingMovie.ReleaseYear = request.ReleaseYear;
             existingMovie.DurationMinutes = request.DurationMinutes;
             existingMovie.Language = request.Language;
+            existingMovie.PosterPath = request.PosterPath;
+            existingMovie.TrailerUrl = request.TrailerUrl;
 
             var updatedMovie =
                 await _movieRepository.Update(id, existingMovie);
@@ -180,7 +184,9 @@ namespace MovieRentalAPI.Services
                     Title = m.Title,
                     RentalCount = m.RentalCount,
                     ReleaseYear = m.ReleaseYear,
-                    Language = m.Language
+                    Language = m.Language,
+                    PosterPath=m.PosterPath,
+                    TrailerUrl=m.TrailerUrl
                 })
                 .ToList();
         }
@@ -194,7 +200,9 @@ namespace MovieRentalAPI.Services
                 Description = movie.Description,
                 ReleaseYear = movie.ReleaseYear,
                 DurationMinutes = movie.DurationMinutes,
-                Language = movie.Language
+                Language = movie.Language,
+                PosterPath = movie.PosterPath,
+                TrailerUrl = movie.TrailerUrl
             };
         }
     }

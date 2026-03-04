@@ -14,6 +14,10 @@ namespace MovieRentalAPI.Models
         public string Language { get; set; } = string.Empty;
         public double Rating { get; set; }
         public int RentalCount { get; set; } = 0;
+        public int MyProperty { get; set; }
+        public string? PosterPath { get; set; }
+        public string? TrailerUrl { get; set; }
+
         public required List<Genre> Genres { get; set; }
 
 

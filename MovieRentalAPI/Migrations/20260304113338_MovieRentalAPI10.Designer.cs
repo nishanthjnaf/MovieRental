@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MovieRentalModels;
 
@@ -11,9 +12,11 @@ using MovieRentalModels;
 namespace MovieRentalAPI.Migrations
 {
     [DbContext(typeof(MovieRentalContext))]
-    partial class MovieRentalContextModelSnapshot : ModelSnapshot
+    [Migration("20260304113338_MovieRentalAPI10")]
+    partial class MovieRentalAPI10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

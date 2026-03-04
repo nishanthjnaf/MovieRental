@@ -1,4 +1,6 @@
-﻿namespace MovieRentalAPI.Models.DTOs
+﻿using MovieRentalAPI.Models.Enums;
+
+namespace MovieRentalAPI.Models.DTOs
 {
     public class UserRentedMovieResponseDto
     {
@@ -18,6 +20,6 @@
 
         public bool IsActive { get; set; }
 
-        public string RentalStatus { get; set; } = string.Empty;
+        public RentalStatus RentalStatus { get; set; }
     }
 }

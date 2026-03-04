@@ -2,6 +2,7 @@
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.Enums;
 
 namespace MovieRentalAPI.Services
 {
@@ -20,48 +21,59 @@ namespace MovieRentalAPI.Services
 
         public async Task<PaymentResponseDto> MakePayment(MakePaymentRequestDto request)
         {
-            if (request.RentalId <= 0)
-                throw new BadRequestException("Invalid rental id");
-
-            if (string.IsNullOrWhiteSpace(request.Method))
-                throw new BadRequestException("Payment method is required");
-
             var rental = await _rentalRepository.Get(request.RentalId);
 
             if (rental == null)
                 throw new NotFoundException("Rental not found");
 
-            if (rental.TotalAmount <= 0)
-                throw new BadRequestException("Invalid rental amount");
+            if (rental.Status != RentalStatus.PaymentPending)
+                throw new ConflictException("Payment already processed");
 
-            if (rental.Status == "Completed")
-                throw new ConflictException("Payment already completed for this rental");
+            var paymentId = GeneratePaymentId();
 
-            var existingPayments = await _paymentRepository.GetAll();
+            PaymentStatus paymentStatus;
+            RentalStatus rentalStatus;
 
-            if (existingPayments != null &&
-                existingPayments.Any(p => p.RentalId == request.RentalId))
-                throw new ConflictException("Payment already exists for this rental");
+            if (request.IsSuccess)
+            {
+                paymentStatus = PaymentStatus.Success;
+                rentalStatus = RentalStatus.Available;
+            }
+            else
+            {
+                paymentStatus = PaymentStatus.Failed;
+                rentalStatus = RentalStatus.PaymentDeclined;
+            }
 
             var payment = new Payment
             {
                 RentalId = rental.Id,
+                PaymentId = paymentId,
+                UserId = rental.UserId,
                 Amount = rental.TotalAmount,
                 PaymentMethod = request.Method,
-                Status = "Success",
-                PaymentDate = DateTime.UtcNow,
-                UserId = rental.UserId
+                Status = paymentStatus,
+                PaymentDate = DateTime.UtcNow
             };
 
             var added = await _paymentRepository.Add(payment);
 
-            if (added == null)
-                throw new Exception("Payment failed");
+            rental.Status = rentalStatus;
+            rental.PaymentId = paymentId;
 
-            rental.Status = "Completed";
             await _rentalRepository.Update(rental.Id, rental);
 
-            return MapToResponse(added);
+            return new PaymentResponseDto
+            {
+                Id = added.Id,
+                RentalId = added.RentalId,
+                PaymentId = added.PaymentId,
+                Amount = added.Amount,
+                Method = added.PaymentMethod,
+                Status = added.Status,
+                PaymentDate = added.PaymentDate,
+                UserId = added.UserId
+            };
         }
 
         public async Task<PaymentResponseDto> GetPaymentByRental(int rentalId)
@@ -118,6 +130,10 @@ namespace MovieRentalAPI.Services
                 PaymentDate = p.PaymentDate,
                 UserId = p.UserId
             };
+        }
+        private string GeneratePaymentId()
+        {
+            return "PAY_" + Guid.NewGuid().ToString("N").Substring(0, 16).ToUpper();
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿namespace MovieRentalAPI.Models.DTOs
+﻿using MovieRentalAPI.Models.Enums;
+
+namespace MovieRentalAPI.Models.DTOs
 {
     public class MakePaymentRequestDto
     {
         public int RentalId { get; set; }
 
 
-        public string Method { get; set; } = string.Empty;
+        public PaymentMethod Method { get; set; }
+        public bool IsSuccess { get; set; }
     }
 }

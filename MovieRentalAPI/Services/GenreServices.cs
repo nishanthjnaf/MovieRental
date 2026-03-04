@@ -142,7 +142,10 @@ namespace MovieRentalAPI.Services
                 Description = m.Description,
                 ReleaseYear = m.ReleaseYear,
                 DurationMinutes = m.DurationMinutes,
-                Language = m.Language
+                Language = m.Language,
+                PosterPath= m.PosterPath,
+                TrailerUrl = m.TrailerUrl
+                
             });
         }
 

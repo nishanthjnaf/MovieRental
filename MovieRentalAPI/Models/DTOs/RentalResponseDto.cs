@@ -1,4 +1,6 @@
-﻿namespace MovieRentalAPI.Models.DTOs
+﻿using MovieRentalAPI.Models.Enums;
+
+namespace MovieRentalAPI.Models.DTOs
 {
     public class RentalResponseDto
     {
@@ -8,7 +10,7 @@
 
         public DateTime RentalDate { get; set; }
 
-        public string Status { get; set; } = string.Empty;
+        public PaymentStatus Status { get; set; }
 
         public float TotalAmount { get; set; }
     }

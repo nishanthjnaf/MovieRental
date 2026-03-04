@@ -11,5 +11,8 @@
         public int ReleaseYear { get; set; }
 
         public string Language { get; set; } = string.Empty;
+        public string? PosterPath { get; set; }
+
+        public string? TrailerUrl { get; set; }
     }
 }

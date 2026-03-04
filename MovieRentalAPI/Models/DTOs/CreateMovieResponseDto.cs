@@ -8,5 +8,7 @@
         public int ReleaseYear { get; set; }
         public int DurationMinutes { get; set; }
         public string Language { get; set; } = String.Empty;
+        public string? PosterPath { get; set; }
+        public string? TrailerUrl { get; set; }
     }
 }

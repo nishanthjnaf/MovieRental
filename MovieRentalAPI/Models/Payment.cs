@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MovieRentalAPI.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,10 +12,10 @@ namespace MovieRentalAPI.Models
         public int UserId { get; set; }
         public Rental Rental { get; set; }
         public float Amount { get; set; }
-        public string PaymentMethod { get; set; } = string.Empty;
+        public PaymentMethod PaymentMethod { get; set; } 
         public DateTime PaymentDate { get; set; }
-        public string Status { get; set; } = string.Empty;
-
+        public PaymentStatus Status { get; set; }
+        public string PaymentId { get; set; }
 
 
         public int CompareTo(Payment? other)
