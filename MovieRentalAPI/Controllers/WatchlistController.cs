@@ -2,6 +2,7 @@
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace MovieRentalAPI.Controllers
             _service = service;
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> AddToWatchlist(
             [FromBody] WatchlistRequestDto request)
@@ -39,6 +41,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserWatchlist(int userId)
         {
@@ -53,6 +56,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(int id)
         {

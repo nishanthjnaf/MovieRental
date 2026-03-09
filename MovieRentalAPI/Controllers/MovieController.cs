@@ -2,6 +2,7 @@
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace MovieRentalAPI.Controllers
             _movieService = movieService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddMovie(CreateMovieRequestDto request)
         {
@@ -38,6 +40,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMovie(int id)
         {
@@ -52,6 +55,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet]
         public async Task<IActionResult> GetAllMovies()
         {
@@ -66,6 +70,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet("search")]
         public async Task<IActionResult> SearchMovies(
             [FromQuery] MovieSearchRequestDto request)
@@ -85,6 +90,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMovie(
             int id,
@@ -105,6 +111,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
@@ -119,6 +126,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet("top-rented")]
         public async Task<IActionResult> GetTopRentedMovies(
             [FromQuery] int count = 5)

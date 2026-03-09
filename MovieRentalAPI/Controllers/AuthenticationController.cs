@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
@@ -15,6 +16,8 @@ namespace MovieRentalAPI.Controllers
         {
             _userService = userService;
         }
+
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<ActionResult<CheckUserResponseDto>> Login(CheckUserRequestDto userRequestDto)
         {
@@ -32,6 +35,8 @@ namespace MovieRentalAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [AllowAnonymous]
         [HttpPost("Register")]
         public async Task<ActionResult<RegisterUserResponseDto>> Register(RegisterUserRequestDto registerRequestDto)
         {

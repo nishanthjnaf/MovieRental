@@ -2,6 +2,7 @@
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace MovieRentalAPI.Controllers
             _genreService = genreService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddGenre(GenreRequestDto request)
         {
@@ -34,6 +36,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet]
         public async Task<IActionResult> GetAllGenres()
         {
@@ -48,6 +51,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGenre(int id)
         {
@@ -62,6 +66,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGenre(int id, GenreRequestDto request)
         {
@@ -80,6 +85,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
         {
@@ -94,6 +100,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("{genreId}/assign/{movieId}")]
         public async Task<IActionResult> AssignGenre(int genreId, int movieId)
         {
@@ -112,6 +119,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet("{genreId}/movies")]
         public async Task<IActionResult> GetMoviesByGenre(int genreId)
         {

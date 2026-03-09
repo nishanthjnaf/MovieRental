@@ -2,6 +2,7 @@
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -15,7 +16,7 @@ namespace MovieRentalAPI.Controllers
         {
             _paymentService = paymentService;
         }
-
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> MakePayment(
             MakePaymentRequestDto request)
@@ -39,6 +40,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet("rental/{rentalId}")]
         public async Task<IActionResult> GetByRental(int rentalId)
         {
@@ -53,6 +55,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUser(int userId)
         {
@@ -67,6 +70,7 @@ namespace MovieRentalAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
