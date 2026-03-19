@@ -1,0 +1,829 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\watchlistcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\watchlistcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\watchlistresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\watchlistresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\watchlistrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\watchlistrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\reviewresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\reviewresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\paymentservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\paymentservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\passwordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\passwordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\paymentresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\paymentresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\repositories\\repository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\repositories\\repository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\rental.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\rental.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\reviewservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\reviewservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\reviewcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\reviewcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\enums\\paymentmethod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\enums\\paymentmethod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\rentalservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\rentalservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\rentalitemresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\rentalitemresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\rentalitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\rentalitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\rentalresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\rentalresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\rentalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\rentalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\interfaces\\irentalservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\interfaces\\irentalservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\rentalitemrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\rentalitemrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\enums\\rentalstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\enums\\rentalstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\enums\\paymentstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\enums\\paymentstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\movieservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\movieservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\moviecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\moviecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\toprentedmoviesdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\toprentedmoviesdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\pagedresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\pagedresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\createmovieresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\createmovieresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\inventoryservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\inventoryservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\interfaces\\irepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\interfaces\\irepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\checkuserresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\checkuserresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\inventoryresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\inventoryresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\errorresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\errorresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\controllers\\genrecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\controllers\\genrecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\userservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\userservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\genrerequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\genrerequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\checkuserrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\checkuserrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\registeruserresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\registeruserresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\dtos\\updateuserrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\dtos\\updateuserrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\interfaces\\iinventoryservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\interfaces\\iinventoryservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\movierentalapi.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\movierentalapi.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\services\\tokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\services\\tokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\models\\movie.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\models\\movie.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\exceptions\\apiexceptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\exceptions\\apiexceptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|c:\\users\\nishanth.j\\source\\repos\\movierentalapi\\movierentalapi\\movierentalapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{167F1253-6F6A-F9DB-3F3C-E4930C143AC2}|MovieRentalAPI\\MovieRentalAPI.csproj|solutionrelative:movierentalapi\\movierentalapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 32,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "WatchlistResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\WatchlistResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\WatchlistResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\WatchlistResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\WatchlistResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-19T09:24:58.653Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "WatchlistRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\WatchlistRequestDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\WatchlistRequestDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\WatchlistRequestDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\WatchlistRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-19T09:24:46.498Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ReviewResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\ReviewResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\ReviewResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\ReviewResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\ReviewResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-19T09:24:29.486Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PaymentResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\PaymentResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\PaymentResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\PaymentResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\PaymentResponseDto.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAwAoAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-19T08:31:28.851Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "RentalItem.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\RentalItem.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\RentalItem.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\RentalItem.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\RentalItem.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T11:11:34.065Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "IRentalServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Interfaces\\IRentalServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Interfaces\\IRentalServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Interfaces\\IRentalServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Interfaces\\IRentalServices.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAYwA4AAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:33:03.962Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Rental.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Rental.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\Rental.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Rental.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\Rental.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:03:26.519Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "RentalItemResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RentalItemResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\RentalItemResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RentalItemResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\RentalItemResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:59:54.819Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "RentalResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RentalResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\RentalResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RentalResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\RentalResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:52:20.915Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "RentalItemRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RentalItemRequestDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\RentalItemRequestDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RentalItemRequestDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\RentalItemRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:52:02.904Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "RentalStatus.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Enums\\RentalStatus.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\Enums\\RentalStatus.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Enums\\RentalStatus.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\Enums\\RentalStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:48:59.379Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "PaymentStatus.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Enums\\PaymentStatus.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\Enums\\PaymentStatus.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Enums\\PaymentStatus.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\Enums\\PaymentStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:48:26.101Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "PaymentMethod.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Enums\\PaymentMethod.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\Enums\\PaymentMethod.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Enums\\PaymentMethod.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\Enums\\PaymentMethod.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:43:50.099Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "PasswordService.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\PasswordService.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\PasswordService.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\PasswordService.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\PasswordService.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAzwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:39:06.413Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "TopRentedMoviesDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\TopRentedMoviesDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\TopRentedMoviesDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\TopRentedMoviesDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\TopRentedMoviesDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T06:50:26.345Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "PagedResultDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\PagedResultDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\PagedResultDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\PagedResultDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\PagedResultDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T06:50:12.122Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "CreateMovieResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\CreateMovieResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\CreateMovieResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\CreateMovieResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\CreateMovieResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T06:49:35.126Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Repository.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Repositories\\Repository.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Repositories\\Repository.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Repositories\\Repository.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Repositories\\Repository.cs",
+              "ViewState": "AgIAAEQAAAAAAAAAAAAmwFkAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T06:16:20.917Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "IRepository.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Interfaces\\IRepository.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Interfaces\\IRepository.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Interfaces\\IRepository.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Interfaces\\IRepository.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA0AAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T06:15:43.433Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "InventoryResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\InventoryResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\InventoryResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\InventoryResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\InventoryResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T04:40:07.564Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "ErrorResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\ErrorResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\ErrorResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\ErrorResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\ErrorResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T04:39:41.092Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "GenreRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\GenreRequestDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\GenreRequestDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\GenreRequestDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\GenreRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T10:32:43.051Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "CheckUserRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\CheckUserRequestDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\CheckUserRequestDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\CheckUserRequestDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\CheckUserRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T05:27:10.979Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "CheckUserResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\CheckUserResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\CheckUserResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\CheckUserResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\CheckUserResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T04:50:21.511Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "RegisterUserResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RegisterUserResponseDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\RegisterUserResponseDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\RegisterUserResponseDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\RegisterUserResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T04:49:57.542Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "UpdateUserRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\UpdateUserRequestDto.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\DTOs\\UpdateUserRequestDto.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\DTOs\\UpdateUserRequestDto.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\DTOs\\UpdateUserRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T04:42:34.028Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ReviewServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\ReviewServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\ReviewServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\ReviewServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\ReviewServices.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAgwHAAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T04:38:52.293Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "RentalServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\RentalServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\RentalServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\RentalServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\RentalServices.cs",
+              "ViewState": "AgIAAK4AAAAAAAAAAAAowLsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T06:47:41.285Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "MovieServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\MovieServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\MovieServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\MovieServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\MovieServices.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T06:11:46.327Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "InventoryServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\InventoryServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\InventoryServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\InventoryServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\InventoryServices.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAYwEIAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T06:09:57.02Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "IInventoryServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Interfaces\\IInventoryServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Interfaces\\IInventoryServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Interfaces\\IInventoryServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Interfaces\\IInventoryServices.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T06:09:47.578Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "MovieRentalAPI",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\MovieRentalAPI.csproj",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\MovieRentalAPI.csproj",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\MovieRentalAPI.csproj",
+              "RelativeToolTip": "MovieRentalAPI\\MovieRentalAPI.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-03-06T09:57:34.761Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "WatchlistController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\WatchlistController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\WatchlistController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\WatchlistController.cs*",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\WatchlistController.cs*",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAuwDsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:21:23.877Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\UserController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\UserController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\UserController.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAQwFQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:21:20.168Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ReviewController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\ReviewController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\ReviewController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\ReviewController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\ReviewController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:21:15.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "RentalController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\RentalController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\RentalController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\RentalController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\RentalController.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAYwFYAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:21:11.179Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "PaymentController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\PaymentController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\PaymentController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\PaymentController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\PaymentController.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAgwEMAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:21:06.575Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\InventoryController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\InventoryController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\InventoryController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\InventoryController.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAwwHoAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:20:58.021Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "GenreController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\GenreController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\GenreController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\GenreController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\GenreController.cs",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAowHoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:20:51.691Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "AuthenticationController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\AuthenticationController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\AuthenticationController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\AuthenticationController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\AuthenticationController.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAYwCYAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:20:47.278Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Program.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Program.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Program.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Program.cs",
+              "ViewState": "AgIAAIUAAAAAAAAAAAAAAF8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:17:50.994Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "TokenService.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\TokenService.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\TokenService.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\TokenService.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\TokenService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:17:11.057Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "UserServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\UserServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\UserServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\UserServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\UserServices.cs",
+              "ViewState": "AgIAAHwAAAAAAAAAAAAkwAQAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:13:41.04Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "Movie.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Movie.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\Movie.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Movie.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\Movie.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAA5wCYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T07:08:02.303Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "MovieController.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\MovieController.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Controllers\\MovieController.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Controllers\\MovieController.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Controllers\\MovieController.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAA1wIAAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-05T09:20:42.36Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "ApiExceptions.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Exceptions\\ApiExceptions.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Exceptions\\ApiExceptions.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Exceptions\\ApiExceptions.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Exceptions\\ApiExceptions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-05T09:12:01.851Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PaymentServices.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\PaymentServices.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Services\\PaymentServices.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Services\\PaymentServices.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Services\\PaymentServices.cs",
+              "ViewState": "AgIAAHEAAAAAAAAAAAAAAHYAAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-05T09:05:14.095Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Payment.cs",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Payment.cs",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\Models\\Payment.cs",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\Models\\Payment.cs",
+              "RelativeToolTip": "MovieRentalAPI\\Models\\Payment.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBEAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-05T08:58:41.034Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "MovieRentalAPI.csproj",
+              "DocumentMoniker": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\MovieRentalAPI.csproj",
+              "RelativeDocumentMoniker": "MovieRentalAPI\\MovieRentalAPI.csproj",
+              "ToolTip": "C:\\Users\\Nishanth.J\\source\\repos\\MovieRentalAPI\\MovieRentalAPI\\MovieRentalAPI.csproj",
+              "RelativeToolTip": "MovieRentalAPI\\MovieRentalAPI.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-03-05T04:18:15.162Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,620 @@
+<div class="h-screen bg-gray-100">
+
+  <!-- ================= SERVICES VIEW ================= -->
+  <ng-container *ngIf="viewMode === 'services'">
+
+    <div class="p-6">
+
+      <h2 class="text-3xl font-bold mb-6">Services</h2>
+
+      <div class="grid grid-cols-3 gap-6">
+
+        <div (click)="openService('genre')"
+          class="bg-white p-10 rounded-xl shadow hover:shadow-lg cursor-pointer text-center text-xl font-semibold">
+          Genre
+        </div>
+
+        <div (click)="openService('inventory')"
+          class="bg-white p-10 rounded-xl shadow hover:shadow-lg cursor-pointer text-center text-xl font-semibold">
+          Inventory
+        </div>
+        <div (click)="openService('movie')"
+          class="bg-white p-10 rounded-xl shadow hover:shadow-lg cursor-pointer text-center text-xl font-semibold">
+          Movie
+        </div>
+        
+
+        <div (click)="openService('rental')"
+          class="bg-white p-10 rounded-xl shadow hover:shadow-lg cursor-pointer text-center text-xl font-semibold">
+          Rental
+        </div>        
+        <div (click)="openService('payment')"
+          class="bg-white p-10 rounded-xl shadow hover:shadow-lg cursor-pointer text-center text-xl font-semibold">
+          Payment
+        </div>  
+        <div class="bg-white p-10 rounded-xl shadow text-center">Review</div>
+        <div class="bg-white p-10 rounded-xl shadow text-center">Watchlist</div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+  <!-- ================= MANAGEMENT VIEW ================= -->
+  <ng-container *ngIf="viewMode !== 'services'">
+
+    <div class="flex h-full">
+
+      <!-- SIDEBAR -->
+      <div class="w-1/5 bg-gray-900 text-white p-5 space-y-4">
+
+        <h2 class="text-xl font-bold mb-4">Services</h2>
+
+        <p (click)="viewMode='services'" class="cursor-pointer text-blue-400">
+          ← Back
+        </p>
+
+        <div class="space-y-3">
+
+          <p (click)="openService('genre')"
+            [class.text-blue-400]="viewMode==='genre'"
+            class="cursor-pointer hover:text-blue-300">
+            Genre
+          </p>
+
+          <p (click)="openService('inventory')"
+            [class.text-blue-400]="viewMode==='inventory'"
+            class="cursor-pointer hover:text-blue-300">
+            Inventory
+          </p>
+
+          <p (click)="openService('movie')"
+            [class.text-blue-400]="viewMode==='movie'"
+            class="cursor-pointer hover:text-blue-300">
+            Movie
+          </p>
+          <p (click)="openService('rental')"
+            [class.text-blue-400]="viewMode==='movie'"
+            class="cursor-pointer hover:text-blue-300">
+            Rental
+          </p>          
+          <p (click)="openService('payment')"
+            [class.text-blue-400]="viewMode==='payment'"
+            class="cursor-pointer hover:text-blue-300">
+            Payment
+          </p>
+          <p class="cursor-pointer hover:text-blue-300">Review</p>
+          <p class="cursor-pointer hover:text-blue-300">Watchlist</p>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="w-4/5 p-6 overflow-auto">
+
+        <!-- ================= GENRE ================= -->
+        <ng-container *ngIf="viewMode === 'genre'">
+
+          <h2 class="text-2xl font-bold mb-4">Genre Management</h2>
+
+          <!-- TOP -->
+          <div class="flex justify-between mb-4">
+
+            <div class="flex gap-2">
+
+              <input [(ngModel)]="searchId"
+                placeholder="Search Genre ID"
+                class="border p-2 rounded w-60" />
+
+              <button (click)="searchGenre()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
+              <button (click)="resetSearch()" class="bg-gray-300 px-3 py-2 rounded">Reset</button>
+              <button (click)="refreshGenres()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
+
+            </div>
+
+            <button (click)="openAddForm()" class="bg-blue-500 text-white px-4 py-2 rounded">
+              + Add Genre
+            </button>
+
+          </div>
+
+          <!-- TABLE -->
+          <table class="w-full bg-white shadow rounded">
+
+            <thead class="bg-gray-200">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let g of genres" class="border-t text-center">
+                <td>{{ g.id }}</td>
+                <td>{{ g.name }}</td>
+                <td>{{ g.description }}</td>
+                <td class="space-x-2">
+                  <button (click)="editGenre(g)">✏️</button>
+                  <button (click)="deleteGenre(g.id)">🗑️</button>
+                  <button (click)="openAssign(g)">🎬</button>
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
+
+        </ng-container>
+
+        <!-- ================= INVENTORY ================= -->
+        <ng-container *ngIf="viewMode === 'inventory'">
+
+          <h2 class="text-2xl font-bold mb-4">Inventory Management</h2>
+
+          <!-- TOP -->
+          <div class="flex justify-between mb-4">
+
+            <div class="flex gap-2">
+
+              <input [(ngModel)]="inventorySearchId"
+                placeholder="Search Inventory ID"
+                class="border p-2 rounded w-60" />
+
+              <button (click)="searchInventory()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
+              <button (click)="resetInventory()" class="bg-gray-300 px-3 py-2 rounded">Reset</button>
+              <button (click)="refreshInventory()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
+
+            </div>
+
+            <button (click)="openInventoryForm()" class="bg-blue-500 text-white px-4 py-2 rounded">
+              + Add Inventory
+            </button>
+
+          </div>
+
+          <!-- TABLE -->
+          <table class="w-full bg-white shadow rounded">
+
+            <thead class="bg-gray-200">
+              <tr>
+                <th>ID</th>
+                <th>Movie ID</th>
+                <th>Movie Name</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let i of inventories" class="border-t text-center">
+
+                <td>{{ i.id }}</td>
+                <td>{{ i.movieId }}</td>
+                <td>{{ i.movieName }}</td>
+                <td>{{ i.rentalPrice }}</td>
+
+                <td>
+                  <span [class]="i.isAvailable ? 'text-green-500' : 'text-red-500'">
+                    {{ i.isAvailable ? 'Available' : 'Not Available' }}
+                  </span>
+                </td>
+
+                <td class="space-x-2">
+                  <button (click)="editInventory(i)">✏️</button>
+                  <button (click)="deleteInventory(i.id)">🗑️</button>
+                  <button (click)="toggleAvailability(i.id)">🔄</button>
+                </td>
+
+              </tr>
+            </tbody>
+
+          </table>
+
+        </ng-container>
+        <!-- =============================Rental===================== -->
+         <ng-container *ngIf="viewMode === 'rental'">
+
+<h2 class="text-2xl font-bold mb-4">Rental Management</h2>
+
+<div class="flex justify-between mb-4">
+
+  <div class="flex gap-2">
+
+    <input [(ngModel)]="rentalSearchUserId"
+      placeholder="Search by User ID"
+      class="border p-2 rounded w-60" />
+
+    <button (click)="searchRental()" class="bg-gray-500 text-white px-3 py-2 rounded">
+      Search
+    </button>
+
+    <button (click)="resetRental()" class="bg-gray-300 px-3 py-2 rounded">
+      Reset
+    </button>
+
+    <button (click)="refreshRentals()" class="bg-blue-400 text-white px-3 py-2 rounded">
+      Refresh
+    </button>
+
+  </div>
+
+</div>
+
+<table class="w-full bg-white shadow rounded">
+
+  <thead class="bg-gray-200">
+    <tr>
+      <th>ID</th>
+      <th>User ID</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Total</th>
+      <th>Items</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let r of rentals" class="border-t text-center h-14">
+
+      <td>{{ r.id }}</td>
+      <td>{{ r.userId }}</td>
+      <td>{{ r.rentalDate | date:'short' }}</td>
+
+      <td>
+        <span [ngClass]="{
+          'text-yellow-500': r.status === 0,
+          'text-green-500': r.status === 1,
+          'text-red-500': r.status === 2
+        }">
+          {{ getStatusText(r.status) }}
+        </span>
+      </td>
+
+      <td>₹ {{ r.totalAmount }}</td>
+
+      <td>
+        <button (click)="openRentalItems(r.id)"
+          class="text-blue-500 text-lg">
+          ➕
+        </button>
+      </td>
+
+    </tr>
+  </tbody>
+
+</table>
+
+</ng-container>
+<!-- RENTAL ITEMS POPUP -->
+<div *ngIf="showRentalItems"
+  class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+
+  <div class="bg-white p-6 rounded-xl w-[90%] max-h-[90vh] overflow-auto">
+
+    <h3 class="text-xl font-bold mb-4 text-center">
+      Rental Items (ID: {{ selectedRentalId }})
+    </h3>
+
+    <table class="w-full bg-white shadow rounded">
+
+      <thead class="bg-gray-200">
+        <tr>
+          <th>Movie ID</th>
+          <th>Price</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of rentalItems" class="text-center border-t">
+
+          <td>{{ item.movieId }}</td>
+          <td>{{ item.pricePerDay }}</td>
+          <td>{{ item.startDate | date:'short' }}</td>
+          <td>{{ item.endDate | date:'short' }}</td>
+
+          <td>
+            <span [class]="item.isActive ? 'text-green-500' : 'text-gray-400'">
+              {{ item.isActive ? 'Active' : 'Ended' }}
+            </span>
+          </td>
+
+          <td>
+            <button (click)="endRentalItem(item)"
+              class="bg-red-500 text-white px-2 py-1 rounded">
+              End
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
+
+    <div class="text-right mt-4">
+      <button (click)="closeRentalItems()"
+        class="bg-gray-400 text-white px-4 py-2 rounded">
+        Close
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= PAYMENT ================= -->
+<ng-container *ngIf="viewMode === 'payment'">
+
+<h2 class="text-2xl font-bold mb-4">Payment Management</h2>
+
+<!-- TOP -->
+<div class="flex justify-between mb-4">
+
+  <div class="flex gap-2">
+
+    <input [(ngModel)]="paymentSearchRentalId"
+      placeholder="Search by Rental ID"
+      class="border p-2 rounded w-40" />
+
+    <input [(ngModel)]="paymentSearchUserId"
+      placeholder="Search by User ID"
+      class="border p-2 rounded w-40" />
+
+    <button (click)="searchPayment()"
+      class="bg-gray-500 text-white px-3 py-2 rounded">
+      Search
+    </button>
+
+    <button (click)="resetPayment()"
+      class="bg-gray-300 px-3 py-2 rounded">
+      Reset
+    </button>
+
+    <button (click)="refreshPayments()"
+      class="bg-blue-400 text-white px-3 py-2 rounded">
+      Refresh
+    </button>
+
+  </div>
+
+</div>
+
+<!-- TABLE -->
+<table class="w-full bg-white shadow rounded">
+
+  <thead class="bg-gray-200">
+    <tr>
+      <th>Rental ID</th>
+      <th>User ID</th>
+      <th>User Name</th>
+      <th>Amount</th>
+      <th>Method</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Payment ID</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let p of payments" class="border-t text-center h-14">
+
+      <td>{{ p.rentalId }}</td>
+      <td>{{ p.userId }}</td>
+      <td>{{ p.userName || '-' }}</td>
+      <td>₹ {{ p.amount }}</td>
+
+      <!-- ✅ METHOD FIX -->
+      <td>{{ getPaymentMethod(p.paymentMethod) }}</td>
+
+      <td>{{ p.paymentDate | date:'short' }}</td>
+
+      <!-- STATUS -->
+      <td>
+        <span [ngClass]="{
+          'text-green-500': p.paymentStatus === 0,
+          'text-red-500': p.paymentStatus === 1
+        }">
+          {{ getPaymentStatus(p.paymentStatus) }}
+        </span>
+      </td>
+
+      <!-- ✅ PAYMENT ID LAST -->
+      <td>{{ p.paymentId }}</td>
+
+    </tr>
+  </tbody>
+
+</table>
+
+</ng-container>
+
+        <!-- ======================Movies========================= -->
+         <ng-container *ngIf="viewMode === 'movie'">
+
+<h2 class="text-2xl font-bold mb-4">Movie Management</h2>
+
+<!-- TOP -->
+<div class="flex justify-between mb-4">
+
+  <div class="flex gap-2">
+
+    <input [(ngModel)]="movieSearchId"
+      placeholder="Search by ID"
+      class="border p-2 rounded w-40" />
+
+    <input [(ngModel)]="movieSearchName"
+      placeholder="Search by Name"
+      class="border p-2 rounded w-60" />
+
+    <button (click)="searchMovie()" class="bg-gray-500 text-white px-3 py-2 rounded">
+      Search
+    </button>
+
+    <button (click)="resetMovie()" class="bg-gray-300 px-3 py-2 rounded">
+      Reset
+    </button>
+
+    <button (click)="refreshMovies()" class="bg-blue-400 text-white px-3 py-2 rounded">
+      Refresh
+    </button>
+
+  </div>
+
+  <button (click)="openMovieForm()"
+    class="bg-blue-500 text-white px-4 py-2 rounded">
+    + Add Movie
+  </button>
+
+</div>
+
+<!-- TABLE -->
+<table class="w-full bg-white shadow rounded">
+
+  <thead class="bg-gray-200">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Year</th>
+      <th>Duration</th>
+      <th>Language</th>
+      <th>Rating</th>
+      <th>Rental Count</th>
+      <th>Poster</th>
+      <th>Trailer</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let m of movies" class="border-t text-center h-16">
+
+      <td>{{ m.id }}</td>
+      <td>{{ m.title }}</td>
+      <td>{{ m.releaseYear }}</td>
+      <td>{{ m.durationMinutes }}</td>
+      <td>{{ m.language }}</td>
+      <td>{{ m.rating || '-' }}</td>
+      <td>{{ m.rentalCount || '-' }}</td>
+
+      <!-- Poster -->
+      <td>
+        <button (click)="showPosterPopup(m.posterPath)">🖼️</button>
+      </td>
+
+      <!-- Trailer -->
+      <td>
+        <button (click)="showTrailerPopup(m.trailerUrl)">🎬</button>
+      </td>
+
+      <td class="space-x-2">
+        <button (click)="editMovie(m)">✏️</button>
+        <button (click)="deleteMovie(m.id)">🗑️</button>
+      </td>
+
+    </tr>
+  </tbody>
+
+</table>
+<!-- ===== MOVIE MODAL ===== -->
+<div *ngIf="showMovieForm"
+  class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+
+  <div class="bg-white p-6 rounded-xl shadow-xl w-[500px] max-h-[90vh] overflow-auto">
+
+    <h3 class="text-xl font-bold mb-4 text-center">
+      {{ isMovieEdit ? 'Edit Movie' : 'Add Movie' }}
+    </h3>
+
+    <!-- Title -->
+    <label class="block text-sm mb-1">Title</label>
+    <input [(ngModel)]="movieForm.title"
+      class="border p-2 w-full mb-3 rounded" />
+
+    <!-- Description -->
+    <label class="block text-sm mb-1">Description</label>
+    <textarea [(ngModel)]="movieForm.description"
+      class="border p-2 w-full mb-3 rounded"></textarea>
+
+    <!-- Year -->
+    <label class="block text-sm mb-1">Release Year</label>
+    <input [(ngModel)]="movieForm.releaseYear"
+      class="border p-2 w-full mb-3 rounded" />
+
+    <!-- Duration -->
+    <label class="block text-sm mb-1">Duration (minutes)</label>
+    <input [(ngModel)]="movieForm.durationMinutes"
+      class="border p-2 w-full mb-3 rounded" />
+
+    <!-- Language -->
+    <label class="block text-sm mb-1">Language</label>
+    <input [(ngModel)]="movieForm.language"
+      class="border p-2 w-full mb-3 rounded" />
+
+    <!-- Poster -->
+    <label class="block text-sm mb-1">Poster Path</label>
+    <input [(ngModel)]="movieForm.posterPath"
+      class="border p-2 w-full mb-3 rounded" />
+
+    <!-- Trailer -->
+    <label class="block text-sm mb-1">Trailer URL</label>
+    <input [(ngModel)]="movieForm.trailerUrl"
+      class="border p-2 w-full mb-4 rounded" />
+
+    <!-- Buttons -->
+    <div class="flex justify-between">
+
+      <button (click)="showMovieForm=false"
+        class="bg-gray-400 text-white px-4 py-2 rounded">
+        Cancel
+      </button>
+
+      <button (click)="saveMovie()"
+        class="bg-green-500 text-white px-4 py-2 rounded">
+        Save
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+</ng-container>
+<!-- Poster Popup -->
+<div *ngIf="showPoster"
+  class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+
+  <div class="bg-white p-4 rounded">
+    <p>{{ showPoster }}</p>
+    <button (click)="showPoster=''" class="mt-2 bg-gray-400 px-3 py-1 rounded">Close</button>
+  </div>
+
+</div>
+
+<!-- Trailer Popup -->
+<div *ngIf="showTrailer"
+  class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+
+  <div class="bg-white p-4 rounded">
+    <p>{{ showTrailer }}</p>
+    <button (click)="showTrailer=''" class="mt-2 bg-gray-400 px-3 py-1 rounded">Close</button>
+  </div>
+
+</div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+  <!-- --------------------------------Payment------------------------------ -->
+   
+
+</div>
