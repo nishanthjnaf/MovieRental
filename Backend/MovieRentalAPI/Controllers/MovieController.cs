@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
@@ -135,6 +135,28 @@ namespace MovieRentalAPI.Controllers
             {
                 var result =
                     await _movieService.GetTopRentedMovies(count);
+
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        //[Authorize(Roles = "Admin,Customer")]
+        [HttpGet("top-user-rated")]
+        public async Task<IActionResult> GetTopUserRatedMovies(
+            [FromQuery] int count = 10)
+        {
+            try
+            {
+                var result =
+                    await _movieService.GetTopUserRatedMovies(count);
 
                 return Ok(result);
             }

@@ -1,1 +1,108 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global cinematic theme */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(151, 71, 255, 0.14), transparent 35%),
+    radial-gradient(circle at 85% 0%, rgba(244, 114, 182, 0.14), transparent 30%),
+    linear-gradient(180deg, #0d1020 0%, #090b14 45%, #07090f 100%);
+  color: #e2e8f0;
+  font-family: Inter, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+}
+
+.neon-border {
+  border: 1px solid rgba(217, 70, 239, 0.65);
+  box-shadow: 0 0 0 1px rgba(217, 70, 239, 0.15), 0 0 20px rgba(217, 70, 239, 0.15);
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #1f2937;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  animation: shimmer 1.25s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.admin-theme {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(151, 71, 255, 0.14), transparent 35%),
+    radial-gradient(circle at 85% 0%, rgba(244, 114, 182, 0.14), transparent 30%),
+    linear-gradient(180deg, #0d1020 0%, #090b14 45%, #07090f 100%);
+}
+
+.admin-theme table {
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  color: #e2e8f0;
+}
+
+.admin-theme thead {
+  background: #1e293b;
+}
+
+.admin-theme td,
+.admin-theme th {
+  padding: 10px;
+  border-color: #334155;
+}
+
+.admin-theme input,
+.admin-theme textarea,
+.admin-theme select {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+}
+
+.top-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.18), 0 0 14px rgba(236, 72, 153, 0.16);
+}
+
+.admin-theme .bg-gray-300 {
+  background: #475569 !important;
+  color: #ffffff !important;
+}
+
+.admin-theme .bg-gray-500 {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+.admin-theme .bg-blue-400 {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}

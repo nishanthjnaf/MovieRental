@@ -35,7 +35,16 @@ export class RentalService {
   endItem(rentalItemId: number): Observable<any> {
     return this.http.patch(
       `${this.baseUrl}/end-item/${rentalItemId}`,
-      {}
+      {},
+      { responseType: 'text' }
+    );
+  }
+
+  // ===================== RENEW RENTAL ITEM =====================
+  renewItem(rentalItemId: number, daysToAdd: number): Observable<any> {
+    return this.http.patch(
+      `${this.baseUrl}/renew-item/${rentalItemId}`,
+      { daysToAdd }
     );
   }
 

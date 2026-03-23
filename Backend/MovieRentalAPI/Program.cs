@@ -115,6 +115,32 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Ensure required Movie columns exist for older databases.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<MovieRentalContext>();
+    db.Database.ExecuteSqlRaw(@"
+IF COL_LENGTH('Movies', 'Cast') IS NULL
+    ALTER TABLE Movies ADD Cast nvarchar(max) NOT NULL CONSTRAINT DF_Movies_Cast DEFAULT('');
+IF COL_LENGTH('Movies', 'Director') IS NULL
+    ALTER TABLE Movies ADD Director nvarchar(max) NOT NULL CONSTRAINT DF_Movies_Director DEFAULT('');
+IF COL_LENGTH('Movies', 'ContentRating') IS NULL
+    ALTER TABLE Movies ADD ContentRating nvarchar(max) NOT NULL CONSTRAINT DF_Movies_ContentRating DEFAULT('');
+IF COL_LENGTH('Movies', 'ContentAdvisory') IS NULL
+    ALTER TABLE Movies ADD ContentAdvisory nvarchar(max) NOT NULL CONSTRAINT DF_Movies_ContentAdvisory DEFAULT('');
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.columns c
+    JOIN sys.types t ON c.user_type_id = t.user_type_id
+    WHERE c.object_id = OBJECT_ID('Reviews')
+      AND c.name = 'Rating'
+      AND t.name = 'int'
+)
+    ALTER TABLE Reviews ALTER COLUMN Rating float NOT NULL;
+");
+}
+
 #region Middleware Pipeline
 
 

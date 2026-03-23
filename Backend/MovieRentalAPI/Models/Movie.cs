@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,6 +13,13 @@ namespace MovieRentalAPI.Models
         public int DurationMinutes { get; set; }
         public string Language { get; set; } = string.Empty;
         public double Rating { get; set; }
+        // Comma-separated cast names (stored as CSV for simplicity)
+        public string Cast { get; set; } = string.Empty;
+        public string Director { get; set; } = string.Empty;
+        // Example: "PG-13"
+        public string ContentRating { get; set; } = string.Empty;
+        // Comma-separated advisory tags (e.g., "Violence, Language")
+        public string ContentAdvisory { get; set; } = string.Empty;
         public int RentalCount { get; set; } = 0;
         public int MyProperty { get; set; }
         public string? PosterPath { get; set; }

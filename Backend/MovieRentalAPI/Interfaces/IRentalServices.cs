@@ -1,4 +1,4 @@
-﻿using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.DTOs;
 
 namespace MovieRentalAPI.Interfaces
 {
@@ -11,6 +11,7 @@ namespace MovieRentalAPI.Interfaces
         Task<IEnumerable<RentalItemResponseDto>> GetActiveRentals(int userId);
 
         Task<bool> EndRentalItem(int rentalItemId);
+        Task<RentalItemResponseDto> RenewRentalItem(int rentalItemId, RenewRentalRequestDto request);
         Task<IEnumerable<RentalItemResponseDto>> GetRentalItemsByRentalId(int rentalId);
         Task<IEnumerable<RentalResponseDto>> GetAllRentals();
     }

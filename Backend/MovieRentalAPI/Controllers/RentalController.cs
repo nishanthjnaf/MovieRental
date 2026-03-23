@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
@@ -113,6 +113,33 @@ namespace MovieRentalAPI.Controllers
             catch (NotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+        //[Authorize(Roles = "Admin,Customer")]
+        [HttpPatch("renew-item/{rentalItemId}")]
+        public async Task<ActionResult> RenewRentalItem(
+            int rentalItemId,
+            [FromBody] RenewRentalRequestDto request)
+        {
+            try
+            {
+                var updated = await _rentalService
+                    .RenewRentalItem(rentalItemId, request);
+
+                return Ok(updated);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (ConflictException ex)
             {

@@ -4,7 +4,8 @@
     {
         PaymentPending,
         Available,
-        PaymentDeclined
+        PaymentDeclined,
+        PaymentNotDone
     }
 
 }

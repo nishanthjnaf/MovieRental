@@ -4,7 +4,8 @@ import { AuthService } from '../services/auth';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { jwtDecode } from "c:/Users/Nishanth.J/Movie-Rental/node_modules/jwt-decode/build/esm/index"
+import { jwtDecode } from 'jwt-decode';
+import { CartStateService } from '../services/cart-state';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class Login implements OnInit {
 
   form: any;
 
-  constructor(private fb: FormBuilder, private auth: AuthService,private router:Router,private toastr: ToastrService) {}
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private toastr: ToastrService, private cartState: CartStateService) {}
   showPassword = false;
 
 togglePassword() {
@@ -63,6 +64,7 @@ togglePassword() {
         const decoded: any = jwtDecode(token);
         const role = decoded.role || decoded.Role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
         localStorage.setItem('role', role);
+        this.cartState.reload();
         if (role === 'Admin') {
         this.router.navigate(['/admin']);
         } else {

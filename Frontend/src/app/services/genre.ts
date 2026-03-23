@@ -18,6 +18,10 @@ export class GenreService {
     return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
+  getMoviesByGenreId(id: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/${id}/movies`);
+  }
+
   // ADD
   addGenre(data: any) {
     return this.http.post(this.baseUrl, data);
@@ -36,5 +40,12 @@ export class GenreService {
   // ASSIGN MOVIE
   assignMovie(genreId: number, movieId: number) {
     return this.http.post(`${this.baseUrl}/${genreId}/assign/${movieId}`, {});
+  }
+
+  // ===================== MOVIES BY GENRE NAME =====================
+  getMoviesByGenreName(genreName: string) {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/name/${encodeURIComponent(genreName)}/movies`
+    );
   }
 }

@@ -1,0 +1,56 @@
+<h1 class="text-4xl font-bold text-amber-300 mb-6">Welcome to Cinefilia</h1>
+
+<section class="mb-10" *ngIf="loading">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div *ngFor="let i of [1,2,3,4,5]" class="rounded-xl border border-slate-800 overflow-hidden">
+      <div class="h-36 skeleton"></div>
+      <div class="p-3 space-y-2">
+        <div class="h-4 rounded skeleton"></div>
+        <div class="h-3 rounded skeleton w-2/3"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mb-10" *ngIf="!loading">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-2xl font-semibold">New Movies</h2>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <article *ngFor="let m of newMovies" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
+      <img [src]="m.posterPath || 'https://placehold.co/400x240'" class="h-36 w-full object-cover" />
+      <div class="p-3">
+        <h3 class="font-semibold truncate">{{ m.title }}</h3>
+        <p class="text-xs text-slate-400">{{ m.releaseYear }} • {{ m.language }}</p>
+        <p class="text-sm text-amber-300 mt-1">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="mb-10" *ngIf="!loading">
+  <h2 class="text-2xl font-semibold mb-3">Top User Rated</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <article *ngFor="let m of topRatedMovies" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
+      <img [src]="m.posterPath || 'https://placehold.co/400x240'" class="h-36 w-full object-cover" />
+      <div class="p-3">
+        <h3 class="font-semibold truncate">{{ m.title }}</h3>
+        <p class="text-sm text-fuchsia-300">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section *ngIf="!loading">
+  <h2 class="text-2xl font-semibold mb-3">Top Rented Movies</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <article *ngFor="let m of topRentedMovies" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.movieId)">
+      <img [src]="m.posterPath || 'https://placehold.co/400x240'" class="h-36 w-full object-cover" />
+      <div class="p-3">
+        <h3 class="font-semibold truncate">{{ m.title }}</h3>
+        <p class="text-xs text-slate-400">Rented {{ m.rentalCount }} times</p>
+      </div>
+    </article>
+  </div>
+</section>
+

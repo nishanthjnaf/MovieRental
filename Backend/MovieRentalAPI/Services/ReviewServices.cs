@@ -1,4 +1,5 @@
-﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Helpers;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
@@ -10,21 +11,27 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, Review> _reviewRepo;
         private readonly IRepository<int, Movie> _movieRepo;
         private readonly IRepository<int, User> _userRepo;
+        private readonly IRepository<int, Rental> _rentalRepo;
+        private readonly IRepository<int, RentalItem> _rentalItemRepo;
 
         public ReviewService(
             IRepository<int, Review> reviewRepo,
             IRepository<int, Movie> movieRepo,
-            IRepository<int, User> userRepo)
+            IRepository<int, User> userRepo,
+            IRepository<int, Rental> rentalRepo,
+            IRepository<int, RentalItem> rentalItemRepo)
         {
             _reviewRepo = reviewRepo;
             _movieRepo = movieRepo;
             _userRepo = userRepo;
+            _rentalRepo = rentalRepo;
+            _rentalItemRepo = rentalItemRepo;
         }
 
         public async Task<ReviewResponseDto> AddReview(ReviewRequestDto request)
         {
-            if (request.Rating < 1 || request.Rating > 5)
-                throw new BadRequestException("Rating must be between 1 and 5");
+            if (request.Rating < 0 || request.Rating > 10)
+                throw new BadRequestException("Rating must be between 0 and 10");
 
             var user = await _userRepo.Get(request.UserId);
             if (user == null)
@@ -33,6 +40,19 @@ namespace MovieRentalAPI.Services
             var movie = await _movieRepo.Get(request.MovieId);
             if (movie == null)
                 throw new NotFoundException("Movie not found");
+
+            var rentals = (await _rentalRepo.GetAll())
+                ?.Where(r => r.UserId == request.UserId)
+                .Select(r => r.Id)
+                .ToHashSet() ?? new HashSet<int>();
+
+            var rentalItems = await _rentalItemRepo.GetAll();
+            var hasRentedMovie = rentalItems?.Any(ri =>
+                rentals.Contains(ri.RentalId) &&
+                ri.MovieId == request.MovieId) ?? false;
+
+            if (!hasRentedMovie)
+                throw new BadRequestException("You can rate only movies you have rented");
 
             var existingReviews = await _reviewRepo.GetAll();
 
@@ -48,13 +68,15 @@ namespace MovieRentalAPI.Services
                 MovieId = request.MovieId,
                 Rating = request.Rating,
                 Comment = request.Comment,
-                ReviewDate = DateTime.UtcNow
+                ReviewDate = IstDateTime.Now
             };
 
             var added = await _reviewRepo.Add(review);
 
             if (added == null)
                 throw new Exception("Review creation failed");
+
+            await UpdateMovieRating(request.MovieId);
 
             return MapToResponse(added);
         }
@@ -92,15 +114,15 @@ namespace MovieRentalAPI.Services
                 .ToList();
 
             if (userReviews == null || !userReviews.Any())
-                throw new NotFoundException("No reviews found for this user");
+                return Enumerable.Empty<ReviewResponseDto>();
 
             return userReviews.Select(MapToResponse);
         }
 
         public async Task<ReviewResponseDto> UpdateReview(int id, ReviewRequestDto request)
         {
-            if (request.Rating < 1 || request.Rating > 5)
-                throw new BadRequestException("Rating must be between 1 and 5");
+            if (request.Rating < 0 || request.Rating > 10)
+                throw new BadRequestException("Rating must be between 0 and 10");
 
             var existing = await _reviewRepo.Get(id);
 
@@ -115,6 +137,8 @@ namespace MovieRentalAPI.Services
             if (updated == null)
                 throw new Exception("Review update failed");
 
+            await UpdateMovieRating(existing.MovieId);
+
             return MapToResponse(updated);
         }
 
@@ -125,12 +149,34 @@ namespace MovieRentalAPI.Services
             if (existing == null)
                 throw new NotFoundException("Review not found");
 
+            var movieId = existing.MovieId;
+
             var deleted = await _reviewRepo.Delete(id);
 
             if (deleted == null)
                 throw new Exception("Review deletion failed");
 
+            await UpdateMovieRating(movieId);
+
             return true;
+        }
+
+        private async Task UpdateMovieRating(int movieId)
+        {
+            var movie = await _movieRepo.Get(movieId);
+            if (movie == null)
+                throw new NotFoundException("Movie not found");
+
+            var allReviews = await _reviewRepo.GetAll();
+            var movieReviews = allReviews?
+                .Where(r => r.MovieId == movieId)
+                .ToList();
+
+            movie.Rating = movieReviews != null && movieReviews.Any()
+                ? movieReviews.Average(r => r.Rating)
+                : 0;
+
+            await _movieRepo.Update(movieId, movie);
         }
 
         private ReviewResponseDto MapToResponse(Review r)

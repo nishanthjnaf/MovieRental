@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
@@ -44,6 +44,25 @@ namespace MovieRentalAPI.Controllers
             catch (NotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        //[Authorize(Roles = "Admin,Customer")]
+        [HttpGet("by-username/{username}")]
+        public async Task<IActionResult> GetUserByUsername(string username)
+        {
+            try
+            {
+                var user = await _userServices.GetUserByUsername(username);
+                return Ok(user);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
@@ -93,6 +112,27 @@ namespace MovieRentalAPI.Controllers
             catch (NotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        //[Authorize(Roles = "Customer")]
+        [HttpPatch("{id}/reset-password")]
+        public async Task<IActionResult> ResetPassword(
+            int id,
+            [FromBody] ResetPasswordRequestDto request)
+        {
+            try
+            {
+                await _userServices.ResetPassword(id, request);
+                return Ok("Password reset successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

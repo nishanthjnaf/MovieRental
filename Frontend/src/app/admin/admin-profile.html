@@ -1,0 +1,52 @@
+<div class="min-h-screen p-6 admin-theme text-slate-100">
+  <div class="max-w-3xl mx-auto space-y-5">
+    <div class="flex items-center justify-between">
+      <h2 class="text-4xl font-bold text-amber-300">Admin Profile</h2>
+      <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="backToAdmin()">Back to Admin</button>
+    </div>
+
+    <div class="glass-panel border border-slate-700 rounded-xl p-5">
+      <p><span class="text-slate-400">Name:</span> {{ user?.name || '-' }}</p>
+      <p><span class="text-slate-400">Username:</span> {{ user?.username || '-' }}</p>
+      <p><span class="text-slate-400">Email:</span> {{ user?.email || '-' }}</p>
+      <p><span class="text-slate-400">Phone:</span> {{ user?.phone || '-' }}</p>
+      <p><span class="text-slate-400">Role:</span> {{ user?.role || 'Admin' }}</p>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button class="bg-fuchsia-700 hover:bg-fuchsia-600 rounded px-4 py-2" (click)="showEditPopup = true">Edit Profile</button>
+        <button class="bg-orange-700 hover:bg-orange-600 rounded px-4 py-2" (click)="showPasswordPopup = true">Reset Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showEditPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-xl">
+    <h3 class="text-xl font-semibold mb-4">Edit Profile</h3>
+    <div class="grid md:grid-cols-2 gap-3">
+      <input [(ngModel)]="edit.name" placeholder="Name" class="bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+      <input [(ngModel)]="edit.username" placeholder="Username" class="bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+      <input [(ngModel)]="edit.email" placeholder="Email" class="bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+      <input [(ngModel)]="edit.phone" placeholder="Phone" class="bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+    </div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button class="bg-slate-700 rounded px-4 py-2" (click)="showEditPopup = false">Cancel</button>
+      <button class="bg-fuchsia-700 rounded px-4 py-2" (click)="saveProfile()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showPasswordPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-xl">
+    <h3 class="text-xl font-semibold mb-4">Reset Password</h3>
+    <div class="space-y-3">
+      <input [(ngModel)]="pwd.oldPassword" type="password" placeholder="Old password" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+      <input [(ngModel)]="pwd.newPassword" type="password" placeholder="New password" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+      <input [(ngModel)]="pwd.confirmPassword" type="password" placeholder="Confirm password" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+    </div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button class="bg-slate-700 rounded px-4 py-2" (click)="showPasswordPopup = false">Cancel</button>
+      <button class="bg-orange-700 rounded px-4 py-2" (click)="resetPassword()">Update</button>
+    </div>
+  </div>
+</div>

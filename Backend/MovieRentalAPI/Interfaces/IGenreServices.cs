@@ -1,4 +1,4 @@
-﻿using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.DTOs;
 
 namespace MovieRentalAPI.Interfaces
 {
@@ -12,5 +12,6 @@ namespace MovieRentalAPI.Interfaces
 
         Task<bool> AssignGenreToMovie(int movieId, int genreId);
         Task<IEnumerable<CreateMovieResponseDto>> GetMoviesByGenre(int genreId);
+        Task<IEnumerable<CreateMovieResponseDto>> GetMoviesByGenreName(string genreName);
     }
 }

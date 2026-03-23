@@ -1,4 +1,4 @@
-﻿namespace MovieRentalAPI.Models.DTOs
+namespace MovieRentalAPI.Models.DTOs
 {
     public class ReviewResponseDto
     {
@@ -8,7 +8,7 @@
         public int MovieId { get; set; }
         public string MovieName { get; set; } = string.Empty; 
 
-        public int Rating { get; set; }
+        public double Rating { get; set; }
         public string Comment { get; set; } = string.Empty;
         public DateTime ReviewDate { get; set; }
     }

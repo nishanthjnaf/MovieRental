@@ -1,4 +1,5 @@
 ﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Helpers;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
@@ -73,7 +74,7 @@ namespace MovieRentalAPI.Services
                 Amount = rental.TotalAmount,
                 PaymentMethod = request.Method,
                 Status = paymentStatus,
-                PaymentDate = DateTime.UtcNow
+                PaymentDate = IstDateTime.Now
             };
 
             var added = await _paymentRepository.Add(payment);

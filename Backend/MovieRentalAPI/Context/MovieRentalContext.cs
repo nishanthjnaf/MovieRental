@@ -64,7 +64,14 @@ namespace MovieRentalModels
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Rental)
                 .WithOne(r => r.Payment)
-                .HasForeignKey<Payment>(p => p.RentalId);
+                .HasForeignKey<Payment>(p => p.RentalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Review>()
                 .HasKey(rv => rv.Id);

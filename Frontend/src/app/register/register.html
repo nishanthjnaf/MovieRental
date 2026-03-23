@@ -1,156 +1,77 @@
-<div class="flex justify-center items-center h-screen bg-gradient-to-r from-blue-100 to-purple-100">
+<div class="min-h-screen flex items-center justify-center px-4 py-8">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="glass-panel neon-border w-full max-w-md p-8 space-y-4">
+    <h2 class="text-3xl font-bold text-center text-amber-300">Create Account</h2>
 
-  <form [formGroup]="form" (ngSubmit)="submit()" 
-        class="bg-white p-8 rounded-2xl shadow-xl w-96 space-y-5">
+    <div class="space-y-1">
+      <label for="reg-username" class="text-sm text-slate-300">Username</label>
+      <input id="reg-username" type="text" formControlName="username" placeholder="lowercase, min 4 chars"
+        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+      <p *ngIf="f.username.touched && f.username.invalid" class="text-red-400 text-xs">Only lowercase, min 4 chars</p>
+    </div>
 
-    <h2 class="text-2xl font-bold text-center text-gray-700">Create Account</h2>
+    <div class="space-y-1">
+      <label for="reg-password" class="text-sm text-slate-300">Password</label>
+      <div class="relative">
+        <input id="reg-password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter password"
+          class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-14 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+        <button type="button" (click)="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-fuchsia-300 text-sm">
+          {{ showPassword ? 'Hide' : 'Show' }}
+        </button>
+      </div>
+      <p *ngIf="f.password.touched && f.password.invalid" class="text-red-400 text-xs">Weak password</p>
+      <div class="h-2 bg-slate-800 rounded overflow-hidden">
+        <div class="h-full transition-all duration-300" [class]="passwordStrengthClass()"></div>
+      </div>
+      <p class="text-xs text-slate-400">{{ passwordStrengthText() }}</p>
+      <p class="text-xs text-slate-500">Needs uppercase, number, special char, and min 6 characters.</p>
+    </div>
 
-    <!-- Username -->
-    <div class="relative mt-6">
+    <div class="space-y-1">
+      <label for="reg-confirm-password" class="text-sm text-slate-300">Confirm Password</label>
+      <div class="relative">
+        <input id="reg-confirm-password" [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Re-enter password"
+          class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-14 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+        <button type="button" (click)="toggleConfirmPassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-fuchsia-300 text-sm">
+          {{ showConfirmPassword ? 'Hide' : 'Show' }}
+        </button>
+      </div>
+      <p *ngIf="f.confirmPassword.touched && f.confirmPassword.invalid" class="text-red-400 text-xs">Confirm password required</p>
+      <p *ngIf="form.errors?.['passwordMismatch'] && f.confirmPassword.touched" class="text-red-400 text-xs">Passwords do not match</p>
+    </div>
 
-  <input type="text" formControlName="username"
-    class="peer w-full pt-6 pb-2 bg-transparent border-b-2 border-gray-300 
-           focus:outline-none focus:border-blue-500"
-    placeholder=" " />
+    <div class="space-y-1">
+      <label for="reg-name" class="text-sm text-slate-300">Name</label>
+      <input id="reg-name" type="text" formControlName="name" placeholder="Enter full name"
+        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+      <p *ngIf="f.name.touched && f.name.invalid" class="text-red-400 text-xs">Only alphabets</p>
+    </div>
 
-  <label class="absolute left-0 top-5 text-gray-500 transition-all
-    peer-placeholder-shown:top-5 peer-placeholder-shown:text-base
-    peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500">
-    Username
-  </label>
+    <div class="space-y-1">
+      <label for="reg-email" class="text-sm text-slate-300">Email</label>
+      <input id="reg-email" type="email" formControlName="email" placeholder="name@example.com"
+        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+      <p *ngIf="f.email.touched && f.email.invalid" class="text-red-400 text-xs">Invalid email</p>
+    </div>
 
-  <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-500 
-               transition-all duration-300 peer-focus:w-full"></span>
+    <div class="space-y-1">
+      <label for="reg-phone" class="text-sm text-slate-300">Phone</label>
+      <div class="flex gap-2">
+        <span class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300">+91</span>
+        <input id="reg-phone" type="text" formControlName="phone" placeholder="10 digit number"
+          class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+      </div>
+      <p *ngIf="f.phone.touched && f.phone.invalid" class="text-red-400 text-xs">Must be 10 digits</p>
+    </div>
 
-  <p *ngIf="f.username.touched && f.username.invalid"
-     class="text-red-500 text-xs mt-1 bg-red-50 px-2 py-1 rounded">
-    Only lowercase, min 4 chars
-  </p>
-
-</div>
-
-    <!-- Password -->
-    <div class="relative mt-6">
-
-  <input [type]="showPassword ? 'text' : 'password'"
-    formControlName="password"
-    class="peer w-full pr-12 pt-6 pb-2 bg-transparent border-b-2 border-gray-300 
-           focus:outline-none focus:border-blue-500"
-    placeholder=" " />
-
-  <label class="absolute left-0 top-5 text-gray-500 transition-all
-    peer-placeholder-shown:top-5 peer-placeholder-shown:text-base
-    peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500">
-    Password
-  </label>
-
-  <span (click)="togglePassword()"
-        class="absolute right-0 top-4 text-blue-500 cursor-pointer text-sm">
-    {{ showPassword ? 'Hide' : 'Show' }}
-  </span>
-
-  <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-500 
-               transition-all duration-300 peer-focus:w-full"></span>
-
-  <p *ngIf="f.password.touched && f.password.invalid"
-     class="text-red-500 text-xs mt-1 bg-red-50 px-2 py-1 rounded">
-    Weak password
-  </p>
-
-  
-
-</div>
-
-    <!-- Name -->
-    <div class="relative mt-6">
-
-  <input type="text" formControlName="name"
-    class="peer w-full pt-6 pb-2 bg-transparent border-b-2 border-gray-300 
-           focus:outline-none focus:border-blue-500"
-    placeholder=" " />
-
-  <label class="absolute left-0 top-5 text-gray-500 transition-all
-    peer-placeholder-shown:top-5 peer-placeholder-shown:text-base
-    peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500">
-    Name
-  </label>
-
-  <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-500 
-               transition-all duration-300 peer-focus:w-full"></span>
-
-  <p *ngIf="f.name.touched && f.name.invalid"
-     class="text-red-500 text-xs mt-1 bg-red-50 px-2 py-1 rounded">
-    Only alphabets
-  </p>
-
-</div>
-
-    <!-- Email -->
-    <div class="relative mt-6">
-
-  <input type="email" formControlName="email"
-    class="peer w-full pt-6 pb-2 bg-transparent border-b-2 border-gray-300 
-           focus:outline-none focus:border-blue-500"
-    placeholder=" " />
-
-  <label class="absolute left-0 top-5 text-gray-500 transition-all
-    peer-placeholder-shown:top-5 peer-placeholder-shown:text-base
-    peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500">
-    Email
-  </label>
-
-  <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-500 
-               transition-all duration-300 peer-focus:w-full"></span>
-
-  <p *ngIf="f.email.touched && f.email.invalid"
-     class="text-red-500 text-xs mt-1 bg-red-50 px-2 py-1 rounded">
-    Invalid email
-  </p>
-
-</div>
-
-    <!-- Phone -->
-    <div class="relative mt-6">
-
-  <!-- +91 prefix -->
-  <span class="absolute left-0 top-5 text-gray-500 text-sm">
-    +91
-  </span>
-
-  <input type="text" formControlName="phone"
-    class="peer w-full pl-10 pt-6 pb-2 bg-transparent border-b-2 border-gray-300 
-           focus:outline-none focus:border-blue-500"
-    placeholder=" " />
-
-  <label class="absolute left-10 top-5 text-gray-500 transition-all
-    peer-placeholder-shown:top-5 peer-placeholder-shown:text-base
-    peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500">
-    Phone
-  </label>
-
-  <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-500 
-               transition-all duration-300 peer-focus:w-full"></span>
-
-  <p *ngIf="f.phone.touched && f.phone.invalid"
-     class="text-red-500 text-xs mt-1 bg-red-50 px-2 py-1 rounded">
-    Must be 10 digits
-  </p>
-
-</div>
-
-    <!-- Button -->
     <button [disabled]="form.invalid || loading"
-      class="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white p-2 rounded transition">
-
+      class="w-full bg-fuchsia-700 hover:bg-fuchsia-600 disabled:bg-slate-700 text-white py-2 rounded-lg transition">
       <span *ngIf="!loading">Register</span>
       <span *ngIf="loading">Registering...</span>
-
     </button>
 
-    <p class="text-center text-sm">
+    <p class="text-center text-sm text-slate-300">
       Already have account?
-      <a routerLink="/login" class="text-blue-500 font-medium">Login</a>
+      <a routerLink="/login" class="text-amber-300 font-medium">Login</a>
     </p>
-
   </form>
 </div>

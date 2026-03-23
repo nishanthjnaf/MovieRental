@@ -17,7 +17,7 @@ namespace MovieRentalAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "8.0.24")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -90,7 +90,23 @@ namespace MovieRentalAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Cast")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentAdvisory")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentRating")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Director")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -162,6 +178,8 @@ namespace MovieRentalAPI.Migrations
 
                     b.HasIndex("RentalId")
                         .IsUnique();
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Payments");
                 });
@@ -249,8 +267,8 @@ namespace MovieRentalAPI.Migrations
                     b.Property<int>("MovieId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("ReviewDate")
                         .HasColumnType("datetime2");
@@ -369,7 +387,15 @@ namespace MovieRentalAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MovieRentalAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Rental");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MovieRentalAPI.Models.Rental", b =>

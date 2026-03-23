@@ -1,4 +1,5 @@
-﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Helpers;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
@@ -41,7 +42,7 @@ namespace MovieRentalAPI.Services
             var rental = new Rental
             {
                 UserId = request.UserId,
-                RentalDate = DateTime.UtcNow,
+                RentalDate = IstDateTime.Now,
                 Status = RentalStatus.PaymentPending,
                 TotalAmount = 0
             };
@@ -50,8 +51,14 @@ namespace MovieRentalAPI.Services
 
             float totalAmount = 0;
 
-            foreach (var movieId in request.MovieIds)
+            for (int idx = 0; idx < request.MovieIds.Count; idx++)
             {
+                var movieId = request.MovieIds[idx];
+                var days = (request.RentalDaysPerMovie != null && idx < request.RentalDaysPerMovie.Count)
+                    ? request.RentalDaysPerMovie[idx]
+                    : request.RentalDays;
+                if (days <= 0) days = 1;
+
                 var movie = await _movieRepository.Get(movieId);
                 if (movie == null)
                     throw new NotFoundException($"Movie {movieId} not found");
@@ -82,16 +89,16 @@ namespace MovieRentalAPI.Services
                     MovieId = movieId,
                     InventoryId = inventory.Id,
                     PricePerDay = inventory.RentalPrice,
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.UtcNow.AddDays(request.RentalDays),
-                    IsActive = false
+                    StartDate = IstDateTime.Now,
+                    EndDate = IstDateTime.Now.AddDays(days),
+                    IsActive = true
                 };
 
                 await _rentalItemRepository.Add(rentalItem);
 
                 await _inventoryRepository.Update(inventory.Id, inventory);
 
-                totalAmount += inventory.RentalPrice * request.RentalDays;
+                totalAmount += inventory.RentalPrice * days;
 
                 movie.RentalCount++;
                 await _movieRepository.Update(movie.Id, movie);
@@ -115,6 +122,16 @@ namespace MovieRentalAPI.Services
 
             if (rentals == null || !rentals.Any())
                 throw new NotFoundException("No rentals found");
+
+            var cutoff = IstDateTime.Now.AddMinutes(-20);
+            foreach (var r in rentals)
+            {
+                if (r.Status == RentalStatus.PaymentPending && r.RentalDate <= cutoff)
+                {
+                    r.Status = RentalStatus.PaymentNotDone;
+                    await _rentalRepository.Update(r.Id, r);
+                }
+            }
 
             return rentals.Select(r => new RentalResponseDto
             {
@@ -199,6 +216,47 @@ namespace MovieRentalAPI.Services
             return true;
         }
 
+        public async Task<RentalItemResponseDto> RenewRentalItem(
+            int rentalItemId,
+            RenewRentalRequestDto request)
+        {
+            if (request == null)
+                throw new BadRequestException("Renew request is required");
+
+            if (request.DaysToAdd <= 0)
+                throw new BadRequestException("DaysToAdd must be greater than zero");
+
+            var item = await _rentalItemRepository.Get(rentalItemId);
+            if (item == null)
+                throw new NotFoundException("Rental item not found");
+
+            var utcNow = IstDateTime.Now;
+
+            var wasExpired = item.EndDate <= utcNow;
+
+            // If already expired, renew starting from now; otherwise extend from existing EndDate.
+            var baseDate = wasExpired ? utcNow : item.EndDate;
+            item.EndDate = baseDate.AddDays(request.DaysToAdd);
+
+            // Align start to now for expired renewals so UI calculations stay intuitive.
+            if (wasExpired)
+                item.StartDate = utcNow;
+
+            item.IsActive = true;
+
+            await _rentalItemRepository.Update(item.Id, item);
+
+            return new RentalItemResponseDto
+            {
+                Id = item.Id,
+                MovieId = item.MovieId,
+                PricePerDay = item.PricePerDay,
+                StartDate = item.StartDate,
+                EndDate = item.EndDate,
+                IsActive = item.IsActive
+            };
+        }
+
 
         private async Task DeactivateExpiredItems()
         {
@@ -208,7 +266,7 @@ namespace MovieRentalAPI.Services
 
             foreach (var item in items)
             {
-                if (item.IsActive && item.EndDate <= DateTime.UtcNow)
+                if (item.IsActive && item.EndDate <= IstDateTime.Now)
                 {
                     item.IsActive = false;
                     await _rentalItemRepository.Update(item.Id, item);

@@ -40,7 +40,7 @@ namespace MovieRentalAPI.Repositories
 
         public async Task<IEnumerable<T>?> GetAll()
         {
-            var items = await _context.Set<T>().ToListAsync();
+            var items = await _context.Set<T>().AsNoTracking().ToListAsync();
             if (items.Any())
                 return items;
             return null;
@@ -68,7 +68,7 @@ namespace MovieRentalAPI.Repositories
         }
         public async Task<IEnumerable<T>> GetAllIncluding(params Expression<Func<T, object>>[] includes)
         {
-            IQueryable<T> query = _context.Set<T>();
+            IQueryable<T> query = _context.Set<T>().AsNoTracking();
 
             foreach (var include in includes)
             {

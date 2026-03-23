@@ -1,4 +1,5 @@
-﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Helpers;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
@@ -136,6 +137,12 @@ namespace MovieRentalAPI.Services
 
                 foreach (var item in items)
                 {
+                    if (item.IsActive && item.EndDate <= IstDateTime.Now)
+                    {
+                        item.IsActive = false;
+                        await _rentalitemRepository.Update(item.Id, item);
+                    }
+
                     var movie = await _movieRepository.Get(item.MovieId);
 
                     result.Add(new UserRentedMovieResponseDto
@@ -166,6 +173,18 @@ namespace MovieRentalAPI.Services
             return MapToResponse(user);
         }
 
+        public async Task<UserResponseDto> GetUserByUsername(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new BadRequestException("Username is required");
+
+            var user = await base.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null)
+                throw new NotFoundException("User not found");
+
+            return MapToResponse(user);
+        }
+
         public async Task<IEnumerable<UserResponseDto>> GetAllUsers()
         {
             var users = await _userRepository.GetAll();
@@ -188,6 +207,9 @@ namespace MovieRentalAPI.Services
 
             existing.Username = request.Username;
             existing.Role = request.Role;
+            existing.Name = request.Name;
+            existing.Email = request.Email;
+            existing.Phone = request.Phone;
 
             var updated = await _userRepository.Update(id, existing);
 
@@ -212,11 +234,52 @@ namespace MovieRentalAPI.Services
             return true;
         }
 
+        public async Task<bool> ResetPassword(int id, ResetPasswordRequestDto request)
+        {
+            var existing = await _userRepository.Get(id);
+            if (existing == null)
+                throw new NotFoundException("User not found");
+
+            if (string.IsNullOrWhiteSpace(request.OldPassword) ||
+                string.IsNullOrWhiteSpace(request.NewPassword) ||
+                string.IsNullOrWhiteSpace(request.ConfirmPassword))
+                throw new BadRequestException("All password fields are required");
+
+            if (request.NewPassword != request.ConfirmPassword)
+                throw new BadRequestException("New password and confirm password do not match");
+
+            byte[] oldHash = _passwordService.HashPassword(
+                request.OldPassword,
+                existing.PasswordHash,
+                out var oldKey);
+
+            for (int i = 0; i < oldHash.Length; i++)
+            {
+                if (oldHash[i] != existing.Password[i])
+                    throw new BadRequestException("Old password is incorrect");
+            }
+
+            byte[] newHash = _passwordService.HashPassword(
+                request.NewPassword,
+                null,
+                out var newKey);
+
+            existing.Password = newHash;
+            existing.PasswordHash = newKey!;
+
+            var updated = await _userRepository.Update(id, existing);
+            if (updated == null)
+                throw new Exception("Failed to reset password");
+
+            return true;
+        }
+
         private UserResponseDto MapToResponse(User user)
         {
             return new UserResponseDto
             {
                 Id = user.Id,
+                Name = user.Name,
                 Username = user.Username,
                 Role = user.Role,
                 Email = user.Email,

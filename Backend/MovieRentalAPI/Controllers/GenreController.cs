@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
@@ -127,6 +127,25 @@ namespace MovieRentalAPI.Controllers
             {
                 var result = await _genreService.GetMoviesByGenre(genreId);
                 return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        //[Authorize(Roles = "Admin,Customer")]
+        [HttpGet("name/{genreName}/movies")]
+        public async Task<IActionResult> GetMoviesByGenreName(string genreName)
+        {
+            try
+            {
+                var result = await _genreService.GetMoviesByGenreName(genreName);
+                return Ok(result);
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NotFoundException ex)
             {

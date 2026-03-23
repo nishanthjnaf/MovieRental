@@ -1,4 +1,4 @@
-﻿using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.DTOs;
 
 namespace MovieRentalAPI.Interfaces
 {
@@ -11,5 +11,6 @@ namespace MovieRentalAPI.Interfaces
         Task<bool> DeleteMovie(int id);
         Task<PagedResultDto<CreateMovieResponseDto>> SearchMovies(MovieSearchRequestDto request);
         Task<IEnumerable<TopRentedMovieDto>> GetTopRentedMovies(int count);
+        Task<IEnumerable<CreateMovieResponseDto>> GetTopUserRatedMovies(int count);
     }
 }

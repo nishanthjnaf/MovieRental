@@ -13,10 +13,14 @@ export class PaymentService {
   }
 
   getByRentalId(rentalId: number) {
-    return this.http.get<any[]>(`${this.baseUrl}/rental/${rentalId}`);
+    return this.http.get<any>(`${this.baseUrl}/rental/${rentalId}`);
   }
 
   getByUserId(userId: number) {
     return this.http.get<any[]>(`${this.baseUrl}/user/${userId}`);
+  }
+
+  makePayment(data: any) {
+    return this.http.post<any>(this.baseUrl, data);
   }
 }

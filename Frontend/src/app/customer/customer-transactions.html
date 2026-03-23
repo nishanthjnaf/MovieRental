@@ -1,0 +1,52 @@
+<h2 class="text-4xl font-bold text-amber-300 mb-6">My Transactions</h2>
+
+<div *ngIf="loading" class="space-y-3">
+  <div *ngFor="let i of [1,2,3]" class="h-14 rounded-xl skeleton"></div>
+</div>
+
+<div *ngIf="!loading && transactions.length > 0" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-800 text-slate-300">
+      <tr>
+        <th class="text-left p-3">Movies</th>
+        <th class="text-left p-3">Payment ID</th>
+        <th class="text-left p-3">Rental ID</th>
+        <th class="text-left p-3">Amount</th>
+        <th class="text-left p-3">Method</th>
+        <th class="text-left p-3">Status</th>
+        <th class="text-left p-3">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of transactions" class="border-t border-slate-800">
+        <td class="p-3">
+          <button class="bg-fuchsia-700 hover:bg-fuchsia-600 rounded px-2 py-1" (click)="openRentalMovies(t.rentalId)">+</button>
+        </td>
+        <td class="p-3">{{ t.paymentId || '-' }}</td>
+        <td class="p-3">{{ t.rentalId }}</td>
+        <td class="p-3">₹ {{ t.amount }}</td>
+        <td class="p-3">{{ getPaymentMethod(t.paymentMethod ?? t.method) }}</td>
+        <td class="p-3">{{ getStatusText(t.paymentStatus ?? t.status) }}</td>
+        <td class="p-3">{{ t.paymentDate | date:'medium' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p *ngIf="!loading && transactions.length === 0" class="text-slate-400">No transactions yet.</p>
+
+<div *ngIf="showMoviesPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-lg">
+    <h3 class="text-xl font-semibold mb-3">Movies in Rental #{{ selectedRentalId }}</h3>
+    <p *ngIf="loadingRentalMovies" class="text-slate-400">Loading movies...</p>
+    <div *ngIf="!loadingRentalMovies" class="space-y-2 max-h-64 overflow-auto">
+      <p *ngFor="let m of selectedRentalMovies" class="text-sm">
+        <span class="text-slate-400">#{{ m.movieId }}:</span> {{ m.title }}
+      </p>
+      <p *ngIf="selectedRentalMovies.length === 0" class="text-slate-400 text-sm">No movies found for this rental.</p>
+    </div>
+    <div class="text-right mt-4">
+      <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="closeRentalMovies()">Close</button>
+    </div>
+  </div>
+</div>

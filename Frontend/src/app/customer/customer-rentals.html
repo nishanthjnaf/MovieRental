@@ -1,0 +1,121 @@
+<h2 class="text-4xl font-bold text-amber-300 mb-6">My Rentals</h2>
+
+<div *ngIf="loading" class="space-y-3">
+  <div *ngFor="let i of [1,2,3]" class="h-20 rounded-xl skeleton"></div>
+</div>
+
+<h3 *ngIf="!loading" class="text-2xl font-semibold mb-3">Active Rentals</h3>
+<div *ngIf="!loading" class="space-y-3">
+  <div *ngFor="let r of activeRentals" class="grid grid-cols-12 gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 items-center">
+    <div class="col-span-3">
+      <p class="font-semibold text-lg cursor-pointer hover:text-amber-300" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</p>
+      <p class="text-xs text-slate-400">Movie ID: {{ r.movieId }}</p>
+    </div>
+    <div class="col-span-2">
+      <span class="px-3 py-1 rounded-full text-xs" [class.bg-green-700]="r.isActive" [class.bg-slate-700]="!r.isActive">
+        {{ r.isActive ? 'ACTIVE' : 'EXPIRED' }}
+      </span>
+    </div>
+    <div class="col-span-2 text-sm">
+      <p>Start: {{ r.startDate | date:'shortDate' }}</p>
+      <p>Expires: {{ r.endDate | date:'shortDate' }}</p>
+    </div>
+    <div class="col-span-2 text-sm">₹ {{ r.pricePerDay }} / day</div>
+    <div class="col-span-3 flex gap-2 justify-end">
+      <button class="bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded" (click)="watchMovie(r.movieId)">Watch Movie</button>
+      <button class="bg-orange-600 hover:bg-orange-500 px-3 py-1 rounded" (click)="openRenew(r)">Renew +</button>
+      <button class="bg-red-700 hover:bg-red-600 px-3 py-1 rounded" (click)="endRental(r)">End Rental</button>
+      <button title="More Details" class="w-8 h-8 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center shrink-0" (click)="openDetails(r)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<p *ngIf="!loading && activeRentals.length === 0" class="text-slate-400 mb-8">No active rentals.</p>
+
+<h3 *ngIf="!loading" class="text-2xl font-semibold mt-10 mb-3">Returned Rentals</h3>
+<div *ngIf="!loading" class="space-y-3">
+  <div *ngFor="let r of returnedRentals" class="grid grid-cols-12 gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 items-center">
+    <div class="col-span-3">
+      <p class="font-semibold text-lg cursor-pointer hover:text-amber-300" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</p>
+      <p class="text-xs text-slate-400">Movie ID: {{ r.movieId }}</p>
+    </div>
+    <div class="col-span-2">
+      <span class="px-3 py-1 rounded-full text-xs bg-blue-700">RETURNED</span>
+    </div>
+    <div class="col-span-2 text-sm">
+      <p>Start: {{ r.startDate | date:'shortDate' }}</p>
+      <p>Expiry: {{ r.endDate | date:'shortDate' }}</p>
+    </div>
+    <div class="col-span-2 text-sm">₹ {{ r.pricePerDay }} / day</div>
+    <div class="col-span-3 flex gap-2 justify-end items-center">
+      <button title="More Details" class="w-8 h-8 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center shrink-0" (click)="openDetails(r)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<p *ngIf="!loading && returnedRentals.length === 0" class="text-slate-400 mb-8">No returned rentals.</p>
+
+<h3 *ngIf="!loading" class="text-2xl font-semibold mt-10 mb-3">Expired Rentals</h3>
+<div *ngIf="!loading" class="space-y-3">
+  <div *ngFor="let r of expiredRentals" class="grid grid-cols-12 gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 items-center">
+    <div class="col-span-3">
+      <p class="font-semibold text-lg cursor-pointer hover:text-amber-300" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</p>
+      <p class="text-xs text-slate-400">Movie ID: {{ r.movieId }}</p>
+    </div>
+    <div class="col-span-2">
+      <span class="px-3 py-1 rounded-full text-xs bg-slate-700">EXPIRED</span>
+    </div>
+    <div class="col-span-2 text-sm">
+      <p>Start: {{ r.startDate | date:'shortDate' }}</p>
+      <p>Expired: {{ r.endDate | date:'shortDate' }}</p>
+    </div>
+    <div class="col-span-2 text-sm">₹ {{ r.pricePerDay }} / day</div>
+    <div class="col-span-3 flex gap-2 justify-end items-center">
+      <button class="bg-orange-600 hover:bg-orange-500 px-3 py-1 rounded" (click)="openRenew(r)">Renew +</button>
+      <button title="More Details" class="w-8 h-8 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center shrink-0" (click)="openDetails(r)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<p *ngIf="!loading && rentals.length === 0" class="text-slate-400">No rentals yet.</p>
+
+<div *ngIf="showDetailsPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-lg">
+    <h3 class="text-xl font-semibold mb-3">Rental Details</h3>
+    <div class="space-y-2 text-sm">
+      <p><span class="text-slate-400">Movie:</span> {{ selectedRentalDetails?.movieTitle }}</p>
+      <p><span class="text-slate-400">Amount Paid:</span> ₹ {{ selectedRentalDetails?.amountPaid }}</p>
+      <p><span class="text-slate-400">Purchase Date:</span> {{ selectedRentalDetails?.purchaseDate | date:'medium' }}</p>
+      <p><span class="text-slate-400">Expiry Date:</span> {{ selectedRentalDetails?.expiryDate | date:'medium' }}</p>
+      <p><span class="text-slate-400">Payment Method:</span> {{ selectedRentalDetails?.paymentMethod }}</p>
+    </div>
+    <div class="text-right mt-4">
+      <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="closeDetails()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showRenewPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-md">
+    <h3 class="text-xl font-semibold mb-3">Renew Rental</h3>
+    <p class="text-sm text-slate-300 mb-3">{{ selectedRentalForRenew?.movieTitle }}</p>
+    <label class="block text-sm text-slate-400 mb-1">Days to renew</label>
+    <input type="number" min="1" [(ngModel)]="renewDays" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 mb-4" />
+    <div class="flex justify-end gap-2">
+      <button class="px-4 py-2 rounded bg-slate-700" (click)="closeRenew()">Cancel</button>
+      <button class="px-4 py-2 rounded bg-orange-600 hover:bg-orange-500" (click)="renew()">Renew</button>
+    </div>
+  </div>
+</div>

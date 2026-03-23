@@ -1,4 +1,4 @@
-﻿using MovieRentalAPI.Exceptions;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
@@ -9,13 +9,16 @@ namespace MovieRentalAPI.Services
     {
         private readonly IRepository<int, Genre> _genreRepository;
         private readonly IRepository<int, Movie> _movieRepository;
+        private readonly IRepository<int, Review> _reviewRepository;
 
         public GenreService(
             IRepository<int, Genre> genreRepository,
-            IRepository<int, Movie> movieRepository)
+            IRepository<int, Movie> movieRepository,
+            IRepository<int, Review> reviewRepository)
         {
             _genreRepository = genreRepository;
             _movieRepository = movieRepository;
+            _reviewRepository = reviewRepository;
         }
 
         public async Task<GenreResponseDto> AddGenre(GenreRequestDto request)
@@ -135,6 +138,12 @@ namespace MovieRentalAPI.Services
             if (genre.Movies == null || !genre.Movies.Any())
                 throw new NotFoundException("No movies found for this genre");
 
+            var allReviews = await _reviewRepository.GetAll();
+            var avgByMovieId = allReviews?
+                .GroupBy(r => r.MovieId)
+                .ToDictionary(g => g.Key, g => g.Average(r => r.Rating))
+                ?? new Dictionary<int, double>();
+
             return genre.Movies.Select(m => new CreateMovieResponseDto
             {
                 Id = m.Id,
@@ -143,10 +152,30 @@ namespace MovieRentalAPI.Services
                 ReleaseYear = m.ReleaseYear,
                 DurationMinutes = m.DurationMinutes,
                 Language = m.Language,
+                Rating = avgByMovieId.TryGetValue(m.Id, out var avg) ? avg : 0,
+                Director = m.Director ?? string.Empty,
+                Cast = SplitCsv(m.Cast),
+                ContentRating = m.ContentRating ?? string.Empty,
+                ContentAdvisory = SplitCsv(m.ContentAdvisory),
                 PosterPath= m.PosterPath,
                 TrailerUrl = m.TrailerUrl
                 
             });
+        }
+
+        public async Task<IEnumerable<CreateMovieResponseDto>> GetMoviesByGenreName(string genreName)
+        {
+            if (string.IsNullOrWhiteSpace(genreName))
+                throw new BadRequestException("Genre name is required");
+
+            var allGenres = await _genreRepository.GetAll();
+            var genre = allGenres?
+                .FirstOrDefault(g => g.Name.Equals(genreName, StringComparison.OrdinalIgnoreCase));
+
+            if (genre == null)
+                throw new NotFoundException("Genre not found");
+
+            return await GetMoviesByGenre(genre.Id);
         }
 
         private GenreResponseDto MapToResponse(Genre genre)
@@ -157,6 +186,18 @@ namespace MovieRentalAPI.Services
                 Name = genre.Name,
                 Description = genre.Description
             };
+        }
+
+        private static List<string> SplitCsv(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return new List<string>();
+
+            return value
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
         }
     }
 }
