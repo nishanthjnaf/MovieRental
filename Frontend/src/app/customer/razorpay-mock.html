@@ -1,0 +1,111 @@
+<div class="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-[#2d6be4] px-6 py-4 flex items-center justify-between">
+      <div>
+        <p class="text-white/70 text-xs uppercase tracking-widest">Cinefilia</p>
+        <p class="text-white text-xl font-bold mt-0.5">₹ {{ amount | number:'1.2-2' }}</p>
+      </div>
+      <div class="text-white/80 text-sm text-right">
+        <p>Secure Payment</p>
+        <p class="text-xs mt-0.5 text-white/50">Powered by Razorpay</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-slate-200 bg-slate-50">
+      <button class="flex-1 py-3 text-sm font-medium transition-colors"
+        [class.text-blue-600]="activeTab === 'card'"
+        [class.border-b-2]="activeTab === 'card'"
+        [class.border-blue-600]="activeTab === 'card'"
+        [class.text-slate-500]="activeTab !== 'card'"
+        (click)="activeTab = 'card'">Card</button>
+      <button class="flex-1 py-3 text-sm font-medium transition-colors"
+        [class.text-blue-600]="activeTab === 'upi'"
+        [class.border-b-2]="activeTab === 'upi'"
+        [class.border-blue-600]="activeTab === 'upi'"
+        [class.text-slate-500]="activeTab !== 'upi'"
+        (click)="activeTab = 'upi'">UPI</button>
+      <button class="flex-1 py-3 text-sm font-medium transition-colors"
+        [class.text-blue-600]="activeTab === 'netbanking'"
+        [class.border-b-2]="activeTab === 'netbanking'"
+        [class.border-blue-600]="activeTab === 'netbanking'"
+        [class.text-slate-500]="activeTab !== 'netbanking'"
+        (click)="activeTab = 'netbanking'">Net Banking</button>
+    </div>
+
+    <div class="p-6">
+
+      <!-- Card Tab -->
+      <div *ngIf="activeTab === 'card'">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Card Number</label>
+            <input [(ngModel)]="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Cardholder Name</label>
+            <input [(ngModel)]="cardName" placeholder="Name on card"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Expiry</label>
+              <input [(ngModel)]="cardExpiry" maxlength="5" placeholder="MM/YY"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">CVV</label>
+              <input [(ngModel)]="cardCvv" maxlength="3" placeholder="***" type="password"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPI Tab -->
+      <div *ngIf="activeTab === 'upi'">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">UPI ID</label>
+            <input [(ngModel)]="upiId" placeholder="yourname@upi"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <p class="text-xs text-slate-400">Enter your UPI ID to proceed with payment.</p>
+        </div>
+      </div>
+
+      <!-- Net Banking Tab -->
+      <div *ngIf="activeTab === 'netbanking'">
+        <div class="space-y-3">
+          <p class="text-xs text-slate-500 mb-2">Select your bank</p>
+          <div class="grid grid-cols-3 gap-2">
+            <div *ngFor="let bank of ['SBI', 'HDFC', 'ICICI', 'Axis', 'Kotak', 'PNB']"
+              class="border border-slate-200 rounded-lg p-3 text-center text-xs text-slate-700 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
+              {{ bank }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 space-y-2">
+        <button (click)="pay(true)" [disabled]="loading"
+          class="w-full bg-[#2d6be4] hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-60">
+          {{ loading ? 'Processing...' : 'Pay ₹ ' + (amount | number:'1.2-2') }}
+        </button>
+        <button (click)="pay(false)" [disabled]="loading"
+          class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm py-2.5 rounded-lg transition-colors disabled:opacity-60">
+          Simulate Decline
+        </button>
+        <button (click)="cancel()" [disabled]="loading"
+          class="w-full text-slate-400 hover:text-slate-600 text-xs py-1.5 transition-colors">
+          Cancel and go back
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

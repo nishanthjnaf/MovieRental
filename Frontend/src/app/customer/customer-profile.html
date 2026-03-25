@@ -13,9 +13,19 @@
   <div class="flex flex-wrap gap-3 pt-2">
     <button class="bg-amber-600 hover:bg-amber-500 rounded px-4 py-2" (click)="showEditPopup = true">Edit Details</button>
     <button class="bg-fuchsia-700 hover:bg-fuchsia-600 rounded px-4 py-2" (click)="showPasswordPopup = true">Reset Password</button>
+    <button class="bg-slate-600 hover:bg-slate-500 rounded px-4 py-2" (click)="showPreferencesPopup = true">Edit Preferences</button>
     <button class="bg-red-700 hover:bg-red-600 rounded px-4 py-2" (click)="deleteAccount()">Delete Account</button>
   </div>
 </div>
+
+<!-- Preferences Popup -->
+<app-preferences-setup
+  *ngIf="showPreferencesPopup"
+  [userId]="user?.id"
+  [editMode]="true"
+  (done)="onPreferencesSaved()"
+  (cancelled)="showPreferencesPopup = false">
+</app-preferences-setup>
 
 <!-- Edit Popup -->
 <div *ngIf="showEditPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">

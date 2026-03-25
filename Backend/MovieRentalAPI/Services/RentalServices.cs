@@ -64,13 +64,16 @@ namespace MovieRentalAPI.Services
                     throw new NotFoundException($"Movie {movieId} not found");
 
                 var existingItems = await _rentalItemRepository.GetAll();
+                var userRentals = (await _rentalRepository.GetAll())
+                    ?.Where(r => r.UserId == request.UserId)
+                    .Select(r => r.Id)
+                    .ToHashSet() ?? new HashSet<int>();
 
                 bool alreadyRented = existingItems?
                     .Any(i =>
                         i.MovieId == movieId &&
                         i.IsActive &&
-                        i.Rental != null &&
-                        i.Rental.UserId == request.UserId) ?? false;
+                        userRentals.Contains(i.RentalId)) ?? false;
 
                 if (alreadyRented)
                     throw new ConflictException("You've already rented this movie");

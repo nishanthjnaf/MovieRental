@@ -4,11 +4,12 @@ import { AuthService } from '../services/auth';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { ThemeToggle } from '../components/theme-toggle';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,RouterModule], // ✅ IMPORTANT
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ThemeToggle],
   templateUrl: './register.html'
 })
 export class Register implements OnInit {

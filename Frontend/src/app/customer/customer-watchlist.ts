@@ -83,13 +83,25 @@ export class CustomerWatchlist implements OnInit {
   addToCart(item: any) {
     const movie = item?.movie;
     if (!movie?.id) return;
-    this.cart.add(movie);
-    this.watchlistService.remove(item.id).subscribe({
-      next: () => {
-        this.items = this.items.filter((i) => i.id !== item.id);
-        this.toastr.success('Added to cart and removed from watchlist');
+    const result = this.cart.add(movie);
+    if (!result) return;
+    result.subscribe({
+      next: (res) => {
+        if (res === null) {
+          this.toastr.error('Could not add to cart');
+        } else if (res === 'exists') {
+          this.toastr.info('Already in cart');
+        } else {
+          this.watchlistService.remove(item.id).subscribe({
+            next: () => {
+              this.items = this.items.filter((i) => i.id !== item.id);
+              this.toastr.success('Added to cart and removed from watchlist');
+            },
+            error: () => this.toastr.success('Added to cart')
+          });
+        }
       },
-      error: () => this.toastr.success('Added to cart')
+      error: () => this.toastr.error('Could not add to cart')
     });
   }
 

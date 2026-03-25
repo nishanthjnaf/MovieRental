@@ -16,7 +16,7 @@ namespace MovieRentalAPI.Interfaces
 
         Task<bool> DeleteUser(int id);
         Task<bool> ResetPassword(int id, ResetPasswordRequestDto request);
-
-
+        Task<UserPreferenceResponseDto> SavePreferences(int userId, SavePreferenceRequestDto request);
+        Task<UserPreferenceResponseDto> GetPreferences(int userId);
     }
 }

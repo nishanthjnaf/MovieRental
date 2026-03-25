@@ -136,8 +136,21 @@ export class CustomerMovieDetail implements OnInit {
 
   addToCart() {
     if (!this.movie || this.isAlreadyRented) return;
-    this.cartState.add(this.movie);
-    this.toastr.success('Added to cart');
+    const result = this.cartState.add(this.movie);
+    if (!result) return;
+    result.subscribe({
+      next: (res) => {
+        if (res === null) {
+          this.toastr.error('Could not add to cart');
+        } else if (res === 'exists') {
+          this.toastr.info('Already in cart');
+        } else {
+          // reload() is called inside add() via tap — just show success
+          this.toastr.success('Added to cart');
+        }
+      },
+      error: () => this.toastr.error('Could not add to cart')
+    });
   }
 
   rentNow() {

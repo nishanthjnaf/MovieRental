@@ -5,6 +5,7 @@ using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
 using MovieRentalAPI.Repositories;
 using MovieRentalModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace MovieRentalAPI.Services
 {
@@ -16,6 +17,7 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, RentalItem> _rentalitemRepository;
         private readonly IRepository<int, Movie> _movieRepository;
         private readonly IRepository<int, User> _userRepository;
+        private readonly MovieRentalContext _context;
 
         public UserServices(
             MovieRentalContext context,
@@ -33,6 +35,7 @@ namespace MovieRentalAPI.Services
             _movieRepository = movieRepository;
             _userRepository = userRepository;
             _rentalitemRepository = rentalitemRepository;
+            _context = context;
         }
 
         public async Task<CheckUserResponseDto> CheckUser(CheckUserRequestDto request)
@@ -56,6 +59,7 @@ namespace MovieRentalAPI.Services
 
             var tokenPayload = new TokenPayloadDto
             {
+                UserId = user.Id,
                 Username = user.Username,
                 Role = user.Role
             };
@@ -274,8 +278,53 @@ namespace MovieRentalAPI.Services
             return true;
         }
 
-        private UserResponseDto MapToResponse(User user)
+        public async Task<UserPreferenceResponseDto> SavePreferences(int userId, SavePreferenceRequestDto request)
         {
+            var existing = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (existing == null)
+            {
+                existing = new UserPreference { UserId = userId };
+                _context.UserPreferences.Add(existing);
+            }
+
+            existing.PreferredGenres = string.Join(",", request.PreferredGenres ?? new List<string>());
+            existing.PreferredLanguages = string.Join(",", request.PreferredLanguages ?? new List<string>());
+            existing.Theme = request.Theme ?? "dark";
+            existing.IsSet = true;
+
+            await _context.SaveChangesAsync();
+            return MapPreferenceToDto(existing);
+        }
+
+        public async Task<UserPreferenceResponseDto> GetPreferences(int userId)
+        {
+            var pref = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (pref == null)
+                return new UserPreferenceResponseDto { IsSet = false };
+            return MapPreferenceToDto(pref);
+        }
+
+        private static UserPreferenceResponseDto MapPreferenceToDto(UserPreference pref)
+        {
+            static List<string> Split(string val) =>
+                string.IsNullOrWhiteSpace(val)
+                    ? new List<string>()
+                    : val.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(s => s.Trim())
+                         .Where(s => !string.IsNullOrWhiteSpace(s))
+                         .ToList();
+
+            return new UserPreferenceResponseDto
+            {
+                PreferredGenres = Split(pref.PreferredGenres),
+                PreferredLanguages = Split(pref.PreferredLanguages),
+                Theme = pref.Theme,
+                IsSet = pref.IsSet
+            };
+        }
+
+        private UserResponseDto MapToResponse(User user)        {
             return new UserResponseDto
             {
                 Id = user.Id,

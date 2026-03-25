@@ -1,4 +1,7 @@
 <div class="min-h-screen flex items-center justify-center px-4 py-8">
+  <div class="absolute top-4 right-4">
+    <app-theme-toggle />
+  </div>
   <form [formGroup]="form" (ngSubmit)="submit()" class="glass-panel neon-border w-full max-w-md p-8 space-y-4">
     <h2 class="text-3xl font-bold text-center text-amber-300">Create Account</h2>
 

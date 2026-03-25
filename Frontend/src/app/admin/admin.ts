@@ -11,12 +11,13 @@ import { Router } from '@angular/router';
 import { CurrentUserService } from '../services/current-user';
 import { UserService } from '../services/user';
 import { catchError, forkJoin, of } from 'rxjs';
+import { ThemeToggle } from '../components/theme-toggle';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   templateUrl: './admin.html',
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, ThemeToggle]
 })
 export class Admin implements OnInit {
 

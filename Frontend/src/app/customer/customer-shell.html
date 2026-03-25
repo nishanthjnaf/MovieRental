@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-slate-950 text-slate-100 flex">
-  <aside class="bg-slate-900/95 border-r border-slate-800 p-3 flex flex-col transition-all duration-200" [class.w-64]="isSidebarOpen" [class.w-14]="!isSidebarOpen">
+  <aside class="sticky top-0 h-screen bg-slate-900/95 border-r border-slate-800 p-3 flex flex-col transition-all duration-200 overflow-y-auto flex-shrink-0" [class.w-64]="isSidebarOpen" [class.w-14]="!isSidebarOpen">
     <div class="flex items-center justify-between mb-8" [class.justify-center]="!isSidebarOpen">
       <div class="text-3xl font-bold text-amber-300" *ngIf="isSidebarOpen">cinefilia</div>
       <button class="text-slate-300 hover:text-white text-xl" [class.ml-auto]="isSidebarOpen" (click)="toggleSidebar()">
@@ -38,6 +38,7 @@
             🛒
             <span class="absolute -top-2 -right-2 bg-amber-500 text-black text-xs rounded-full px-1.5">{{ cartCount }}</span>
           </button>
+          <app-theme-toggle />
           <button class="top-icon-btn" routerLink="/dashboard/profile" title="Profile">👤</button>
         </div>
       </div>

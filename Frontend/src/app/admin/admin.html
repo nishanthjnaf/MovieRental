@@ -7,6 +7,7 @@
         <h2 class="text-3xl font-bold text-amber-300">Admin Panel</h2>
         <div class="flex items-center gap-3 relative">
           <button class="top-icon-btn" (click)="toggleProfileMenu()" title="Profile">👤</button>
+          <app-theme-toggle />
           <button (click)="logout()" class="bg-fuchsia-700 hover:bg-fuchsia-600 text-white px-4 py-2 rounded-lg">Logout</button>
           <div *ngIf="showProfileMenu" class="absolute right-0 top-12 bg-slate-900 border border-slate-700 rounded-lg w-52 p-3 shadow-2xl z-50">
             <p class="text-sm text-slate-300">Signed in as</p>
@@ -89,7 +90,8 @@
       <div class="w-4/5 p-6 overflow-auto">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-amber-300">Management</h2>
-          <div class="relative">
+          <div class="relative flex items-center gap-2">
+            <app-theme-toggle />
             <button class="top-icon-btn" (click)="toggleProfileMenu()" title="Profile">👤</button>
             <div *ngIf="showProfileMenu" class="absolute right-0 top-12 bg-slate-900 border border-slate-700 rounded-lg w-52 p-3 shadow-2xl z-50">
               <p class="text-sm text-slate-300">Signed in as</p>

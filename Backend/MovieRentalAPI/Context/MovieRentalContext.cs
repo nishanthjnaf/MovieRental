@@ -18,6 +18,8 @@ namespace MovieRentalModels
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<Review> Reviews => Set<Review>();
         public DbSet<Watchlist> Watchlists => Set<Watchlist>();
+        public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
+        public DbSet<CartItem> CartItems => Set<CartItem>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -94,6 +96,27 @@ namespace MovieRentalModels
                 .HasOne(w => w.Movie)
                 .WithMany(m => m.Watchlists)
                 .HasForeignKey(w => w.MovieId);
+
+            modelBuilder.Entity<UserPreference>()
+                .HasKey(p => p.Id);
+            modelBuilder.Entity<UserPreference>()
+                .HasOne(p => p.User)
+                .WithOne()
+                .HasForeignKey<UserPreference>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CartItem>()
+                .HasKey(c => c.Id);
+            modelBuilder.Entity<CartItem>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CartItem>()
+                .HasOne(c => c.Movie)
+                .WithMany()
+                .HasForeignKey(c => c.MovieId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

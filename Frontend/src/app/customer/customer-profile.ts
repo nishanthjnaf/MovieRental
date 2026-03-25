@@ -5,11 +5,12 @@ import { CurrentUserService } from '../services/current-user';
 import { UserService } from '../services/user';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { PreferencesSetup } from './preferences-setup';
 
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PreferencesSetup],
   templateUrl: './customer-profile.html'
 })
 export class CustomerProfile implements OnInit {
@@ -18,6 +19,7 @@ export class CustomerProfile implements OnInit {
   pwd = { oldPassword: '', newPassword: '', confirmPassword: '' };
   showEditPopup = false;
   showPasswordPopup = false;
+  showPreferencesPopup = false;
 
   constructor(
     private currentUser: CurrentUserService,
@@ -76,6 +78,11 @@ export class CustomerProfile implements OnInit {
       },
       error: () => this.toastr.error('Could not delete account')
     });
+  }
+
+  onPreferencesSaved() {
+    this.showPreferencesPopup = false;
+    this.toastr.success('Preferences updated');
   }
 }
 

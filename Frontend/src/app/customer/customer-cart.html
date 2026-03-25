@@ -7,17 +7,17 @@
 
 <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden" *ngIf="items.length > 0">
   <div *ngFor="let m of items" class="grid grid-cols-12 items-center gap-3 p-3 border-b border-slate-800">
-    <img [src]="m.posterPath || 'https://placehold.co/120x80'" class="col-span-2 h-16 w-full object-cover rounded cursor-pointer" (click)="openMovie(m.id)">
-    <div class="col-span-4 font-semibold cursor-pointer hover:text-amber-300" (click)="openMovie(m.id)">{{ m.title }} ({{ m.releaseYear }})</div>
+    <img [src]="m.posterPath || 'https://placehold.co/120x80'" class="col-span-2 h-16 w-full object-cover rounded cursor-pointer" (click)="openMovie(m.movieId)">
+    <div class="col-span-4 font-semibold cursor-pointer hover:text-amber-300" (click)="openMovie(m.movieId)">{{ m.title }} ({{ m.releaseYear }})</div>
     <div class="col-span-2 text-right">
-      <input type="number" min="1" max="30" [ngModel]="m.rentalDays || 7" (ngModelChange)="setDays(m.id, $event)"
+      <input type="number" min="1" max="30" [ngModel]="m.rentalDays || 7" (ngModelChange)="setDays(m.movieId, $event)"
         class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-right">
       <p class="text-xs text-slate-400 mt-1">days</p>
     </div>
-    <div class="col-span-2 text-right">₹ {{ priceByMovieId[m.id] ?? '-' }} / day</div>
-    <div class="col-span-2 text-right">₹ {{ ((priceByMovieId[m.id] || 0) * (m.rentalDays || 1)) | number:'1.2-2' }}</div>
-    <div class="col-span-2 text-right">
-      <button class="text-red-300 hover:text-red-200" (click)="remove(m.id)">Remove</button>
+    <div class="col-span-2 text-right">₹ {{ priceByMovieId[m.movieId] ?? '-' }} / day</div>
+    <div class="col-span-2 text-right">₹ {{ ((priceByMovieId[m.movieId] || 0) * (m.rentalDays || 1)) | number:'1.2-2' }}</div>
+    <div class="col-span-1 text-right">
+      <button class="text-red-300 hover:text-red-200" (click)="remove(m.movieId)">Remove</button>
     </div>
   </div>
 
@@ -30,21 +30,35 @@
   </div>
 </div>
 
-<div *ngIf="showPaymentPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-md">
-    <h3 class="text-xl font-semibold mb-3">Choose payment method</h3>
-    <select [(ngModel)]="selectedPaymentMethod" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 mb-4">
+<div *ngIf="showPaymentPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 w-[92%] max-w-md">
+    <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
+
+    <div class="space-y-2 mb-4 max-h-48 overflow-y-auto">
+      <div *ngFor="let m of items" class="flex justify-between text-sm text-slate-300">
+        <span>{{ m.title }} &times; {{ m.rentalDays || 1 }} day(s)</span>
+        <span>₹ {{ ((priceByMovieId[m.movieId] || 0) * (m.rentalDays || 1)) | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="border-t border-slate-700 pt-3 mb-4 flex justify-between font-semibold">
+      <span>Total</span>
+      <span class="text-amber-300">₹ {{ total | number:'1.2-2' }}</span>
+    </div>
+
+    <label class="block text-xs text-slate-400 mb-1">Payment Method</label>
+    <select [(ngModel)]="selectedPaymentMethod" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 mb-5">
       <option [ngValue]="0">Debit Card</option>
       <option [ngValue]="1">Credit Card</option>
       <option [ngValue]="2">Net Banking</option>
       <option [ngValue]="3">UPI</option>
     </select>
+
     <div class="flex justify-end gap-2">
-      <button class="px-4 py-2 rounded bg-slate-700" [disabled]="loading" (click)="showPaymentPopup=false">Cancel</button>
-      <button class="px-4 py-2 rounded bg-fuchsia-700 hover:bg-fuchsia-600" [disabled]="loading" (click)="checkout()">
-        {{ loading ? 'Processing...' : 'Confirm & Pay' }}
+      <button class="px-4 py-2 rounded bg-slate-700 hover:bg-slate-600" [disabled]="loading" (click)="showPaymentPopup=false">Cancel</button>
+      <button class="px-4 py-2 rounded bg-amber-600 hover:bg-amber-500 font-semibold" [disabled]="loading" (click)="checkout()">
+        {{ loading ? 'Creating rental...' : 'Proceed to Pay' }}
       </button>
     </div>
   </div>
 </div>
-

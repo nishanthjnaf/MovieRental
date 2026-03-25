@@ -4,6 +4,7 @@ using MovieRentalAPI.Models.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 public class TokenService : ITokenService
 {
     private readonly IConfiguration _config;
@@ -11,20 +12,21 @@ public class TokenService : ITokenService
     {
         _config = config;
     }
+
     public string CreateToken(TokenPayloadDto payload)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_config["Jwt:Key"])
         );
-        var creds = new SigningCredentials(
-            key,
-            SecurityAlgorithms.HmacSha256
-        );
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
         var claims = new[]
         {
-           new Claim(ClaimTypes.Name, payload.Username),
-           new Claim(ClaimTypes.Role, payload.Role)
-       };
+            new Claim(ClaimTypes.Name, payload.Username),
+            new Claim(ClaimTypes.Role, payload.Role),
+            new Claim(ClaimTypes.NameIdentifier, payload.UserId.ToString())
+        };
+
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],

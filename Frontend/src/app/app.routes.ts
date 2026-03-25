@@ -15,6 +15,9 @@ import { CustomerMovies } from './customer/customer-movies';
 import { CustomerMyRatings } from './customer/customer-my-ratings';
 import { CustomerTransactions } from './customer/customer-transactions';
 import { CustomerWatch } from './customer/customer-watch';
+import { RazorpayMock } from './customer/razorpay-mock';
+import { PaymentResult } from './customer/payment-result';
+import { CustomerPreferencesPage } from './customer/customer-preferences-page';
 import { AdminProfile } from './admin/admin-profile';
 
 
@@ -26,6 +29,7 @@ export const routes: Routes = [
 
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+  { path: 'preferences', component: CustomerPreferencesPage, canActivate: [authGuard] },
 
   {
     path: 'dashboard',
@@ -43,7 +47,9 @@ export const routes: Routes = [
       { path: 'transactions', component: CustomerTransactions },
       { path: 'cart', component: CustomerCart },
       { path: 'profile', component: CustomerProfile },
-      { path: 'watch/:id', component: CustomerWatch }
+      { path: 'watch/:id', component: CustomerWatch },
+      { path: 'pay', component: RazorpayMock },
+      { path: 'payment-result', component: PaymentResult }
     ]
   },
 

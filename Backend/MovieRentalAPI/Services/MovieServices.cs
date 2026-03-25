@@ -2,6 +2,8 @@ using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
+using MovieRentalModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace MovieRentalAPI.Services
 {
@@ -10,15 +12,18 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, Movie> _movieRepository;
         private readonly IRepository<int, Genre> _genreRepository;
         private readonly IRepository<int, Review> _reviewRepository;
+        private readonly MovieRentalContext _context;
 
         public MovieServices(
             IRepository<int, Movie> movieRepository,
             IRepository<int, Genre> genreRepository,
-            IRepository<int, Review> reviewRepository)
+            IRepository<int, Review> reviewRepository,
+            MovieRentalContext context)
         {
             _movieRepository = movieRepository;
             _genreRepository = genreRepository;
             _reviewRepository = reviewRepository;
+            _context = context;
         }
 
         public async Task<CreateMovieResponseDto> AddMovie(CreateMovieRequestDto request)
@@ -250,6 +255,49 @@ namespace MovieRentalAPI.Services
                 .Where(m => m.Rating > 0)
                 .OrderByDescending(m => m.Rating)
                 .Take(count)
+                .Select(MapToResponseDto)
+                .ToList();
+        }
+
+        public async Task<IEnumerable<CreateMovieResponseDto>> GetSuggestedMovies(int userId)
+        {
+            var pref = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+
+            var movies = await _movieRepository.GetAllIncluding(m => m.Genres);
+            if (movies == null || !movies.Any())
+                return Enumerable.Empty<CreateMovieResponseDto>();
+
+            var avgByMovieId = await GetAverageRatingsByMovieId();
+            foreach (var m in movies)
+            {
+                if (avgByMovieId.TryGetValue(m.Id, out var avg))
+                    m.Rating = avg;
+            }
+
+            IEnumerable<Movie> filtered = movies;
+
+            if (pref != null && pref.IsSet)
+            {
+                var genres = string.IsNullOrWhiteSpace(pref.PreferredGenres)
+                    ? new List<string>()
+                    : pref.PreferredGenres.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim().ToLower()).ToList();
+
+                var languages = string.IsNullOrWhiteSpace(pref.PreferredLanguages)
+                    ? new List<string>()
+                    : pref.PreferredLanguages.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim().ToLower()).ToList();
+
+                filtered = movies.Where(m =>
+                    (genres.Count == 0 || m.Genres.Any(g => genres.Contains(g.Name.ToLower()))) &&
+                    (languages.Count == 0 || languages.Contains(m.Language.ToLower()))
+                );
+            }
+
+            return filtered
+                .OrderByDescending(m => m.RentalCount)
+                .ThenByDescending(m => m.Rating)
+                .Take(10)
                 .Select(MapToResponseDto)
                 .ToList();
         }

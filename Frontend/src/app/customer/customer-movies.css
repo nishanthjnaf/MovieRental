@@ -100,3 +100,38 @@
   z-index: 3;
 }
 
+
+/* ---- Light theme overrides ---- */
+:host-context(html.light-theme) .price-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+:host-context(html.light-theme) .price-input:focus {
+  border-color: #a21caf;
+}
+
+:host-context(html.light-theme) .slider-track {
+  background: linear-gradient(
+    to right,
+    #e2e8f0 0%,
+    #e2e8f0 var(--min-pct),
+    #a21caf var(--min-pct),
+    #a21caf var(--max-pct),
+    #e2e8f0 var(--max-pct),
+    #e2e8f0 100%
+  );
+}
+
+:host-context(html.light-theme) .slider-input::-webkit-slider-thumb {
+  background: #ffffff;
+  border-color: #a21caf;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+:host-context(html.light-theme) .slider-input::-moz-range-thumb {
+  background: #ffffff;
+  border-color: #a21caf;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}

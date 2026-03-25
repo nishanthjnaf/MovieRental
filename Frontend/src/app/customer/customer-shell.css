@@ -5,12 +5,35 @@
   border-radius: 0.5rem;
   background: rgba(20, 28, 44, 0.72);
   border: 1px solid rgba(148, 163, 184, 0.15);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  color: #e2e8f0;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-btn:hover {
   background: rgba(34, 43, 66, 1);
   border-color: rgba(217, 70, 239, 0.5);
+}
+
+:host-context(html.light-theme) .nav-btn {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #1e293b;
+}
+
+:host-context(html.light-theme) .nav-btn:hover {
+  background: #f1f5f9;
+  border-color: #a21caf;
+  color: #0f172a;
+}
+
+:host-context(html.light-theme) aside {
+  background-color: #e8edf5 !important;
+  border-color: #e2e8f0 !important;
+}
+
+:host-context(html.light-theme) header {
+  background-color: rgba(241,245,249,0.97) !important;
+  border-color: #e2e8f0 !important;
 }
 
 .top-icon-btn {
@@ -24,5 +47,12 @@
   justify-content: center;
   font-size: 18px;
   box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.18), 0 0 14px rgba(236, 72, 153, 0.16);
+}
+
+:host-context(html.light-theme) .top-icon-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  color: #0f172a;
 }
 

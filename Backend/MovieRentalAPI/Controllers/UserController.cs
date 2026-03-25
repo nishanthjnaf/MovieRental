@@ -135,5 +135,33 @@ namespace MovieRentalAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("{id}/preferences")]
+        public async Task<IActionResult> SavePreferences(int id, [FromBody] SavePreferenceRequestDto request)
+        {
+            try
+            {
+                var result = await _userServices.SavePreferences(id, request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{id}/preferences")]
+        public async Task<IActionResult> GetPreferences(int id)
+        {
+            try
+            {
+                var result = await _userServices.GetPreferences(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

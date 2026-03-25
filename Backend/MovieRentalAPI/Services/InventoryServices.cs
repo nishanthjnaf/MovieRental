@@ -31,7 +31,7 @@ namespace MovieRentalAPI.Services
             if (movie == null)
                 throw new NotFoundException("Movie not found");
 
-            var existingInventory = (await _inventoryRepository.GetAll())
+            var existingInventory = (await _inventoryRepository.GetAllIncluding(i => i.Movie))
                 ?.FirstOrDefault(i => i.MovieId == request.MovieId);
 
             if (existingInventory != null)
@@ -49,7 +49,9 @@ namespace MovieRentalAPI.Services
             if (added == null)
                 throw new Exception("Inventory creation failed");
 
-            return MapToResponse(added);
+            // Reload with Movie included so MapToResponse doesn't throw
+            var withMovie = await _inventoryRepository.GetIncluding(added.Id, i => i.Movie);
+            return MapToResponse(withMovie!);
         }
 
         public async Task<IEnumerable<InventoryResponseDto>> GetAllInventory()
@@ -79,7 +81,7 @@ namespace MovieRentalAPI.Services
             if (movie == null)
                 throw new NotFoundException("Movie not found");
 
-            var list = await _inventoryRepository.GetAll();
+            var list = await _inventoryRepository.GetAllIncluding(i => i.Movie);
 
             var inv = list?.FirstOrDefault(i => i.MovieId == movieId);
 
@@ -102,12 +104,10 @@ namespace MovieRentalAPI.Services
             existing.RentalPrice = request.RentalPrice;
             existing.IsAvailable = request.IsAvailable;
 
-            var updated = await _inventoryRepository.Update(id, existing);
+            await _inventoryRepository.Update(id, existing);
 
-            if (updated == null)
-                throw new Exception("Inventory update failed");
-
-            return MapToResponse(updated);
+            var withMovie = await _inventoryRepository.GetIncluding(id, i => i.Movie);
+            return MapToResponse(withMovie!);
         }
 
         public async Task<bool> DeleteInventory(int id)

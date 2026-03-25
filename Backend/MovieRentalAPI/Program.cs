@@ -138,6 +138,32 @@ IF EXISTS (
       AND t.name = 'int'
 )
     ALTER TABLE Reviews ALTER COLUMN Rating float NOT NULL;
+
+IF OBJECT_ID('UserPreferences', 'U') IS NULL
+BEGIN
+    CREATE TABLE UserPreferences (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        UserId INT NOT NULL UNIQUE,
+        PreferredGenres NVARCHAR(MAX) NOT NULL DEFAULT '',
+        PreferredLanguages NVARCHAR(MAX) NOT NULL DEFAULT '',
+        Theme NVARCHAR(20) NOT NULL DEFAULT 'dark',
+        IsSet BIT NOT NULL DEFAULT 0,
+        CONSTRAINT FK_UserPreferences_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+    );
+END
+
+IF OBJECT_ID('CartItems', 'U') IS NULL
+BEGIN
+    CREATE TABLE CartItems (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        UserId INT NOT NULL,
+        MovieId INT NOT NULL,
+        RentalDays INT NOT NULL DEFAULT 7,
+        CONSTRAINT FK_CartItems_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
+        CONSTRAINT FK_CartItems_Movies FOREIGN KEY (MovieId) REFERENCES Movies(Id) ON DELETE CASCADE,
+        CONSTRAINT UQ_CartItems_User_Movie UNIQUE (UserId, MovieId)
+    );
+END
 ");
 }
 

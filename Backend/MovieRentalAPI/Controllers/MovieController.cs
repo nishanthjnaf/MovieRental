@@ -169,5 +169,19 @@ namespace MovieRentalAPI.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [HttpGet("suggestions/{userId}")]
+        public async Task<IActionResult> GetSuggestedMovies(int userId)
+        {
+            try
+            {
+                var result = await _movieService.GetSuggestedMovies(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

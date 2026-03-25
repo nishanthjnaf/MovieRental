@@ -1,9 +1,20 @@
 <h1 class="text-4xl font-bold text-amber-300 mb-6">Welcome to Cinefilia</h1>
 
+<!-- First-time preferences popup -->
+<app-preferences-setup
+  *ngIf="showPreferencesPopup"
+  [userId]="userId"
+  [editMode]="false"
+  (done)="onPreferencesDone()"
+  (cancelled)="onPreferencesDone()">
+</app-preferences-setup>
+
+<!-- Skeleton -->
 <section class="mb-10" *ngIf="loading">
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-    <div *ngFor="let i of [1,2,3,4,5]" class="rounded-xl border border-slate-800 overflow-hidden">
-      <div class="h-36 skeleton"></div>
+  <div class="h-6 w-40 rounded skeleton mb-4"></div>
+  <div class="flex gap-3">
+    <div *ngFor="let i of [1,2,3,4,5]" class="flex-1 rounded-xl border border-slate-800 overflow-hidden">
+      <div class="h-44 skeleton"></div>
       <div class="p-3 space-y-2">
         <div class="h-4 rounded skeleton"></div>
         <div class="h-3 rounded skeleton w-2/3"></div>
@@ -12,45 +23,131 @@
   </div>
 </section>
 
+<!-- Your Suggestions -->
+<section class="mb-10" *ngIf="!loading && hasSuggestions">
+  <div class="flex items-center gap-3 mb-4">
+    <h2 class="text-2xl font-semibold">Your Suggestions</h2>
+    <span class="text-xs bg-fuchsia-700/40 text-fuchsia-300 px-2 py-0.5 rounded-full">Based on your preferences</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <button (click)="prev('suggested')" [disabled]="!canPrev('suggested')"
+      class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <div class="carousel-viewport">
+      <div class="carousel-track" [style.transform]="trackTranslate('suggested')" [style.--count]="visibleCount">
+        <article *ngFor="let m of suggestedMovies"
+          class="carousel-card bg-slate-900 border border-fuchsia-900/40 cursor-pointer hover:scale-[1.02]"
+          (click)="openMovie(m.id)">
+          <img [src]="m.posterPath || 'https://placehold.co/400x260'" class="h-44 w-full object-cover" />
+          <div class="p-3">
+            <h3 class="font-semibold truncate text-sm">{{ m.title }}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">{{ m.releaseYear }} • {{ m.language }}</p>
+            <p class="text-sm text-fuchsia-300 mt-1">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+          </div>
+        </article>
+      </div>
+    </div>
+    <button (click)="next('suggested', suggestedMovies)" [disabled]="!canNext('suggested', suggestedMovies)"
+      class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+</section>
+
+<!-- New Movies -->
 <section class="mb-10" *ngIf="!loading">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="text-2xl font-semibold">New Movies</h2>
-  </div>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-    <article *ngFor="let m of newMovies" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
-      <img [src]="m.posterPath || 'https://placehold.co/400x240'" class="h-36 w-full object-cover" />
-      <div class="p-3">
-        <h3 class="font-semibold truncate">{{ m.title }}</h3>
-        <p class="text-xs text-slate-400">{{ m.releaseYear }} • {{ m.language }}</p>
-        <p class="text-sm text-amber-300 mt-1">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+  <h2 class="text-2xl font-semibold mb-4">New Movies</h2>
+  <div class="flex items-center gap-3">
+    <button (click)="prev('newMovies')" [disabled]="!canPrev('newMovies')" class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <div class="carousel-viewport">
+      <div class="carousel-track" [style.transform]="trackTranslate('newMovies')" [style.--count]="visibleCount">
+        <article *ngFor="let m of newMovies"
+          class="carousel-card bg-slate-900 border border-slate-800 cursor-pointer hover:scale-[1.02]"
+          (click)="openMovie(m.id)">
+          <img [src]="m.posterPath || 'https://placehold.co/400x260'" class="h-44 w-full object-cover" />
+          <div class="p-3">
+            <h3 class="font-semibold truncate text-sm">{{ m.title }}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">{{ m.releaseYear }} • {{ m.language }}</p>
+            <p class="text-sm text-amber-300 mt-1">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+          </div>
+        </article>
       </div>
-    </article>
+    </div>
+    <button (click)="next('newMovies', newMovies)" [disabled]="!canNext('newMovies', newMovies)" class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
   </div>
 </section>
 
+<!-- Top User Rated -->
 <section class="mb-10" *ngIf="!loading">
-  <h2 class="text-2xl font-semibold mb-3">Top User Rated</h2>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-    <article *ngFor="let m of topRatedMovies" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
-      <img [src]="m.posterPath || 'https://placehold.co/400x240'" class="h-36 w-full object-cover" />
-      <div class="p-3">
-        <h3 class="font-semibold truncate">{{ m.title }}</h3>
-        <p class="text-sm text-fuchsia-300">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+  <h2 class="text-2xl font-semibold mb-4">Top User Rated</h2>
+  <div class="flex items-center gap-3">
+    <button (click)="prev('topRated')" [disabled]="!canPrev('topRated')" class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <div class="carousel-viewport">
+      <div class="carousel-track" [style.transform]="trackTranslate('topRated')" [style.--count]="visibleCount">
+        <article *ngFor="let m of topRatedMovies"
+          class="carousel-card bg-slate-900 border border-slate-800 cursor-pointer hover:scale-[1.02]"
+          (click)="openMovie(m.id)">
+          <img [src]="m.posterPath || 'https://placehold.co/400x260'" class="h-44 w-full object-cover" />
+          <div class="p-3">
+            <h3 class="font-semibold truncate text-sm">{{ m.title }}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">{{ m.releaseYear }} • {{ m.language }}</p>
+            <p class="text-sm text-fuchsia-300 mt-1">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+          </div>
+        </article>
       </div>
-    </article>
+    </div>
+    <button (click)="next('topRated', topRatedMovies)" [disabled]="!canNext('topRated', topRatedMovies)" class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
   </div>
 </section>
 
-<section *ngIf="!loading">
-  <h2 class="text-2xl font-semibold mb-3">Top Rented Movies</h2>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-    <article *ngFor="let m of topRentedMovies" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.movieId)">
-      <img [src]="m.posterPath || 'https://placehold.co/400x240'" class="h-36 w-full object-cover" />
-      <div class="p-3">
-        <h3 class="font-semibold truncate">{{ m.title }}</h3>
-        <p class="text-xs text-slate-400">Rented {{ m.rentalCount }} times</p>
+<!-- Top Rented -->
+<section class="mb-10" *ngIf="!loading">
+  <h2 class="text-2xl font-semibold mb-4">Top Rented Movies</h2>
+  <div class="flex items-center gap-3">
+    <button (click)="prev('topRented')" [disabled]="!canPrev('topRented')" class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <div class="carousel-viewport">
+      <div class="carousel-track" [style.transform]="trackTranslate('topRented')" [style.--count]="visibleCount">
+        <article *ngFor="let m of topRentedMovies"
+          class="carousel-card bg-slate-900 border border-slate-800 cursor-pointer hover:scale-[1.02]"
+          (click)="openMovie(m.movieId || m.id)">
+          <img [src]="m.posterPath || 'https://placehold.co/400x260'" class="h-44 w-full object-cover" />
+          <div class="p-3">
+            <h3 class="font-semibold truncate text-sm">{{ m.title }}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">{{ m.releaseYear }} • {{ m.language }}</p>
+            <p class="text-xs text-slate-500 mt-1">Rented {{ m.rentalCount }} times</p>
+          </div>
+        </article>
       </div>
-    </article>
+    </div>
+    <button (click)="next('topRented', topRentedMovies)" [disabled]="!canNext('topRented', topRentedMovies)" class="carousel-arrow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
   </div>
 </section>
-

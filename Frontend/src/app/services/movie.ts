@@ -47,4 +47,7 @@ export class MovieService {
     );
   }
 
+  getSuggestions(userId: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/suggestions/${userId}`);
+  }
 }

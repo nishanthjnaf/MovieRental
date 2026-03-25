@@ -12,5 +12,6 @@ namespace MovieRentalAPI.Interfaces
         Task<PagedResultDto<CreateMovieResponseDto>> SearchMovies(MovieSearchRequestDto request);
         Task<IEnumerable<TopRentedMovieDto>> GetTopRentedMovies(int count);
         Task<IEnumerable<CreateMovieResponseDto>> GetTopUserRatedMovies(int count);
+        Task<IEnumerable<CreateMovieResponseDto>> GetSuggestedMovies(int userId);
     }
 }

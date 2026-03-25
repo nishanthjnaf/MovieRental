@@ -38,5 +38,13 @@ export class UserService {
   deleteUser(id: number) {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
+
+  getPreferences(userId: number) {
+    return this.http.get<any>(`${this.baseUrl}/${userId}/preferences`);
+  }
+
+  savePreferences(userId: number, data: { preferredGenres: string[]; preferredLanguages: string[]; theme: string }) {
+    return this.http.post<any>(`${this.baseUrl}/${userId}/preferences`, data);
+  }
 }
 

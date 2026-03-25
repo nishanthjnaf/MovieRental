@@ -464,6 +464,17 @@ namespace MovieRentalAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MovieRentalAPI.Models.UserPreference", b =>
+                {
+                    b.HasOne("MovieRentalAPI.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("MovieRentalAPI.Models.UserPreference", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MovieRentalAPI.Models.Inventory", b =>
                 {
                     b.Navigation("RentalItems");

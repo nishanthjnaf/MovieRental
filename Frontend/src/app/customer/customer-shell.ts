@@ -7,11 +7,12 @@ import { CurrentUserService } from '../services/current-user';
 import { ToastrService } from 'ngx-toastr';
 import { CartStateService } from '../services/cart-state';
 import { filter } from 'rxjs/operators';
+import { ThemeToggle } from '../components/theme-toggle';
 
 @Component({
   selector: 'app-customer-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, ThemeToggle],
   templateUrl: './customer-shell.html',
   styleUrl: './customer-shell.css'
 })
@@ -82,6 +83,7 @@ export class CustomerShell implements OnInit {
     sessionStorage.removeItem('token');
     localStorage.removeItem('role');
     this.currentUser.clear();
+    this.cart.reset();
     this.toastr.info('Logged out');
     this.router.navigate(['/login']);
   }

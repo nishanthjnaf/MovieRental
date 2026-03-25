@@ -1,67 +1,101 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
+import { BehaviorSubject, catchError, of, switchMap, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { CurrentUserService } from './current-user';
 
 @Injectable({ providedIn: 'root' })
 export class CartStateService {
-  private cartSubject = new BehaviorSubject<any[]>(this.readCart());
+  private readonly baseUrl = 'http://localhost:5287/api/Cart';
+  private cartSubject = new BehaviorSubject<any[]>([]);
   cart$ = this.cartSubject.asObservable();
 
-  private get storageKey(): string {
-    try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (!token) return 'movie_rental_cart_guest';
-      const decoded: any = jwtDecode(token);
-      const id = decoded?.nameid || decoded?.sub || decoded?.userId ||
-        decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
-      return id ? `movie_rental_cart_${id}` : 'movie_rental_cart_guest';
-    } catch {
-      return 'movie_rental_cart_guest';
-    }
-  }
+  constructor(private http: HttpClient, private currentUser: CurrentUserService) {}
 
-  private readCart(): any[] {
-    try {
-      const raw = localStorage.getItem(this.storageKey);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private persist(items: any[]) {
-    localStorage.setItem(this.storageKey, JSON.stringify(items));
-    this.cartSubject.next(items);
+  private getUserId(): number {
+    const fromSubject = this.currentUser.currentUserId;
+    if (fromSubject > 0) return fromSubject;
+    return this.currentUser.decodedUserId;
   }
 
   get items(): any[] {
     return this.cartSubject.value;
   }
 
-  // Call this after login to reload the correct user's cart
   reload() {
-    this.cartSubject.next(this.readCart());
+    this.currentUser.loadCurrentUser().subscribe(() => {
+      const uid = this.getUserId();
+      if (!uid) { this.cartSubject.next([]); return; }
+      this.http.get<any[]>(`${this.baseUrl}/${uid}`)
+        .pipe(catchError(() => of([])))
+        .subscribe(items => this.cartSubject.next(items || []));
+    });
+  }
+
+  reset() {
+    this.cartSubject.next([]);
   }
 
   add(movie: any) {
-    const exists = this.items.some((m) => m.id === movie.id);
-    if (exists) return;
-    this.persist([...this.items, { ...movie, rentalDays: 7 }]);
-  }
+    const movieId = movie?.id ?? movie?.movieId;
+    if (!movieId) return of(null);
 
-  updateRentalDays(movieId: number, rentalDays: number) {
-    const days = Math.max(1, Math.min(30, Number(rentalDays || 1)));
-    this.persist(
-      this.items.map((m) => (m.id === movieId ? { ...m, rentalDays: days } : m))
+    return this.currentUser.loadCurrentUser().pipe(
+      switchMap(() => {
+        const uid = this.getUserId();
+        if (!uid) {
+          console.warn('CartStateService.add: userId resolved to 0');
+          return of(null);
+        }
+
+        const exists = this.items.some(m => (m.movieId ?? m.id) === movieId);
+        if (exists) return of('exists');
+
+        // Use { responseType: 'text' } because the backend returns Ok() with no body
+        return this.http.post(`${this.baseUrl}/${uid}/add`, { movieId, rentalDays: 7 }, { responseType: 'text' })
+          .pipe(
+            tap(() => this.fetchCart(uid)),
+            catchError((err) => {
+              console.error('Cart add failed:', err);
+              return of(null);
+            })
+          );
+      })
     );
   }
 
+  private fetchCart(uid: number) {
+    this.http.get<any[]>(`${this.baseUrl}/${uid}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(items => this.cartSubject.next(items || []));
+  }
+
+  updateRentalDays(movieId: number, rentalDays: number) {
+    const uid = this.getUserId();
+    if (!uid) return;
+    const days = Math.max(1, Math.min(30, Number(rentalDays) || 1));
+    this.cartSubject.next(
+      this.items.map(m => (m.movieId === movieId ? { ...m, rentalDays: days } : m))
+    );
+    this.http.patch(`${this.baseUrl}/${uid}/days`, { movieId, rentalDays: days }, { responseType: 'text' })
+      .pipe(catchError(() => of(null)))
+      .subscribe();
+  }
+
   remove(movieId: number) {
-    this.persist(this.items.filter((m) => m.id !== movieId));
+    const uid = this.getUserId();
+    if (!uid) return;
+    this.cartSubject.next(this.items.filter(m => m.movieId !== movieId));
+    this.http.delete(`${this.baseUrl}/${uid}/remove/${movieId}`, { responseType: 'text' })
+      .pipe(catchError(() => of(null)))
+      .subscribe();
   }
 
   clear() {
-    this.persist([]);
+    const uid = this.getUserId();
+    if (!uid) return;
+    this.cartSubject.next([]);
+    this.http.delete(`${this.baseUrl}/${uid}/clear`, { responseType: 'text' })
+      .pipe(catchError(() => of(null)))
+      .subscribe();
   }
 }
-

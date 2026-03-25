@@ -7,7 +7,7 @@ import { RentalService } from '../services/rental';
 import { PaymentService } from '../services/payment';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { catchError, finalize, of, switchMap } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 import { InventoryService } from '../services/inventory';
 
 @Component({
@@ -45,20 +45,16 @@ export class CustomerCart {
   get total(): number {
     return this.items.reduce((sum, m) => {
       const days = Math.max(1, Number(m?.rentalDays || 1));
-      const price = Number(this.priceByMovieId[m.id] || 0);
+      const price = Number(this.priceByMovieId[m.movieId] || 0);
       return sum + (price * days);
     }, 0);
   }
 
   private ensurePricesLoaded() {
     (this.items || []).forEach((m) => {
-      const movieId = Number(m?.id);
+      const movieId = Number(m?.movieId);
       if (!movieId) return;
       if (Number.isFinite(this.priceByMovieId[movieId]) || this.pricesLoading.has(movieId)) return;
-      const fallbackPrice = Number(m?.rentalPrice ?? m?.pricePerDay);
-      if (Number.isFinite(fallbackPrice) && fallbackPrice > 0) {
-        this.priceByMovieId[movieId] = fallbackPrice;
-      }
       this.pricesLoading.add(movieId);
       this.inventoryService.getByMovie(movieId).pipe(catchError(() => of([]))).subscribe((res: any) => {
         const rows = Array.isArray(res)
@@ -92,7 +88,7 @@ export class CustomerCart {
     if (!userId || this.items.length === 0) return;
     this.loading = true;
 
-    const movieIds = this.items.map((m) => m.id);
+    const movieIds = this.items.map((m) => m.movieId);
     const rentalDaysPerMovie = this.items.map((m) => Math.max(1, Number(m?.rentalDays || 1)));
 
     this.rentalService.createRental({
@@ -101,27 +97,24 @@ export class CustomerCart {
       rentalDays: rentalDaysPerMovie[0],
       rentalDaysPerMovie
     }).pipe(
-      switchMap((rental: any) =>
-        this.paymentService.makePayment({
-          rentalId: rental.id,
-          method: this.selectedPaymentMethod,
-          isSuccess: true
-        })
-      ),
       catchError(() => of(null)),
-      finalize(() => (this.loading = false))
+      finalize(() => { this.loading = false; this.cdr.detectChanges(); })
     ).subscribe({
-      next: (res) => {
-        if (!res) {
-          this.toastr.error('Payment failed');
+      next: (rental: any) => {
+        if (!rental?.id) {
+          this.toastr.error('Could not create rental. Please try again.');
           return;
         }
-        this.toastr.success(`Rental successful for ${movieIds.length} movie(s)`);
         this.showPaymentPopup = false;
-        this.cart.clear();
-        this.router.navigate(['/dashboard/rentals']);
+        this.router.navigate(['/dashboard/pay'], {
+          queryParams: {
+            rentalId: rental.id,
+            amount: this.total.toFixed(2),
+            method: this.selectedPaymentMethod
+          }
+        });
       },
-      error: () => this.toastr.error('Unable to complete checkout')
+      error: () => this.toastr.error('Unable to create rental')
     });
   }
 
