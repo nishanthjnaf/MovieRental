@@ -17,6 +17,8 @@ namespace MovieRentalAPI.Models
         public PaymentStatus Status { get; set; }
         public string PaymentId { get; set; }
         public User User { get; set; }
+        public double? RefundAmount { get; set; }
+        public DateTime? RefundedAt { get; set; }
 
 
         public int CompareTo(Payment? other)

@@ -57,7 +57,8 @@ namespace MovieRentalAPI.Services
                 var days = (request.RentalDaysPerMovie != null && idx < request.RentalDaysPerMovie.Count)
                     ? request.RentalDaysPerMovie[idx]
                     : request.RentalDays;
-                if (days <= 0) days = 1;
+                if (days <= 0) days = 3;
+                if (days < 3) days = 3;
 
                 var movie = await _movieRepository.Get(movieId);
                 if (movie == null)
@@ -65,7 +66,7 @@ namespace MovieRentalAPI.Services
 
                 var existingItems = await _rentalItemRepository.GetAll();
                 var userRentals = (await _rentalRepository.GetAll())
-                    ?.Where(r => r.UserId == request.UserId)
+                    ?.Where(r => r.UserId == request.UserId && r.Status == RentalStatus.Available)
                     .Select(r => r.Id)
                     .ToHashSet() ?? new HashSet<int>();
 
@@ -94,7 +95,7 @@ namespace MovieRentalAPI.Services
                     PricePerDay = inventory.RentalPrice,
                     StartDate = IstDateTime.Now,
                     EndDate = IstDateTime.Now.AddDays(days),
-                    IsActive = true
+                    IsActive = false  // activated only after successful payment
                 };
 
                 await _rentalItemRepository.Add(rentalItem);
@@ -180,7 +181,7 @@ namespace MovieRentalAPI.Services
             await DeactivateExpiredItems();
 
             var rentals = (await _rentalRepository.GetAll())
-                ?.Where(r => r.UserId == userId)
+                ?.Where(r => r.UserId == userId && r.Status == RentalStatus.Available)
                 ?? new List<Rental>();
 
             var items = (await _rentalItemRepository.GetAll())

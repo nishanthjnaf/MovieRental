@@ -3,6 +3,7 @@ using MovieRentalAPI.Helpers;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.Enums;
 using MovieRentalAPI.Repositories;
 using MovieRentalModels;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, Movie> _movieRepository;
         private readonly IRepository<int, User> _userRepository;
         private readonly MovieRentalContext _context;
+        private readonly NotificationService _notifications;
 
         public UserServices(
             MovieRentalContext context,
@@ -26,7 +28,8 @@ namespace MovieRentalAPI.Services
             IRepository<int, Rental> rentalRepository,
             IRepository<int, Movie> movieRepository,
             IRepository<int, User> userRepository,
-            IRepository<int, RentalItem> rentalitemRepository)
+            IRepository<int, RentalItem> rentalitemRepository,
+            NotificationService notifications)
             : base(context)
         {
             _tokenService = tokenService;
@@ -36,6 +39,7 @@ namespace MovieRentalAPI.Services
             _userRepository = userRepository;
             _rentalitemRepository = rentalitemRepository;
             _context = context;
+            _notifications = notifications;
         }
 
         public async Task<CheckUserResponseDto> CheckUser(CheckUserRequestDto request)
@@ -132,6 +136,10 @@ namespace MovieRentalAPI.Services
 
             foreach (var rental in rentals)
             {
+                // Only show items from paid/active rentals
+                if (rental.Status != RentalStatus.Available)
+                    continue;
+
                 var items = rentalItems?
                     .Where(i => i.RentalId == rental.Id)
                     .ToList();
@@ -148,6 +156,7 @@ namespace MovieRentalAPI.Services
                     }
 
                     var movie = await _movieRepository.Get(item.MovieId);
+                    var rentalDays = Math.Max(1, (int)Math.Round((item.EndDate - item.StartDate).TotalDays));
 
                     result.Add(new UserRentedMovieResponseDto
                     {
@@ -158,6 +167,8 @@ namespace MovieRentalAPI.Services
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         PricePerDay = item.PricePerDay,
+                        RentalDays = rentalDays,
+                        TotalAmount = item.PricePerDay * rentalDays,
                         IsActive = item.IsActive,
                         RentalStatus = rental.Status
                     });
@@ -274,6 +285,10 @@ namespace MovieRentalAPI.Services
             var updated = await _userRepository.Update(id, existing);
             if (updated == null)
                 throw new Exception("Failed to reset password");
+
+            await _notifications.Push(id, "password",
+                "Password Changed",
+                "Your password was successfully updated. If you did not make this change, contact support immediately.");
 
             return true;
         }

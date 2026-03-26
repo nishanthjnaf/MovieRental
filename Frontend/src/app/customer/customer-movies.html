@@ -107,7 +107,7 @@
   </div>
 </section>
 
-<!-- Movies section with pagination at bottom -->
+<!-- Movies section with infinite scroll -->
 <section class="flex flex-col min-h-[400px]">
   <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" *ngIf="loading">
     <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="rounded-xl border border-slate-800 overflow-hidden">
@@ -119,8 +119,8 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 flex-1" *ngIf="!loading">
-    <article *ngFor="let m of pagedMovies" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
+  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" *ngIf="!loading">
+    <article *ngFor="let m of visibleMovies" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
       <img [src]="m.posterPath || 'https://placehold.co/300x220'" class="h-32 w-full object-cover">
       <div class="p-3">
         <h3 class="text-sm font-semibold truncate">{{ m.title }}</h3>
@@ -131,36 +131,11 @@
     </article>
   </div>
 
-  <p *ngIf="!loading && pagedMovies.length === 0" class="text-slate-400 py-12">No movies found.</p>
+  <p *ngIf="!loading && visibleMovies.length === 0" class="text-slate-400 py-12">No movies found.</p>
 
-  <!-- Pagination – anchored at bottom of section -->
-  <div class="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-slate-800" *ngIf="!loading && totalPages > 1">
-    <button
-      (click)="goPage(currentPage - 1)"
-      [disabled]="currentPage <= 1"
-      class="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      ← Prev
-    </button>
-    <div class="flex items-center gap-1">
-      <button
-        *ngFor="let p of pages"
-        (click)="goPage(p)"
-        class="min-w-[2.25rem] px-2 py-1.5 rounded-lg border text-sm transition-colors hover:border-fuchsia-500"
-        [class.border-fuchsia-500]="p === currentPage"
-        [class.bg-fuchsia-700]="p === currentPage"
-        [class.text-fuchsia-300]="p === currentPage"
-        [class.border-slate-700]="p !== currentPage"
-      >
-        {{ p }}
-      </button>
-    </div>
-    <button
-      (click)="goPage(currentPage + 1)"
-      [disabled]="currentPage >= totalPages"
-      class="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      Next →
-    </button>
+  <!-- Sentinel for IntersectionObserver -->
+  <div #sentinel class="h-10 flex items-center justify-center mt-4">
+    <span *ngIf="loadingMore" class="text-slate-500 text-sm">Loading more...</span>
+    <span *ngIf="!loadingMore && !hasMore && visibleMovies.length > 0" class="text-slate-600 text-xs">All movies loaded</span>
   </div>
 </section>

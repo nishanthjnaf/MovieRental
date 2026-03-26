@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrentUserService } from '../services/current-user';
@@ -6,6 +6,8 @@ import { UserService } from '../services/user';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { PreferencesSetup } from './preferences-setup';
+import { ThemeService } from '../services/theme';
+import { NotificationService } from '../services/notification';
 
 @Component({
   selector: 'app-customer-profile',
@@ -25,7 +27,10 @@ export class CustomerProfile implements OnInit {
     private currentUser: CurrentUserService,
     private userService: UserService,
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    public theme: ThemeService,
+    private notifService: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -56,9 +61,11 @@ export class CustomerProfile implements OnInit {
     if (!this.user?.id) return;
     this.userService.resetPassword(this.user.id, this.pwd).subscribe({
       next: () => {
-        this.toastr.success('Password changed');
         this.pwd = { oldPassword: '', newPassword: '', confirmPassword: '' };
         this.showPasswordPopup = false;
+        this.cdr.detectChanges();
+        this.notifService.refreshUnread(this.user.id);
+        this.toastr.success('Password changed');
       },
       error: () => this.toastr.error('Password reset failed')
     });

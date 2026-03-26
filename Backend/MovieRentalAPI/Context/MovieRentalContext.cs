@@ -20,6 +20,9 @@ namespace MovieRentalModels
         public DbSet<Watchlist> Watchlists => Set<Watchlist>();
         public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
         public DbSet<CartItem> CartItems => Set<CartItem>();
+        public DbSet<RentalItemRefund> RentalItemRefunds => Set<RentalItemRefund>();
+        public DbSet<Notification> Notifications => Set<Notification>();
+        public DbSet<BroadcastMessage> BroadcastMessages => Set<BroadcastMessage>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -117,6 +120,15 @@ namespace MovieRentalModels
                 .WithMany()
                 .HasForeignKey(c => c.MovieId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RentalItemRefund>()
+                .HasKey(r => r.Id);
+
+            modelBuilder.Entity<Notification>()
+                .HasKey(n => n.Id);
+
+            modelBuilder.Entity<BroadcastMessage>()
+                .HasKey(b => b.Id);
         }
     }
 }

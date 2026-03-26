@@ -16,7 +16,7 @@ export class WatchlistService {
   }
 
   remove(id: number) {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+    return this.http.delete(`${this.baseUrl}/${id}`, { responseType: 'text' });
   }
 }
 

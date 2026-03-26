@@ -14,6 +14,8 @@ import { Router } from '@angular/router';
 export class CustomerMyRatings implements OnInit {
   ratings: any[] = [];
   loading = true;
+  showConfirmPopup = false;
+  pendingDeleteId: number | null = null;
 
   constructor(
     private currentUser: CurrentUserService,
@@ -45,14 +47,30 @@ export class CustomerMyRatings implements OnInit {
   }
 
   removeRating(id: number) {
-    this.reviewService.deleteReview(id).subscribe({
+    this.pendingDeleteId = id;
+    this.showConfirmPopup = true;
+    this.cdr.detectChanges();
+  }
+
+  confirmDelete() {
+    if (this.pendingDeleteId === null) return;
+    this.reviewService.deleteReview(this.pendingDeleteId).subscribe({
       next: () => {
-        this.ratings = this.ratings.filter((r) => r.id !== id);
+        this.ratings = this.ratings.filter((r) => r.id !== this.pendingDeleteId);
         this.toastr.success('Rating removed');
-        this.cdr.detectChanges();
+        this.cancelDelete();
       },
-      error: () => this.toastr.error('Could not remove rating')
+      error: () => {
+        this.toastr.error('Could not remove rating');
+        this.cancelDelete();
+      }
     });
+  }
+
+  cancelDelete() {
+    this.showConfirmPopup = false;
+    this.pendingDeleteId = null;
+    this.cdr.detectChanges();
   }
 
   openMovie(movieId: number) {

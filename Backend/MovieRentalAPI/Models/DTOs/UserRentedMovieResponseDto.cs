@@ -18,6 +18,10 @@ namespace MovieRentalAPI.Models.DTOs
 
         public float PricePerDay { get; set; }
 
+        public int RentalDays { get; set; }
+
+        public float TotalAmount { get; set; }
+
         public bool IsActive { get; set; }
 
         public RentalStatus RentalStatus { get; set; }

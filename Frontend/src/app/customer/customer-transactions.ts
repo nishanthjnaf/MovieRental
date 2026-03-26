@@ -19,6 +19,8 @@ export class CustomerTransactions implements OnInit {
   selectedRentalId: number | null = null;
   selectedRentalMovies: Array<{ movieId: number; title: string }> = [];
   loadingRentalMovies = false;
+  showRefundPopup = false;
+  selectedRefund: any = null;
 
   constructor(
     private currentUser: CurrentUserService,
@@ -29,6 +31,10 @@ export class CustomerTransactions implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadTransactions();
+  }
+
+  loadTransactions() {
     const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
     if (!userId) {
       this.transactions = [];
@@ -36,6 +42,7 @@ export class CustomerTransactions implements OnInit {
       this.cdr.detectChanges();
       return;
     }
+    this.loading = true;
     this.paymentService.getByUserId(userId).subscribe({
       next: (res: any) => {
         const list = Array.isArray(res) ? res : (res?.data ? [res.data] : []);
@@ -62,7 +69,51 @@ export class CustomerTransactions implements OnInit {
   }
 
   getStatusText(status: number): string {
-    return status === 0 ? 'Success' : 'Failed';
+    switch (status) {
+      case 0: return 'Success';
+      case 1: return 'Failed';
+      case 2: return 'Refunded';
+      default: return '-';
+    }
+  }
+
+  openRefundDetails(t: any) {
+    // Fetch rental items to find which one was refunded, then get per-item refund
+    this.rentalService.getItemsByRentalId(t.rentalId).subscribe({
+      next: (items: any[]) => {
+        // Try each item until we find one with a refund record
+        const tryNext = (idx: number) => {
+          if (idx >= items.length) {
+            // Fallback: show payment-level refund data
+            this.selectedRefund = t;
+            this.showRefundPopup = true;
+            this.cdr.detectChanges();
+            return;
+          }
+          const itemId = items[idx]?.id ?? items[idx]?.rentalItemId;
+          if (!itemId) { tryNext(idx + 1); return; }
+          this.paymentService.getItemRefund(itemId).subscribe({
+            next: (refund: any) => {
+              this.selectedRefund = { ...t, refundAmount: refund.refundAmount, refundedAt: refund.refundedAt };
+              this.showRefundPopup = true;
+              this.cdr.detectChanges();
+            },
+            error: () => tryNext(idx + 1)
+          });
+        };
+        tryNext(0);
+      },
+      error: () => {
+        this.selectedRefund = t;
+        this.showRefundPopup = true;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeRefundDetails() {
+    this.showRefundPopup = false;
+    this.selectedRefund = null;
   }
 
   openRentalMovies(rentalId: number) {

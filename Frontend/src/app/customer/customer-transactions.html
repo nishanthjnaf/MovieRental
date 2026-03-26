@@ -15,6 +15,7 @@
         <th class="text-left p-3">Method</th>
         <th class="text-left p-3">Status</th>
         <th class="text-left p-3">Date</th>
+        <th class="text-left p-3">Refund Details</th>
       </tr>
     </thead>
     <tbody>
@@ -26,14 +27,45 @@
         <td class="p-3">{{ t.rentalId }}</td>
         <td class="p-3">₹ {{ t.amount }}</td>
         <td class="p-3">{{ getPaymentMethod(t.paymentMethod ?? t.method) }}</td>
-        <td class="p-3">{{ getStatusText(t.paymentStatus ?? t.status) }}</td>
+        <td class="p-3">
+          <span [class.text-green-400]="(t.paymentStatus ?? t.status) === 0"
+                [class.text-red-400]="(t.paymentStatus ?? t.status) === 1"
+                [class.text-amber-400]="(t.paymentStatus ?? t.status) === 2">
+            {{ getStatusText(t.paymentStatus ?? t.status) }}
+          </span>
+        </td>
         <td class="p-3">{{ t.paymentDate | date:'medium' }}</td>
+        <td class="p-3">
+          <button *ngIf="(t.paymentStatus ?? t.status) === 2"
+            class="bg-amber-700 hover:bg-amber-600 rounded px-2 py-1 text-xs"
+            (click)="openRefundDetails(t)">+</button>
+          <span *ngIf="(t.paymentStatus ?? t.status) !== 2" class="text-slate-600">—</span>
+        </td>
       </tr>
     </tbody>
   </table>
 </div>
 
 <p *ngIf="!loading && transactions.length === 0" class="text-slate-400">No transactions yet.</p>
+
+<div *ngIf="showRefundPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-sm">
+    <h3 class="text-xl font-semibold mb-4">Refund Details</h3>
+    <div class="space-y-2 text-sm">
+      <div class="flex justify-between">
+        <span class="text-slate-400">Amount Refunded</span>
+        <span class="text-green-400 font-semibold">₹ {{ selectedRefund?.refundAmount | number:'1.2-2' }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-400">Returned At</span>
+        <span>{{ selectedRefund?.refundedAt | date:'medium' }}</span>
+      </div>
+    </div>
+    <div class="text-right mt-5">
+      <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="closeRefundDetails()">Close</button>
+    </div>
+  </div>
+</div>
 
 <div *ngIf="showMoviesPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
   <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-lg">

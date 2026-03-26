@@ -10,6 +10,7 @@ import { PaymentService } from '../services/payment';
 import { Router } from '@angular/router';
 import { CurrentUserService } from '../services/current-user';
 import { UserService } from '../services/user';
+import { NotificationService } from '../services/notification';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ThemeToggle } from '../components/theme-toggle';
 
@@ -29,16 +30,29 @@ export class Admin implements OnInit {
     private paymentService: PaymentService,
     private userService: UserService,
     private currentUser: CurrentUserService,
+    private notifService: NotificationService,
     private router: Router,
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  viewMode: 'services' | 'genre' | 'inventory' | 'movie' | 'rental' | 'payment' = 'services';
+  viewMode: 'services' | 'genre' | 'inventory' | 'movie' | 'rental' | 'payment' | 'broadcast' = 'services';
+
+  // ---- BROADCAST ----
+  broadcastTitle = '';
+  broadcastMessage = '';
+  broadcasts: any[] = [];
+  filteredBroadcasts: any[] = [];
+  broadcastsLoading = false;
+  broadcastFilterUsername = '';
+  broadcastDateFrom = '';
+  broadcastDateTo = '';
+  broadcastSortDate = '';
 
   // ---- GENRE ----
   genres: any[] = [];
   searchId: any;
+  genreSearchName = '';
   showForm = false;
   isEdit = false;
   selectedId: number | null = null;
@@ -50,6 +64,9 @@ export class Admin implements OnInit {
   // ---- INVENTORY ----
   inventories: any[] = [];
   inventorySearchId: any;
+  inventorySearchMovieId: any;
+  inventorySearchMovieName = '';
+  inventoryStatusFilter = '';
   showInventoryForm = false;
   isInventoryEdit = false;
   selectedInventoryId: number | null = null;
@@ -57,8 +74,13 @@ export class Admin implements OnInit {
 
   // ---- MOVIE ----
   movies: any[] = [];
+  movieLanguages: string[] = [];
   movieSearchId: any;
-  movieSearchName: string = '';
+  movieSearchName = '';
+  movieSearchLanguage = '';
+  movieMinYear: any;
+  movieMaxYear: any;
+  movieSort = '';
   showMovieForm = false;
   isMovieEdit = false;
   selectedMovieId: number | null = null;
@@ -73,7 +95,15 @@ export class Admin implements OnInit {
   // ---- RENTAL ----
   rentals: any[] = [];
   rentalSearchUserId: any;
+  rentalDateFrom = '';
+  rentalDateTo = '';
+  rentalStatusFilter = '';
+  rentalSortDate = '';
   showRentalItems = false;
+
+  get todayStr(): string {
+    return new Date().toISOString().split('T')[0];
+  }
   selectedRentalId: number | null = null;
   rentalItems: any[] = [];
 
@@ -81,6 +111,11 @@ export class Admin implements OnInit {
   payments: any[] = [];
   paymentSearchRentalId: any;
   paymentSearchUserId: any;
+  paymentMethodFilter = '';
+  paymentStatusFilter = '';
+  paymentDateFrom = '';
+  paymentDateTo = '';
+  paymentSortDate = '';
 
   // ---- MISC ----
   currentAdminName = 'Admin';
@@ -103,6 +138,7 @@ export class Admin implements OnInit {
     if (service === 'movie') this.loadMovies();
     if (service === 'rental') this.loadRentals();
     if (service === 'payment') this.loadPayments();
+    if (service === 'broadcast') this.loadBroadcasts();
   }
 
   // ================= STATS =================
@@ -168,14 +204,31 @@ export class Admin implements OnInit {
   refreshGenres() { this.loadGenres(); this.toastr.success('Refreshed'); }
 
   searchGenre() {
-    if (!this.searchId) { this.loadGenres(); return; }
-    this.genreService.getGenreById(this.searchId).subscribe({
-      next: (res) => { this.genres = [res]; this.cdr.detectChanges(); },
-      error: () => this.toastr.error('Genre not found')
-    });
+    if (this.searchId) {
+      this.genreService.getGenreById(this.searchId).subscribe({
+        next: (res) => { this.genres = [res]; this.cdr.detectChanges(); },
+        error: () => this.toastr.error('Genre not found')
+      });
+      return;
+    }
+    if (this.genreSearchName.trim()) {
+      this.genreService.getAllGenres().subscribe({
+        next: (res) => {
+          const term = this.genreSearchName.trim().toLowerCase();
+          this.genres = (res || []).filter((g: any) =>
+            g.name?.toLowerCase().includes(term)
+          );
+          if (!this.genres.length) this.toastr.info('No genres matched');
+          this.cdr.detectChanges();
+        },
+        error: () => this.toastr.error('Search failed')
+      });
+      return;
+    }
+    this.loadGenres();
   }
 
-  resetSearch() { this.searchId = null; this.loadGenres(); }
+  resetSearch() { this.searchId = null; this.genreSearchName = ''; this.loadGenres(); }
 
   openAddForm() {
     this.isEdit = false;
@@ -244,14 +297,42 @@ export class Admin implements OnInit {
   refreshInventory() { this.loadInventory(); this.toastr.success('Refreshed'); }
 
   searchInventory() {
-    if (!this.inventorySearchId) { this.loadInventory(); return; }
-    this.inventoryService.getById(this.inventorySearchId).subscribe({
-      next: (res) => { this.inventories = [res]; this.cdr.detectChanges(); },
-      error: () => this.toastr.error('Inventory not found')
+    // Start from full list, then apply filters client-side
+    this.inventoryService.getAll().subscribe({
+      next: (res) => {
+        let list: any[] = res || [];
+
+        if (this.inventorySearchId) {
+          list = list.filter((i: any) => i.id === Number(this.inventorySearchId));
+        }
+        if (this.inventorySearchMovieId) {
+          list = list.filter((i: any) => i.movieId === Number(this.inventorySearchMovieId));
+        }
+        if (this.inventorySearchMovieName.trim()) {
+          const term = this.inventorySearchMovieName.trim().toLowerCase();
+          list = list.filter((i: any) => i.movieName?.toLowerCase().includes(term));
+        }
+        if (this.inventoryStatusFilter === 'available') {
+          list = list.filter((i: any) => i.isAvailable === true);
+        } else if (this.inventoryStatusFilter === 'unavailable') {
+          list = list.filter((i: any) => i.isAvailable === false);
+        }
+
+        this.inventories = list;
+        if (!list.length) this.toastr.info('No inventory items matched');
+        this.cdr.detectChanges();
+      },
+      error: () => this.toastr.error('Search failed')
     });
   }
 
-  resetInventory() { this.inventorySearchId = null; this.loadInventory(); }
+  resetInventory() {
+    this.inventorySearchId = null;
+    this.inventorySearchMovieId = null;
+    this.inventorySearchMovieName = '';
+    this.inventoryStatusFilter = '';
+    this.loadInventory();
+  }
 
   openInventoryForm() {
     this.isInventoryEdit = false;
@@ -303,7 +384,13 @@ export class Admin implements OnInit {
   // ================= MOVIE =================
   loadMovies() {
     this.movieService.getAll().subscribe({
-      next: (res) => { this.movies = [...res]; this.cdr.detectChanges(); },
+      next: (res) => {
+        this.movies = [...res];
+        const langs = new Set<string>();
+        this.movies.forEach((m: any) => { if (m.language) langs.add(m.language); });
+        this.movieLanguages = Array.from(langs).sort();
+        this.cdr.detectChanges();
+      },
       error: () => this.toastr.error('Failed to load movies')
     });
   }
@@ -311,27 +398,54 @@ export class Admin implements OnInit {
   refreshMovies() { this.loadMovies(); this.toastr.success('Refreshed'); }
 
   searchMovie() {
-    if (this.movieSearchId) {
-      this.movieService.getById(this.movieSearchId).subscribe({
-        next: (res) => { this.movies = [res]; this.cdr.detectChanges(); },
-        error: () => this.toastr.error('Movie not found')
-      });
-      return;
-    }
-    if (this.movieSearchName) {
-      this.movieService.search(this.movieSearchName).subscribe({
-        next: (res: any) => {
-          this.movies = Array.isArray(res) ? res : (res?.items || res?.data || res?.results || []);
-          this.cdr.detectChanges();
-        },
-        error: () => this.toastr.error('Search failed')
-      });
-      return;
-    }
-    this.loadMovies();
+    // Fetch all then apply filters + sort client-side
+    this.movieService.getAll().subscribe({
+      next: (res) => {
+        let list: any[] = Array.isArray(res) ? res : [];
+
+        if (this.movieSearchId) {
+          list = list.filter((m: any) => m.id === Number(this.movieSearchId));
+        }
+        if (this.movieSearchName.trim()) {
+          const term = this.movieSearchName.trim().toLowerCase();
+          list = list.filter((m: any) => m.title?.toLowerCase().includes(term));
+        }
+        if (this.movieSearchLanguage.trim()) {
+          const lang = this.movieSearchLanguage.trim().toLowerCase();
+          list = list.filter((m: any) => m.language?.toLowerCase().includes(lang));
+        }
+        if (this.movieMinYear) {
+          list = list.filter((m: any) => Number(m.releaseYear) >= Number(this.movieMinYear));
+        }
+        if (this.movieMaxYear) {
+          list = list.filter((m: any) => Number(m.releaseYear) <= Number(this.movieMaxYear));
+        }
+        if (this.movieSort === 'rentalCount_desc') {
+          list = list.sort((a, b) => (b.rentalCount ?? 0) - (a.rentalCount ?? 0));
+        } else if (this.movieSort === 'rentalCount_asc') {
+          list = list.sort((a, b) => (a.rentalCount ?? 0) - (b.rentalCount ?? 0));
+        } else if (this.movieSort === 'rating_desc') {
+          list = list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        } else if (this.movieSort === 'rating_asc') {
+          list = list.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
+        }
+        this.movies = list;
+        if (!list.length) this.toastr.info('No movies matched');
+        this.cdr.detectChanges();
+      },
+      error: () => this.toastr.error('Search failed')
+    });
   }
 
-  resetMovie() { this.movieSearchId = null; this.movieSearchName = ''; this.loadMovies(); }
+  resetMovie() {
+    this.movieSearchId = null;
+    this.movieSearchName = '';
+    this.movieSearchLanguage = '';
+    this.movieMinYear = null;
+    this.movieMaxYear = null;
+    this.movieSort = '';
+    this.loadMovies();
+  }
 
   openMovieForm() {
     this.isMovieEdit = false;
@@ -404,18 +518,66 @@ export class Admin implements OnInit {
 
   refreshRentals() { this.loadRentals(); this.toastr.success('Refreshed'); }
 
+  onRentalDateFromChange(val: string) {
+    // If From > To, clear To so user must re-pick
+    if (val && this.rentalDateTo && val > this.rentalDateTo) {
+      this.rentalDateTo = '';
+      this.toastr.info('"From" date cannot be after "To" date');
+    }
+    this.rentalDateFrom = val;
+  }
+
+  onRentalDateToChange(val: string) {
+    // If To < From, clear From
+    if (val && this.rentalDateFrom && val < this.rentalDateFrom) {
+      this.rentalDateFrom = '';
+      this.toastr.info('"To" date cannot be before "From" date');
+    }
+    this.rentalDateTo = val;
+  }
+
   searchRental() {
-    if (!this.rentalSearchUserId) { this.loadRentals(); return; }
-    this.rentalService.getByUserId(this.rentalSearchUserId).subscribe({
+    this.rentalService.getAll().subscribe({
       next: (res: any) => {
-        this.rentals = Array.isArray(res) ? res : (res?.data || []);
+        let list: any[] = Array.isArray(res) ? res : (res?.data || res?.items || []);
+
+        if (this.rentalSearchUserId) {
+          list = list.filter((r: any) => r.userId === Number(this.rentalSearchUserId));
+        }
+        if (this.rentalStatusFilter !== '') {
+          list = list.filter((r: any) => r.status === Number(this.rentalStatusFilter));
+        }
+        if (this.rentalDateFrom) {
+          const from = new Date(this.rentalDateFrom);
+          list = list.filter((r: any) => new Date(r.rentalDate) >= from);
+        }
+        if (this.rentalDateTo) {
+          const to = new Date(this.rentalDateTo);
+          to.setHours(23, 59, 59);
+          list = list.filter((r: any) => new Date(r.rentalDate) <= to);
+        }
+        if (this.rentalSortDate === 'desc') {
+          list = list.sort((a, b) => new Date(b.rentalDate).getTime() - new Date(a.rentalDate).getTime());
+        } else if (this.rentalSortDate === 'asc') {
+          list = list.sort((a, b) => new Date(a.rentalDate).getTime() - new Date(b.rentalDate).getTime());
+        }
+
+        this.rentals = list;
+        if (!list.length) this.toastr.info('No rentals matched');
         this.cdr.detectChanges();
       },
-      error: () => this.toastr.error('No rentals found')
+      error: () => this.toastr.error('Search failed')
     });
   }
 
-  resetRental() { this.rentalSearchUserId = null; this.loadRentals(); }
+  resetRental() {
+    this.rentalSearchUserId = null;
+    this.rentalDateFrom = '';
+    this.rentalDateTo = '';
+    this.rentalStatusFilter = '';
+    this.rentalSortDate = '';
+    this.loadRentals();
+  }
 
   getStatusText(status: number): string {
     switch (status) {
@@ -450,6 +612,22 @@ export class Admin implements OnInit {
     });
   }
 
+  onPaymentDateFromChange(val: string) {
+    if (val && this.paymentDateTo && val > this.paymentDateTo) {
+      this.paymentDateTo = '';
+      this.toastr.info('"From" date cannot be after "To" date');
+    }
+    this.paymentDateFrom = val;
+  }
+
+  onPaymentDateToChange(val: string) {
+    if (val && this.paymentDateFrom && val < this.paymentDateFrom) {
+      this.paymentDateFrom = '';
+      this.toastr.info('"To" date cannot be before "From" date');
+    }
+    this.paymentDateTo = val;
+  }
+
   // ================= PAYMENT =================
   loadPayments() {
     this.paymentService.getAll().subscribe({
@@ -464,30 +642,55 @@ export class Admin implements OnInit {
   refreshPayments() { this.loadPayments(); this.toastr.success('Refreshed'); }
 
   searchPayment() {
-    if (this.paymentSearchRentalId) {
-      this.paymentService.getByRentalId(this.paymentSearchRentalId).subscribe({
-        next: (res: any) => {
-          this.payments = Array.isArray(res) ? res : (res ? [res] : []);
-          this.cdr.detectChanges();
-        },
-        error: () => this.toastr.error('No payments found')
-      });
-      return;
-    }
-    if (this.paymentSearchUserId) {
-      this.paymentService.getByUserId(this.paymentSearchUserId).subscribe({
-        next: (res: any) => {
-          this.payments = Array.isArray(res) ? res : (res?.data || []);
-          this.cdr.detectChanges();
-        },
-        error: () => this.toastr.error('No payments found')
-      });
-      return;
-    }
-    this.loadPayments();
+    this.paymentService.getAll().subscribe({
+      next: (res: any) => {
+        let list: any[] = Array.isArray(res) ? res : (res?.data || []);
+
+        if (this.paymentSearchRentalId) {
+          list = list.filter((p: any) => p.rentalId === Number(this.paymentSearchRentalId));
+        }
+        if (this.paymentSearchUserId) {
+          list = list.filter((p: any) => p.userId === Number(this.paymentSearchUserId));
+        }
+        if (this.paymentMethodFilter !== '') {
+          list = list.filter((p: any) => (p.method ?? p.paymentMethod) === Number(this.paymentMethodFilter));
+        }
+        if (this.paymentStatusFilter !== '') {
+          list = list.filter((p: any) => (p.status ?? p.paymentStatus) === Number(this.paymentStatusFilter));
+        }
+        if (this.paymentDateFrom) {
+          const from = new Date(this.paymentDateFrom);
+          list = list.filter((p: any) => new Date(p.paymentDate) >= from);
+        }
+        if (this.paymentDateTo) {
+          const to = new Date(this.paymentDateTo);
+          to.setHours(23, 59, 59);
+          list = list.filter((p: any) => new Date(p.paymentDate) <= to);
+        }
+        if (this.paymentSortDate === 'desc') {
+          list = list.sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
+        } else if (this.paymentSortDate === 'asc') {
+          list = list.sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
+        }
+
+        this.payments = list;
+        if (!list.length) this.toastr.info('No payments matched');
+        this.cdr.detectChanges();
+      },
+      error: () => this.toastr.error('Search failed')
+    });
   }
 
-  resetPayment() { this.paymentSearchRentalId = null; this.paymentSearchUserId = null; this.loadPayments(); }
+  resetPayment() {
+    this.paymentSearchRentalId = null;
+    this.paymentSearchUserId = null;
+    this.paymentMethodFilter = '';
+    this.paymentStatusFilter = '';
+    this.paymentDateFrom = '';
+    this.paymentDateTo = '';
+    this.paymentSortDate = '';
+    this.loadPayments();
+  }
 
   getPaymentStatus(status: number): string {
     return status === 0 ? 'Success' : 'Failed';
@@ -501,6 +704,103 @@ export class Admin implements OnInit {
       case 3: return 'UPI';
       default: return '-';
     }
+  }
+
+  // ================= BROADCAST =================
+  loadBroadcasts() {
+    this.broadcastsLoading = true;
+    this.notifService.getBroadcasts().subscribe({
+      next: (res) => {
+        this.broadcasts = res || [];
+        this.filteredBroadcasts = [...this.broadcasts];
+        this.broadcastsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.broadcastsLoading = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  applyBroadcastFilters() {
+    let list = [...this.broadcasts];
+
+    if (this.broadcastFilterUsername.trim()) {
+      const term = this.broadcastFilterUsername.trim().toLowerCase();
+      list = list.filter(b => b.sentByUsername?.toLowerCase().includes(term));
+    }
+    if (this.broadcastDateFrom) {
+      const from = new Date(this.broadcastDateFrom);
+      list = list.filter(b => new Date(b.sentAt) >= from);
+    }
+    if (this.broadcastDateTo) {
+      const to = new Date(this.broadcastDateTo);
+      to.setHours(23, 59, 59);
+      list = list.filter(b => new Date(b.sentAt) <= to);
+    }
+    if (this.broadcastSortDate === 'desc') {
+      list = list.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
+    } else if (this.broadcastSortDate === 'asc') {
+      list = list.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+    }
+
+    this.filteredBroadcasts = list;
+    this.cdr.detectChanges();
+  }
+
+  resetBroadcastFilters() {
+    this.broadcastFilterUsername = '';
+    this.broadcastDateFrom = '';
+    this.broadcastDateTo = '';
+    this.broadcastSortDate = '';
+    this.filteredBroadcasts = [...this.broadcasts];
+    this.cdr.detectChanges();
+  }
+
+  onBroadcastDateFromChange(val: string) {
+    if (val && this.broadcastDateTo && val > this.broadcastDateTo) {
+      this.broadcastDateTo = '';
+      this.toastr.info('"From" date cannot be after "To" date');
+    }
+    this.broadcastDateFrom = val;
+  }
+
+  onBroadcastDateToChange(val: string) {
+    if (val && this.broadcastDateFrom && val < this.broadcastDateFrom) {
+      this.broadcastDateFrom = '';
+      this.toastr.info('"To" date cannot be before "From" date');
+    }
+    this.broadcastDateTo = val;
+  }
+
+  sendBroadcast() {
+    if (!this.broadcastTitle.trim() || !this.broadcastMessage.trim()) {
+      this.toastr.error('Title and message are required');
+      return;
+    }
+    const adminId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
+    this.notifService.broadcast(adminId, this.broadcastTitle, this.broadcastMessage).subscribe({
+      next: (record) => {
+        this.toastr.success('Notification sent to all customers');
+        this.broadcastTitle = '';
+        this.broadcastMessage = '';
+        this.broadcasts = [record, ...this.broadcasts];
+        this.filteredBroadcasts = [record, ...this.filteredBroadcasts];
+        this.cdr.detectChanges();
+      },
+      error: () => this.toastr.error('Failed to send notification')
+    });
+  }
+
+  deleteBroadcast(id: number) {
+    if (!confirm('Delete this broadcast record?')) return;
+    this.notifService.deleteBroadcast(id).subscribe({
+      next: () => {
+        this.broadcasts = this.broadcasts.filter(b => b.id !== id);
+        this.filteredBroadcasts = this.filteredBroadcasts.filter(b => b.id !== id);
+        this.toastr.success('Deleted');
+        this.cdr.detectChanges();
+      },
+      error: () => this.toastr.error('Delete failed')
+    });
   }
 
   // ================= AUTH =================

@@ -23,22 +23,58 @@
   <main class="flex-1">
     <header class="sticky top-0 z-20 bg-slate-950/95 border-b border-slate-800 px-6 py-4">
       <div class="flex items-center gap-4 transition-all duration-200" [class.mt-3]="isSearchFocused">
-        <div class="flex-1 max-w-3xl">
+        <div class="flex-1 max-w-3xl relative flex items-center">
           <input
             [formControl]="searchControl"
             (focus)="isSearchFocused = true"
             (blur)="isSearchFocused = false"
             placeholder="Search films, directors, cast..."
-            class="w-full bg-slate-900 border border-fuchsia-600 rounded-full px-5 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500 neon-border"
+            class="w-full bg-slate-900 border border-fuchsia-600 rounded-full px-5 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500 neon-border pr-10"
           />
+          <button *ngIf="searchControl.value" class="absolute right-3 text-slate-400 hover:text-white text-sm" (click)="clearSearch()" title="Clear search">✕</button>
         </div>
         <div class="flex items-center gap-2 ml-auto">
-          <button *ngIf="searchControl.value" class="top-icon-btn" (click)="clearSearch()" title="Clear search">✕</button>
+          <!-- Notification bell with dropdown -->
+          <div class="relative">
+            <button class="top-icon-btn relative" (click)="toggleNotifDropdown()" title="Notifications">
+              🔔
+              <span *ngIf="unreadNotifications > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5">{{ unreadNotifications }}</span>
+            </button>
+
+            <!-- Dropdown -->
+            <div *ngIf="showNotifDropdown"
+              class="absolute right-0 top-12 w-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+              <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                <span class="font-semibold text-base">Notifications</span>
+                <button class="text-slate-500 hover:text-white text-sm" (click)="closeNotifDropdown()">✕</button>
+              </div>
+
+              <div *ngIf="recentNotifications.length === 0" class="px-5 py-8 text-center text-slate-500 text-sm">
+                No notifications
+              </div>
+
+              <div *ngFor="let n of recentNotifications"
+                class="px-5 py-4 border-b border-slate-800 hover:bg-slate-800 cursor-pointer transition"
+                [class.opacity-60]="n.isRead"
+                (click)="closeNotifDropdown()">
+                <p class="text-sm font-semibold truncate" [class.text-white]="!n.isRead" [class.text-slate-400]="n.isRead">
+                  {{ n.title }}
+                </p>
+                <p class="text-xs text-slate-500 truncate mt-1">{{ n.message }}</p>
+              </div>
+
+              <div class="px-5 py-3 text-center">
+                <button class="text-fuchsia-400 hover:text-fuchsia-300 text-sm font-medium" (click)="openNotifPage()">
+                  See all notifications
+                </button>
+              </div>
+            </div>
+          </div>
+
           <button class="top-icon-btn relative" routerLink="/dashboard/cart" title="Cart">
             🛒
             <span class="absolute -top-2 -right-2 bg-amber-500 text-black text-xs rounded-full px-1.5">{{ cartCount }}</span>
           </button>
-          <app-theme-toggle />
           <button class="top-icon-btn" routerLink="/dashboard/profile" title="Profile">👤</button>
         </div>
       </div>

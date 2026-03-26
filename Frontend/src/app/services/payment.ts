@@ -23,4 +23,12 @@ export class PaymentService {
   makePayment(data: any) {
     return this.http.post<any>(this.baseUrl, data);
   }
+
+  processRefund(rentalItemId: number) {
+    return this.http.post<any>(`${this.baseUrl}/refund/${rentalItemId}`, {});
+  }
+
+  getItemRefund(rentalItemId: number) {
+    return this.http.get<any>(`${this.baseUrl}/item-refund/${rentalItemId}`);
+  }
 }

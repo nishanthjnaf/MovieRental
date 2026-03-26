@@ -13,17 +13,20 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, Genre> _genreRepository;
         private readonly IRepository<int, Review> _reviewRepository;
         private readonly MovieRentalContext _context;
+        private readonly NotificationService _notifications;
 
         public MovieServices(
             IRepository<int, Movie> movieRepository,
             IRepository<int, Genre> genreRepository,
             IRepository<int, Review> reviewRepository,
-            MovieRentalContext context)
+            MovieRentalContext context,
+            NotificationService notifications)
         {
             _movieRepository = movieRepository;
             _genreRepository = genreRepository;
             _reviewRepository = reviewRepository;
             _context = context;
+            _notifications = notifications;
         }
 
         public async Task<CreateMovieResponseDto> AddMovie(CreateMovieRequestDto request)
@@ -72,6 +75,10 @@ namespace MovieRentalAPI.Services
 
             if (addedMovie == null)
                 throw new Exception("Movie creation failed");
+
+            // Notify users whose preferences match
+            var genreNames = addedMovie.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>();
+            await _notifications.NotifyNewMovie(addedMovie.Id, addedMovie.Title, genreNames, addedMovie.Language ?? "");
 
             return MapToResponseDto(addedMovie);
         }
@@ -332,6 +339,73 @@ namespace MovieRentalAPI.Services
                 TrailerUrl = movie.TrailerUrl,
                 RentalCount = movie.RentalCount
             };
+        }
+
+        public async Task<IEnumerable<CreateMovieResponseDto>> FilterMovies(MovieFilterRequestDto req)
+        {
+            // Build query with EF Core — join Movies → MovieGenres → Genres → Inventories
+            var query = _context.Set<Movie>()
+                .Include(m => m.Genres)
+                .AsNoTracking()
+                .AsQueryable();
+
+            // Search term (title / director / cast)
+            if (!string.IsNullOrWhiteSpace(req.SearchTerm))
+            {
+                var term = req.SearchTerm.ToLower();
+                query = query.Where(m =>
+                    m.Title.ToLower().Contains(term) ||
+                    (m.Director != null && m.Director.ToLower().Contains(term)) ||
+                    (m.Cast != null && m.Cast.ToLower().Contains(term)));
+            }
+
+            // Language filter
+            if (req.Languages != null && req.Languages.Count > 0)
+            {
+                var langs = req.Languages.Select(l => l.ToLower()).ToList();
+                query = query.Where(m => langs.Contains(m.Language.ToLower()));
+            }
+
+            // Year range
+            if (req.MinYear.HasValue)
+                query = query.Where(m => m.ReleaseYear >= req.MinYear.Value);
+            if (req.MaxYear.HasValue)
+                query = query.Where(m => m.ReleaseYear <= req.MaxYear.Value);
+
+            // Genre filter
+            if (req.GenreIds != null && req.GenreIds.Count > 0)
+                query = query.Where(m => m.Genres.Any(g => req.GenreIds.Contains(g.Id)));
+
+            var movies = await query.ToListAsync();
+
+            // Price filter — join with inventories in memory (inventory is a separate table)
+            if (req.MinPrice.HasValue || req.MaxPrice.HasValue)
+            {
+                var inventories = await _context.Set<Inventory>()
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var priceByMovie = inventories
+                    .GroupBy(i => i.MovieId)
+                    .ToDictionary(g => g.Key, g => (decimal)g.Min(i => i.RentalPrice));
+
+                movies = movies.Where(m =>
+                {
+                    if (!priceByMovie.TryGetValue(m.Id, out var price)) return false;
+                    if (req.MinPrice.HasValue && price < req.MinPrice.Value) return false;
+                    if (req.MaxPrice.HasValue && price > req.MaxPrice.Value) return false;
+                    return true;
+                }).ToList();
+            }
+
+            var avgByMovieId = await GetAverageRatingsByMovieId();
+            foreach (var m in movies)
+            {
+                if (avgByMovieId.TryGetValue(m.Id, out var avg))
+                    m.Rating = avg;
+            }
+
+            return movies.Select(MapToResponseDto);
         }
 
         private async Task<Dictionary<int, double>> GetAverageRatingsByMovieId()

@@ -17,6 +17,20 @@ namespace MovieRentalAPI.Controllers
             _paymentService = paymentService;
         }
         //[Authorize(Roles = "Customer")]
+        [HttpPost("refund/{rentalItemId}")]
+        public async Task<IActionResult> ProcessRefund(int rentalItemId)
+        {
+            try
+            {
+                var result = await _paymentService.ProcessRefund(rentalItemId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (ConflictException ex) { return Conflict(ex.Message); }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+        }
+
+        //[Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> MakePayment(
             MakePaymentRequestDto request)
@@ -38,6 +52,15 @@ namespace MovieRentalAPI.Controllers
             {
                 return NotFound(ex.Message);
             }
+        }
+
+        //[Authorize(Roles = "Customer")]
+        [HttpGet("item-refund/{rentalItemId}")]
+        public async Task<IActionResult> GetItemRefund(int rentalItemId)
+        {
+            var result = await _paymentService.GetItemRefund(rentalItemId);
+            if (result == null) return NotFound("No refund found for this item");
+            return Ok(result);
         }
 
         //[Authorize(Roles = "Admin,Customer")]

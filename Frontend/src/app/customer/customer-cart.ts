@@ -44,10 +44,14 @@ export class CustomerCart {
 
   get total(): number {
     return this.items.reduce((sum, m) => {
-      const days = Math.max(1, Number(m?.rentalDays || 1));
+      const days = Math.max(3, Number(m?.rentalDays || 3));
       const price = Number(this.priceByMovieId[m.movieId] || 0);
       return sum + (price * days);
     }, 0);
+  }
+
+  get hasInvalidDays(): boolean {
+    return this.items.some(m => Number(m?.rentalDays || 0) < 3);
   }
 
   private ensurePricesLoaded() {
@@ -74,7 +78,7 @@ export class CustomerCart {
   }
 
   setDays(movieId: number, days: number) {
-    this.cart.updateRentalDays(movieId, days);
+    this.cart.updateRentalDays(movieId, Math.max(3, Number(days) || 3));
   }
 
   openCheckout() {
@@ -89,7 +93,7 @@ export class CustomerCart {
     this.loading = true;
 
     const movieIds = this.items.map((m) => m.movieId);
-    const rentalDaysPerMovie = this.items.map((m) => Math.max(1, Number(m?.rentalDays || 1)));
+    const rentalDaysPerMovie = this.items.map((m) => Math.max(3, Number(m?.rentalDays || 3)));
 
     this.rentalService.createRental({
       userId,

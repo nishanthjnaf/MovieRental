@@ -183,5 +183,20 @@ namespace MovieRentalAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        // GET api/Movie/filter?searchTerm=&languages=English&languages=Korean&minYear=2000&maxYear=2024&minPrice=50&maxPrice=300&genreIds=1&genreIds=2
+        [HttpGet("filter")]
+        public async Task<IActionResult> FilterMovies([FromQuery] MovieFilterRequestDto request)
+        {
+            try
+            {
+                var result = await _movieService.FilterMovies(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

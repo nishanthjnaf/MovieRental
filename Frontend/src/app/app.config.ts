@@ -16,7 +16,7 @@ export const appConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     importProvidersFrom(ReactiveFormsModule,ToastrModule.forRoot({
-        positionClass: 'toast-top-right',
+        positionClass: 'toast-bottom-right',
         timeOut: 3000,
         preventDuplicates: true
       }))

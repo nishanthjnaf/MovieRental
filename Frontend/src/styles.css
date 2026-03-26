@@ -409,3 +409,13 @@ html.light-theme .carousel-arrow {
 html.light-theme .carousel-arrow:hover:not(:disabled) {
   background: #cbd5e1;
 }
+
+/* Date input calendar icon visibility */
+.date-input {
+  color-scheme: light;
+}
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.3) sepia(1) saturate(5) hue-rotate(175deg);
+  opacity: 1;
+}

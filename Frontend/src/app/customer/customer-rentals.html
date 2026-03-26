@@ -9,7 +9,7 @@
   <div *ngFor="let r of activeRentals" class="grid grid-cols-12 gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 items-center">
     <div class="col-span-3">
       <p class="font-semibold text-lg cursor-pointer hover:text-amber-300" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</p>
-      <p class="text-xs text-slate-400">Movie ID: {{ r.movieId }}</p>
+      <p class="text-xs text-slate-400">{{ r.rentalDays }} day(s) rented</p>
     </div>
     <div class="col-span-2">
       <span class="px-3 py-1 rounded-full text-xs" [class.bg-green-700]="r.isActive" [class.bg-slate-700]="!r.isActive">
@@ -41,7 +41,7 @@
   <div *ngFor="let r of returnedRentals" class="grid grid-cols-12 gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 items-center">
     <div class="col-span-3">
       <p class="font-semibold text-lg cursor-pointer hover:text-amber-300" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</p>
-      <p class="text-xs text-slate-400">Movie ID: {{ r.movieId }}</p>
+      <p class="text-xs text-slate-400">{{ r.rentalDays }} day(s) rented</p>
     </div>
     <div class="col-span-2">
       <span class="px-3 py-1 rounded-full text-xs bg-blue-700">RETURNED</span>
@@ -68,7 +68,7 @@
   <div *ngFor="let r of expiredRentals" class="grid grid-cols-12 gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 items-center">
     <div class="col-span-3">
       <p class="font-semibold text-lg cursor-pointer hover:text-amber-300" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</p>
-      <p class="text-xs text-slate-400">Movie ID: {{ r.movieId }}</p>
+      <p class="text-xs text-slate-400">{{ r.rentalDays }} day(s) rented</p>
     </div>
     <div class="col-span-2">
       <span class="px-3 py-1 rounded-full text-xs bg-slate-700">EXPIRED</span>
@@ -100,6 +100,10 @@
       <p><span class="text-slate-400">Purchase Date:</span> {{ selectedRentalDetails?.purchaseDate | date:'medium' }}</p>
       <p><span class="text-slate-400">Expiry Date:</span> {{ selectedRentalDetails?.expiryDate | date:'medium' }}</p>
       <p><span class="text-slate-400">Payment Method:</span> {{ selectedRentalDetails?.paymentMethod }}</p>
+      <ng-container *ngIf="selectedRentalDetails?.refundAmount != null">
+        <p><span class="text-slate-400">Refunded Amount:</span> <span class="text-green-400">₹ {{ selectedRentalDetails.refundAmount | number:'1.2-2' }}</span></p>
+        <p><span class="text-slate-400">Returned At:</span> {{ selectedRentalDetails.refundedAt | date:'medium' }}</p>
+      </ng-container>
     </div>
     <div class="text-right mt-4">
       <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="closeDetails()">Close</button>
@@ -107,15 +111,86 @@
   </div>
 </div>
 
+<div *ngIf="showRefundPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 w-[92%] max-w-md">
+    <h3 class="text-xl font-semibold mb-1">Return Rental</h3>
+    <p class="text-slate-400 text-sm mb-4">{{ selectedRentalForRefund?.movieTitle }}</p>
+
+    <div class="bg-slate-800 rounded-lg p-4 mb-5 space-y-2 text-sm">
+      <div class="flex justify-between">
+        <span class="text-slate-400">Amount Paid</span>
+        <span>₹ {{ refundTotal | number:'1.2-2' }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-400">Refund Eligibility</span>
+        <span [class.text-green-400]="refundPercent > 0" [class.text-slate-400]="refundPercent === 0">
+          {{ refundPercent }}%
+        </span>
+      </div>
+      <div class="flex justify-between font-semibold">
+        <span class="text-slate-400">Refund Amount</span>
+        <span [class.text-green-400]="refundPercent > 0" [class.text-slate-300]="refundPercent === 0">
+          {{ refundPercent > 0 ? ('₹ ' + refundAmount.toFixed(2)) : 'No refund' }}
+        </span>
+      </div>
+      <p class="text-xs text-slate-500 pt-1">
+        Returned within 2 hrs: 75% &nbsp;|&nbsp; 2–4 hrs: 50% &nbsp;|&nbsp; After 4 hrs: 0%
+      </p>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <button class="px-4 py-2 rounded bg-slate-700 hover:bg-slate-600" (click)="closeRefundPopup()">Cancel</button>
+      <button class="px-4 py-2 rounded bg-red-700 hover:bg-red-600 font-semibold" (click)="confirmEndRental()">
+        {{ refundPercent > 0 ? 'Proceed with Refund' : 'Return Rental' }}
+      </button>
+    </div>
+  </div>
+</div>
+
 <div *ngIf="showRenewPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
   <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-md">
-    <h3 class="text-xl font-semibold mb-3">Renew Rental</h3>
-    <p class="text-sm text-slate-300 mb-3">{{ selectedRentalForRenew?.movieTitle }}</p>
-    <label class="block text-sm text-slate-400 mb-1">Days to renew</label>
-    <input type="number" min="1" [(ngModel)]="renewDays" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 mb-4" />
-    <div class="flex justify-end gap-2">
-      <button class="px-4 py-2 rounded bg-slate-700" (click)="closeRenew()">Cancel</button>
-      <button class="px-4 py-2 rounded bg-orange-600 hover:bg-orange-500" (click)="renew()">Renew</button>
-    </div>
+
+    <!-- Step 1: Enter days -->
+    <ng-container *ngIf="renewStep === 1">
+      <h3 class="text-xl font-semibold mb-3">Renew Rental</h3>
+      <p class="text-sm text-slate-300 mb-3">{{ selectedRentalForRenew?.movieTitle }}</p>
+      <label class="block text-sm text-slate-400 mb-1">Days to renew</label>
+      <input type="number" min="1" [(ngModel)]="renewDays" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 mb-4" />
+      <div class="flex justify-end gap-2">
+        <button class="px-4 py-2 rounded bg-slate-700 hover:bg-slate-600" (click)="closeRenew()">Cancel</button>
+        <button class="px-4 py-2 rounded bg-orange-600 hover:bg-orange-500" (click)="renewContinue()">Continue</button>
+      </div>
+    </ng-container>
+
+    <!-- Step 2: Order summary -->
+    <ng-container *ngIf="renewStep === 2">
+      <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
+
+      <div class="space-y-2 mb-4">
+        <div class="flex justify-between text-sm text-slate-300">
+          <span>{{ selectedRentalForRenew?.movieTitle }} &times; {{ renewDays }} day(s)</span>
+          <span>₹ {{ renewTotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-700 pt-3 mb-4 flex justify-between font-semibold">
+        <span>Total</span>
+        <span class="text-amber-300">₹ {{ renewTotal | number:'1.2-2' }}</span>
+      </div>
+
+      <label class="block text-xs text-slate-400 mb-1">Payment Method</label>
+      <select [(ngModel)]="renewPaymentMethod" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 mb-5">
+        <option [ngValue]="0">Debit Card</option>
+        <option [ngValue]="1">Credit Card</option>
+        <option [ngValue]="2">Net Banking</option>
+        <option [ngValue]="3">UPI</option>
+      </select>
+
+      <div class="flex justify-end gap-2">
+        <button class="px-4 py-2 rounded bg-slate-700 hover:bg-slate-600" (click)="renewStep = 1">Back</button>
+        <button class="px-4 py-2 rounded bg-amber-600 hover:bg-amber-500 font-semibold" (click)="renewProceed()">Proceed to Pay</button>
+      </div>
+    </ng-container>
+
   </div>
 </div>

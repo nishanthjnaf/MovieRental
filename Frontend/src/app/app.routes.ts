@@ -23,6 +23,10 @@ import { AdminProfile } from './admin/admin-profile';
 
 
 
+import { CustomerNotifications } from './customer/customer-notifications';
+
+import { NotFound } from './not-found';
+
 export const routes: Routes = [
 
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -49,7 +53,8 @@ export const routes: Routes = [
       { path: 'profile', component: CustomerProfile },
       { path: 'watch/:id', component: CustomerWatch },
       { path: 'pay', component: RazorpayMock },
-      { path: 'payment-result', component: PaymentResult }
+      { path: 'payment-result', component: PaymentResult },
+      { path: 'notifications', component: CustomerNotifications }
     ]
   },
 
@@ -64,6 +69,8 @@ export const routes: Routes = [
     component: AdminProfile,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['Admin'] }
-  }
+  },
+
+  { path: '**', component: NotFound }
 
 ];

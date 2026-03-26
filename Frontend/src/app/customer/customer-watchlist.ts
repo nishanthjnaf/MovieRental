@@ -16,6 +16,8 @@ import { CartStateService } from '../services/cart-state';
 export class CustomerWatchlist implements OnInit {
   items: any[] = [];
   loading = true;
+  showConfirmPopup = false;
+  pendingRemoveId: number | null = null;
 
   constructor(
     private watchlistService: WatchlistService,
@@ -106,13 +108,28 @@ export class CustomerWatchlist implements OnInit {
   }
 
   remove(itemId: number) {
-    this.watchlistService.remove(itemId).subscribe({
-      next: () => {
-        this.items = this.items.filter((i) => i.id !== itemId);
-        this.toastr.success('Removed from watchlist');
-      },
-      error: () => this.toastr.error('Could not remove')
+    this.pendingRemoveId = itemId;
+    this.showConfirmPopup = true;
+    this.cdr.detectChanges();
+  }
+
+  confirmRemove() {
+    if (this.pendingRemoveId === null) return;
+    const id = this.pendingRemoveId;
+    // Optimistically update UI immediately
+    this.items = this.items.filter((i) => i.id !== id);
+    this.cancelRemove();
+    this.watchlistService.remove(id).subscribe({
+      next: () => this.toastr.success('Removed from watchlist'),
+      error: () => this.toastr.error('Could not remove from watchlist')
     });
+    this.cdr.detectChanges();
+  }
+
+  cancelRemove() {
+    this.showConfirmPopup = false;
+    this.pendingRemoveId = null;
+    this.cdr.detectChanges();
   }
 }
 

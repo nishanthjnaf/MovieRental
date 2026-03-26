@@ -63,6 +63,10 @@
             <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-rose-400">Payment</span></div>
             <div class="p-3"><p class="text-xs text-slate-400">Manage payments</p></div>
           </div>
+          <div (click)="openService('broadcast')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
+            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-amber-400">Broadcast</span></div>
+            <div class="p-3"><p class="text-xs text-slate-400">Send notifications</p></div>
+          </div>
         </div>
       </section>
     </div>
@@ -82,6 +86,7 @@
           <p (click)="openService('movie')" [class.text-blue-400]="viewMode==='movie'" class="cursor-pointer hover:text-blue-300">Movie</p>
           <p (click)="openService('rental')" [class.text-blue-400]="viewMode==='rental'" class="cursor-pointer hover:text-blue-300">Rental</p>
           <p (click)="openService('payment')" [class.text-blue-400]="viewMode==='payment'" class="cursor-pointer hover:text-blue-300">Payment</p>
+          <p (click)="openService('broadcast')" [class.text-blue-400]="viewMode==='broadcast'" class="cursor-pointer hover:text-blue-300">Broadcast</p>
         </div>
         <button (click)="logout()" class="mt-auto bg-fuchsia-700 hover:bg-fuchsia-600 text-white px-3 py-2 rounded-lg">Logout</button>
       </div>
@@ -107,7 +112,8 @@
           <h2 class="text-2xl font-bold mb-4">Genre Management</h2>
           <div class="flex justify-between mb-4">
             <div class="flex gap-2">
-              <input [(ngModel)]="searchId" placeholder="Search Genre ID" class="border p-2 rounded w-60 text-black" />
+              <input [(ngModel)]="searchId" type="number" placeholder="Search by ID" class="border p-2 rounded w-36 text-black" />
+              <input [(ngModel)]="genreSearchName" placeholder="Search by Name" class="border p-2 rounded w-48 text-black" />
               <button (click)="searchGenre()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
               <button (click)="resetSearch()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
               <button (click)="refreshGenres()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
@@ -137,8 +143,15 @@
         <ng-container *ngIf="viewMode === 'inventory'">
           <h2 class="text-2xl font-bold mb-4">Inventory Management</h2>
           <div class="flex justify-between mb-4">
-            <div class="flex gap-2">
-              <input [(ngModel)]="inventorySearchId" placeholder="Search Inventory ID" class="border p-2 rounded w-60 text-black" />
+            <div class="flex gap-2 flex-wrap">
+              <input [(ngModel)]="inventorySearchId" type="number" placeholder="Inventory ID" class="border p-2 rounded w-32 text-black" />
+              <input [(ngModel)]="inventorySearchMovieId" type="number" placeholder="Movie ID" class="border p-2 rounded w-28 text-black" />
+              <input [(ngModel)]="inventorySearchMovieName" placeholder="Movie Name" class="border p-2 rounded w-40 text-black" />
+              <select [(ngModel)]="inventoryStatusFilter" class="border p-2 rounded text-black">
+                <option value="">All Status</option>
+                <option value="available">Available</option>
+                <option value="unavailable">Not Available</option>
+              </select>
               <button (click)="searchInventory()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
               <button (click)="resetInventory()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
               <button (click)="refreshInventory()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
@@ -170,9 +183,22 @@
         <ng-container *ngIf="viewMode === 'movie'">
           <h2 class="text-2xl font-bold mb-4">Movie Management</h2>
           <div class="flex justify-between mb-4">
-            <div class="flex gap-2">
-              <input [(ngModel)]="movieSearchId" placeholder="Search by ID" class="border p-2 rounded w-40 text-black" />
-              <input [(ngModel)]="movieSearchName" placeholder="Search by Name" class="border p-2 rounded w-60 text-black" />
+            <div class="flex gap-2 flex-wrap">
+              <input [(ngModel)]="movieSearchId" type="number" placeholder="Movie ID" class="border p-2 rounded w-28 text-black" />
+              <input [(ngModel)]="movieSearchName" placeholder="Movie Name" class="border p-2 rounded w-44 text-black" />
+              <select [(ngModel)]="movieSearchLanguage" class="border p-2 rounded text-black w-36">
+                <option value="">All Languages</option>
+                <option *ngFor="let lang of movieLanguages" [value]="lang">{{ lang }}</option>
+              </select>
+              <input [(ngModel)]="movieMinYear" type="number" placeholder="Min Year" class="border p-2 rounded w-24 text-black" />
+              <input [(ngModel)]="movieMaxYear" type="number" placeholder="Max Year" class="border p-2 rounded w-24 text-black" />
+              <select [(ngModel)]="movieSort" class="border p-2 rounded text-black w-52">
+                <option value="">Sort By</option>
+                <option value="rentalCount_desc">Rental Count (High → Low)</option>
+                <option value="rentalCount_asc">Rental Count (Low → High)</option>
+                <option value="rating_desc">Rating (High → Low)</option>
+                <option value="rating_asc">Rating (Low → High)</option>
+              </select>
               <button (click)="searchMovie()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
               <button (click)="resetMovie()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
               <button (click)="refreshMovies()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
@@ -210,8 +236,32 @@
         <!-- ================= RENTAL ================= -->
         <ng-container *ngIf="viewMode === 'rental'">
           <h2 class="text-2xl font-bold mb-4">Rental Management</h2>
-          <div class="flex gap-2 mb-4">
-            <input [(ngModel)]="rentalSearchUserId" placeholder="Search by User ID" class="border p-2 rounded w-60 text-black" />
+          <div class="flex gap-2 flex-wrap mb-4">
+            <input [(ngModel)]="rentalSearchUserId" type="number" placeholder="User ID" class="border p-2 rounded w-28 text-black" />
+            <div class="flex flex-col gap-0.5">
+              <label class="text-xs text-slate-400">From</label>
+              <input [(ngModel)]="rentalDateFrom" type="date" [max]="rentalDateTo || todayStr"
+                (ngModelChange)="onRentalDateFromChange($event)"
+                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <label class="text-xs text-slate-400">To</label>
+              <input [(ngModel)]="rentalDateTo" type="date" [min]="rentalDateFrom" [max]="todayStr"
+                (ngModelChange)="onRentalDateToChange($event)"
+                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
+            </div>
+            <select [(ngModel)]="rentalStatusFilter" class="border p-2 rounded text-black w-44">
+              <option value="">All Status</option>
+              <option value="0">Payment Pending</option>
+              <option value="1">Available</option>
+              <option value="2">Payment Declined</option>
+              <option value="3">Payment Not Done</option>
+            </select>
+            <select [(ngModel)]="rentalSortDate" class="border p-2 rounded text-black w-44">
+              <option value="">Sort by Date</option>
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
             <button (click)="searchRental()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
             <button (click)="resetRental()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
             <button (click)="refreshRentals()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
@@ -240,9 +290,39 @@
         <!-- ================= PAYMENT ================= -->
         <ng-container *ngIf="viewMode === 'payment'">
           <h2 class="text-2xl font-bold mb-4">Payment Management</h2>
-          <div class="flex gap-2 mb-4">
-            <input [(ngModel)]="paymentSearchRentalId" placeholder="Search by Rental ID" class="border p-2 rounded w-40 text-black" />
-            <input [(ngModel)]="paymentSearchUserId" placeholder="Search by User ID" class="border p-2 rounded w-40 text-black" />
+          <div class="flex gap-2 flex-wrap mb-4">
+            <input [(ngModel)]="paymentSearchRentalId" type="number" placeholder="Rental ID" class="border p-2 rounded w-28 text-black" />
+            <input [(ngModel)]="paymentSearchUserId" type="number" placeholder="User ID" class="border p-2 rounded w-28 text-black" />
+            <select [(ngModel)]="paymentMethodFilter" class="border p-2 rounded text-black w-36">
+              <option value="">All Methods</option>
+              <option value="0">Debit Card</option>
+              <option value="1">Credit Card</option>
+              <option value="2">Net Banking</option>
+              <option value="3">UPI</option>
+            </select>
+            <select [(ngModel)]="paymentStatusFilter" class="border p-2 rounded text-black w-32">
+              <option value="">All Status</option>
+              <option value="0">Success</option>
+              <option value="1">Failed</option>
+              <option value="2">Refunded</option>
+            </select>
+            <div class="flex flex-col gap-0.5">
+              <label class="text-xs text-slate-400">From</label>
+              <input [(ngModel)]="paymentDateFrom" type="date" [max]="paymentDateTo || todayStr"
+                (ngModelChange)="onPaymentDateFromChange($event)"
+                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <label class="text-xs text-slate-400">To</label>
+              <input [(ngModel)]="paymentDateTo" type="date" [min]="paymentDateFrom" [max]="todayStr"
+                (ngModelChange)="onPaymentDateToChange($event)"
+                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
+            </div>
+            <select [(ngModel)]="paymentSortDate" class="border p-2 rounded text-black w-40">
+              <option value="">Sort by Date</option>
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
             <button (click)="searchPayment()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
             <button (click)="resetPayment()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
             <button (click)="refreshPayments()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
@@ -272,6 +352,77 @@
               </tr>
             </tbody>
           </table>
+        </ng-container>
+
+        <!-- ================= BROADCAST ================= -->
+        <ng-container *ngIf="viewMode === 'broadcast'">
+          <h2 class="text-2xl font-bold mb-6">Send Notification to All Customers</h2>
+          <div class="max-w-lg space-y-4 mb-8">
+            <div>
+              <label class="block text-sm text-slate-400 mb-1">Title</label>
+              <input [(ngModel)]="broadcastTitle" placeholder="Notification title" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2" />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-400 mb-1">Message</label>
+              <textarea [(ngModel)]="broadcastMessage" rows="4" placeholder="Write your message..." class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2"></textarea>
+            </div>
+            <button class="bg-amber-600 hover:bg-amber-500 px-6 py-2 rounded font-semibold" (click)="sendBroadcast()">Send to All Customers</button>
+          </div>
+
+          <h3 class="text-xl font-semibold mb-3">Broadcast History</h3>
+
+          <!-- Filters -->
+          <div class="flex gap-2 flex-wrap mb-4">
+            <input [(ngModel)]="broadcastFilterUsername" placeholder="Sent by username" class="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm w-44" />
+            <div class="flex flex-col gap-0.5">
+              <label class="text-xs text-slate-400">From</label>
+              <input [(ngModel)]="broadcastDateFrom" type="date" [max]="broadcastDateTo || todayStr"
+                (ngModelChange)="onBroadcastDateFromChange($event)"
+                class="border p-2 rounded text-black bg-white cursor-pointer date-input text-sm" />
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <label class="text-xs text-slate-400">To</label>
+              <input [(ngModel)]="broadcastDateTo" type="date" [min]="broadcastDateFrom" [max]="todayStr"
+                (ngModelChange)="onBroadcastDateToChange($event)"
+                class="border p-2 rounded text-black bg-white cursor-pointer date-input text-sm" />
+            </div>
+            <select [(ngModel)]="broadcastSortDate" class="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm w-40">
+              <option value="">Sort by Date</option>
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
+            <button class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded text-sm" (click)="applyBroadcastFilters()">Apply</button>
+            <button class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm" (click)="resetBroadcastFilters()">Reset</button>
+          </div>
+
+          <div *ngIf="broadcastsLoading" class="text-slate-400">Loading...</div>
+          <div *ngIf="!broadcastsLoading && filteredBroadcasts.length === 0" class="text-slate-500 text-sm">No broadcasts found.</div>
+          <div *ngIf="!broadcastsLoading && filteredBroadcasts.length > 0" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-800 text-slate-300">
+                <tr>
+                  <th class="text-left p-3">ID</th>
+                  <th class="text-left p-3">Title</th>
+                  <th class="text-left p-3">Message</th>
+                  <th class="text-left p-3">Sent By</th>
+                  <th class="text-left p-3">Sent At</th>
+                  <th class="text-left p-3">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let b of filteredBroadcasts" class="border-t border-slate-800 align-top">
+                  <td class="p-3 text-slate-400">{{ b.id }}</td>
+                  <td class="p-3 font-semibold">{{ b.title }}</td>
+                  <td class="p-3 text-slate-300 max-w-xs">{{ b.message }}</td>
+                  <td class="p-3 text-fuchsia-300">{{ b.sentByUsername }}</td>
+                  <td class="p-3 text-slate-400 whitespace-nowrap">{{ b.sentAt | date:'MMM d, y, h:mm a' }}</td>
+                  <td class="p-3">
+                    <button class="text-red-400 hover:text-red-300 text-xs" (click)="deleteBroadcast(b.id)">Delete</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </ng-container>
 
       </div>

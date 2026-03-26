@@ -91,6 +91,7 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<NotificationService>();
 #endregion
 
 #region Authentication (JWT)
@@ -162,6 +163,49 @@ BEGIN
         CONSTRAINT FK_CartItems_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
         CONSTRAINT FK_CartItems_Movies FOREIGN KEY (MovieId) REFERENCES Movies(Id) ON DELETE CASCADE,
         CONSTRAINT UQ_CartItems_User_Movie UNIQUE (UserId, MovieId)
+    );
+END
+
+IF COL_LENGTH('Payments', 'RefundAmount') IS NULL
+    ALTER TABLE Payments ADD RefundAmount float NULL;
+IF COL_LENGTH('Payments', 'RefundedAt') IS NULL
+    ALTER TABLE Payments ADD RefundedAt datetime2 NULL;
+
+IF OBJECT_ID('RentalItemRefunds', 'U') IS NULL
+BEGIN
+    CREATE TABLE RentalItemRefunds (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        RentalItemId INT NOT NULL,
+        RentalId INT NOT NULL,
+        UserId INT NOT NULL,
+        RefundAmount float NOT NULL DEFAULT 0,
+        RefundedAt datetime2 NOT NULL
+    );
+END
+
+IF OBJECT_ID('Notifications', 'U') IS NULL
+BEGIN
+    CREATE TABLE Notifications (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        UserId INT NOT NULL,
+        Title NVARCHAR(200) NOT NULL DEFAULT '',
+        Message NVARCHAR(MAX) NOT NULL DEFAULT '',
+        Type NVARCHAR(50) NOT NULL DEFAULT '',
+        IsRead BIT NOT NULL DEFAULT 0,
+        CreatedAt datetime2 NOT NULL,
+        RelatedId INT NULL
+    );
+END
+
+IF OBJECT_ID('BroadcastMessages', 'U') IS NULL
+BEGIN
+    CREATE TABLE BroadcastMessages (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        SentByUserId INT NOT NULL DEFAULT 0,
+        SentByUsername NVARCHAR(100) NOT NULL DEFAULT '',
+        Title NVARCHAR(200) NOT NULL DEFAULT '',
+        Message NVARCHAR(MAX) NOT NULL DEFAULT '',
+        SentAt datetime2 NOT NULL
     );
 END
 ");

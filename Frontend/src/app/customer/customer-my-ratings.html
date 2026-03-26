@@ -18,3 +18,14 @@
 
 <p *ngIf="!loading && ratings.length === 0" class="text-slate-400">No ratings found.</p>
 
+<div *ngIf="showConfirmPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 w-[92%] max-w-sm text-center">
+    <p class="text-lg font-semibold mb-2">Remove Rating</p>
+    <p class="text-slate-400 text-sm mb-6">Are you sure you want to remove this rating? This cannot be undone.</p>
+    <div class="flex justify-center gap-3">
+      <button class="px-5 py-2 rounded bg-slate-700 hover:bg-slate-600" (click)="cancelDelete()">Cancel</button>
+      <button class="px-5 py-2 rounded bg-red-700 hover:bg-red-600 font-semibold" (click)="confirmDelete()">Remove</button>
+    </div>
+  </div>
+</div>
+

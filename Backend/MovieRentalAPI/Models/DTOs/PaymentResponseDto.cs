@@ -17,6 +17,8 @@ namespace MovieRentalAPI.Models.DTOs
 
         public DateTime PaymentDate { get; set; }
         public string PaymentId { get; set; } = string.Empty;
+        public double? RefundAmount { get; set; }
+        public DateTime? RefundedAt { get; set; }
 
     }
 }

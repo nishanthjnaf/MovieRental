@@ -10,9 +10,13 @@
     <img [src]="m.posterPath || 'https://placehold.co/120x80'" class="col-span-2 h-16 w-full object-cover rounded cursor-pointer" (click)="openMovie(m.movieId)">
     <div class="col-span-4 font-semibold cursor-pointer hover:text-amber-300" (click)="openMovie(m.movieId)">{{ m.title }} ({{ m.releaseYear }})</div>
     <div class="col-span-2 text-right">
-      <input type="number" min="1" max="30" [ngModel]="m.rentalDays || 7" (ngModelChange)="setDays(m.movieId, $event)"
-        class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-right">
-      <p class="text-xs text-slate-400 mt-1">days</p>
+      <input type="number" min="3" max="30" [ngModel]="m.rentalDays || 7" (ngModelChange)="setDays(m.movieId, $event)"
+        class="w-20 bg-slate-800 border rounded px-2 py-1 text-right"
+        [class.border-red-500]="(m.rentalDays || 7) < 3"
+        [class.border-slate-700]="(m.rentalDays || 7) >= 3">
+      <p class="text-xs mt-1" [class.text-red-400]="(m.rentalDays || 7) < 3" [class.text-slate-400]="(m.rentalDays || 7) >= 3">
+        {{ (m.rentalDays || 7) < 3 ? 'Min 3 days' : 'days' }}
+      </p>
     </div>
     <div class="col-span-2 text-right">₹ {{ priceByMovieId[m.movieId] ?? '-' }} / day</div>
     <div class="col-span-2 text-right">₹ {{ ((priceByMovieId[m.movieId] || 0) * (m.rentalDays || 1)) | number:'1.2-2' }}</div>
@@ -22,9 +26,13 @@
   </div>
 
   <div class="p-4 flex flex-wrap items-center justify-between gap-3">
-    <div class="text-slate-300">Set rental days per movie.</div>
+    <div class="text-slate-300">
+      Minimum rental period is <span class="text-amber-300 font-semibold">3 days</span> per movie.
+    </div>
     <div class="text-xl font-semibold">Total: ₹ {{ total | number:'1.2-2' }}</div>
-    <button class="bg-amber-600 hover:bg-amber-500 rounded-full px-6 py-2 disabled:opacity-50" [disabled]="items.length === 0 || loading" (click)="openCheckout()">
+    <button class="bg-amber-600 hover:bg-amber-500 rounded-full px-6 py-2 disabled:opacity-50"
+      [disabled]="items.length === 0 || loading || hasInvalidDays"
+      (click)="openCheckout()">
       {{ loading ? 'Processing...' : 'Rent Now' }}
     </button>
   </div>

@@ -47,6 +47,26 @@ export class MovieService {
     );
   }
 
+  filter(params: {
+    searchTerm?: string;
+    genreIds?: number[];
+    languages?: string[];
+    minYear?: number;
+    maxYear?: number;
+    minPrice?: number;
+    maxPrice?: number;
+  }) {
+    const p = new URLSearchParams();
+    if (params.searchTerm) p.set('searchTerm', params.searchTerm);
+    (params.genreIds || []).forEach(id => p.append('genreIds', String(id)));
+    (params.languages || []).forEach(l => p.append('languages', l));
+    if (params.minYear) p.set('minYear', String(params.minYear));
+    if (params.maxYear) p.set('maxYear', String(params.maxYear));
+    if (params.minPrice) p.set('minPrice', String(params.minPrice));
+    if (params.maxPrice) p.set('maxPrice', String(params.maxPrice));
+    return this.http.get<any[]>(`${this.baseUrl}/filter?${p.toString()}`);
+  }
+
   getSuggestions(userId: number) {
     return this.http.get<any[]>(`${this.baseUrl}/suggestions/${userId}`);
   }
