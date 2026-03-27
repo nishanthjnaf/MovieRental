@@ -2,8 +2,10 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { CurrentUserService } from '../services/current-user';
 import { ReviewService } from '../services/review';
+import { MovieService } from '../services/movie';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-customer-my-ratings',
@@ -20,6 +22,7 @@ export class CustomerMyRatings implements OnInit {
   constructor(
     private currentUser: CurrentUserService,
     private reviewService: ReviewService,
+    private movieService: MovieService,
     private toastr: ToastrService,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -27,22 +30,23 @@ export class CustomerMyRatings implements OnInit {
 
   ngOnInit(): void {
     const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
-    if (!userId) {
-      this.loading = false;
-      this.cdr.detectChanges();
-      return;
-    }
+    if (!userId) { this.loading = false; this.cdr.detectChanges(); return; }
+
     this.reviewService.getByUser(userId).subscribe({
       next: (res) => {
-        this.ratings = res || [];
-        this.loading = false;
-        this.cdr.detectChanges();
+        const list = res || [];
+        if (!list.length) { this.ratings = []; this.loading = false; this.cdr.detectChanges(); return; }
+
+        let pending = list.length;
+        list.forEach((r: any) => {
+          this.movieService.getById(r.movieId).pipe(catchError(() => of(null))).subscribe(movie => {
+            this.ratings = [...this.ratings.filter(x => x.id !== r.id), { ...r, movie }];
+            pending--;
+            if (pending <= 0) { this.loading = false; this.cdr.detectChanges(); }
+          });
+        });
       },
-      error: () => {
-        this.ratings = [];
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.ratings = []; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 

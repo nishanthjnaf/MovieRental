@@ -1,141 +1,132 @@
-<section *ngIf="!q" class="mb-6">
-  <!-- Genres -->
-  <div class="mb-4">
-    <p class="text-sm text-slate-400 mb-2">Genres</p>
-    <div class="flex gap-2 flex-wrap">
-      <button
-        *ngFor="let g of genres"
-        (click)="toggleGenre(g.id)"
-        class="px-4 py-2 rounded-lg border border-slate-700 bg-slate-900 hover:border-fuchsia-500 transition-colors"
-        [class.border-fuchsia-500]="selectedGenreIds.has(g.id)"
-        [class.text-fuchsia-300]="selectedGenreIds.has(g.id)"
-      >
-        {{ g.name }}
-      </button>
-    </div>
-  </div>
+<div class="movies-page">
 
-  <!-- Filters grid -->
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+  <!-- ── FILTER SIDEBAR ── -->
+  <aside class="movies-sidebar" *ngIf="!q">
+
+    <div class="movies-sidebar__header">
+      <span class="movies-sidebar__title">Filters</span>
+      <button class="movies-sidebar__clear" (click)="clearFilters()">Reset</button>
+    </div>
+
+    <!-- Genres -->
+    <div class="filter-group">
+      <p class="filter-group__label">Genre</p>
+      <div class="filter-chips">
+        <button *ngFor="let g of genres"
+          class="filter-chip"
+          [class.filter-chip--active]="selectedGenreIds.has(g.id)"
+          (click)="toggleGenre(g.id)">
+          {{ g.name }}
+        </button>
+      </div>
+    </div>
+
     <!-- Language -->
-    <div>
-      <p class="text-sm text-slate-300 mb-2 font-medium">Language</p>
-      <div class="flex flex-wrap gap-2">
-        <button
-          *ngFor="let lang of availableLanguages"
-          (click)="toggleLanguage(lang)"
-          class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-950 hover:border-fuchsia-500 text-sm transition-colors"
-          [class.border-fuchsia-500]="selectedLanguages.has(lang)"
-          [class.text-fuchsia-300]="selectedLanguages.has(lang)"
-        >
+    <div class="filter-group">
+      <p class="filter-group__label">Language</p>
+      <div class="filter-chips">
+        <button *ngFor="let lang of availableLanguages"
+          class="filter-chip"
+          [class.filter-chip--active]="selectedLanguages.has(lang)"
+          (click)="toggleLanguage(lang)">
           {{ lang }}
         </button>
       </div>
     </div>
 
     <!-- Year Range -->
-    <div class="flex flex-col items-center">
-      <p class="text-sm text-slate-300 mb-2 font-medium">Year Range</p>
-      <div class="flex items-center gap-2 w-full justify-center">
-        <input
-          type="number"
-          [(ngModel)]="minYear"
-          (ngModelChange)="applyRangeFilters()"
-          placeholder="Min"
-          class="w-24 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-fuchsia-500 focus:outline-none"
-        />
-        <span class="text-slate-500">–</span>
-        <input
-          type="number"
-          [(ngModel)]="maxYear"
-          (ngModelChange)="applyRangeFilters()"
-          placeholder="Max"
-          class="w-24 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-fuchsia-500 focus:outline-none"
-        />
+    <div class="filter-group">
+      <p class="filter-group__label">Year Range</p>
+      <div class="filter-range">
+        <input type="number" [(ngModel)]="minYear" (ngModelChange)="applyRangeFilters()"
+          placeholder="From" class="filter-range__input" />
+        <span class="filter-range__sep">–</span>
+        <input type="number" [(ngModel)]="maxYear" (ngModelChange)="applyRangeFilters()"
+          placeholder="To" class="filter-range__input" />
       </div>
     </div>
 
-    <!-- Rental Price Range – dual-handle slider -->
-    <div class="md:col-span-2 lg:col-span-1">
-      <p class="text-sm text-slate-300 mb-2 font-medium">Rental Price (₹ / day)</p>
-      <div class="price-range-slider max-w-[220px]">
-        <div class="flex items-center gap-2 mb-3">
-          <input
-            type="number"
-            [(ngModel)]="minPrice"
-            (ngModelChange)="applyRangeFilters()"
-            [min]="priceSliderMin"
-            [max]="priceSliderMax"
-            class="price-input"
-          />
-          <span class="text-slate-500 text-sm">–</span>
-          <input
-            type="number"
-            [(ngModel)]="maxPrice"
-            (ngModelChange)="applyRangeFilters()"
-            [min]="priceSliderMin"
-            [max]="priceSliderMax"
-            class="price-input"
-          />
-        </div>
+    <!-- Price Range -->
+    <div class="filter-group">
+      <p class="filter-group__label">Rental Price (₹/day)</p>
+      <div class="filter-range mb-3">
+        <input type="number" [(ngModel)]="minPrice" (ngModelChange)="applyRangeFilters()"
+          [min]="priceSliderMin" [max]="priceSliderMax" placeholder="Min" class="filter-range__input" />
+        <span class="filter-range__sep">–</span>
+        <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="applyRangeFilters()"
+          [min]="priceSliderMin" [max]="priceSliderMax" placeholder="Max" class="filter-range__input" />
+      </div>
+      <div class="price-range-slider">
         <div class="slider-track" [style.--min-pct]="getPriceMinPct() + '%'" [style.--max-pct]="getPriceMaxPct() + '%'">
-          <input
-            type="range"
-            [min]="priceSliderMin"
-            [max]="priceSliderMax"
-            [step]="1"
-            [ngModel]="minPrice ?? priceSliderMin"
-            (ngModelChange)="onMinPriceSliderChange($event)"
-            class="slider-input slider-input-min"
-          />
-          <input
-            type="range"
-            [min]="priceSliderMin"
-            [max]="priceSliderMax"
-            [step]="1"
-            [ngModel]="maxPrice ?? priceSliderMax"
-            (ngModelChange)="onMaxPriceSliderChange($event)"
-            class="slider-input slider-input-max"
-          />
+          <input type="range" [min]="priceSliderMin" [max]="priceSliderMax" [step]="1"
+            [ngModel]="minPrice ?? priceSliderMin" (ngModelChange)="onMinPriceSliderChange($event)"
+            class="slider-input slider-input-min" />
+          <input type="range" [min]="priceSliderMin" [max]="priceSliderMax" [step]="1"
+            [ngModel]="maxPrice ?? priceSliderMax" (ngModelChange)="onMaxPriceSliderChange($event)"
+            class="slider-input slider-input-max" />
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="mt-3">
-    <button class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm transition-colors" (click)="clearFilters()">Clear Filters</button>
-  </div>
-</section>
+  </aside>
 
-<!-- Movies section with infinite scroll -->
-<section class="flex flex-col min-h-[400px]">
-  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" *ngIf="loading">
-    <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="rounded-xl border border-slate-800 overflow-hidden">
-      <div class="h-32 skeleton"></div>
-      <div class="p-3 space-y-2">
-        <div class="h-4 rounded skeleton"></div>
-        <div class="h-3 rounded skeleton w-1/2"></div>
+  <!-- ── MAIN CONTENT ── -->
+  <div class="movies-main">
+
+    <!-- Search mode header -->
+    <div *ngIf="q" class="movies-search-header">
+      <p class="movies-search-header__label">Results for</p>
+      <h2 class="movies-search-header__query">"{{ q }}"</h2>
+    </div>
+
+    <!-- Page title when no search -->
+    <div *ngIf="!q" class="movies-main__header">
+      <h1 class="movies-main__title">Browse Movies</h1>
+      <p class="movies-main__count" *ngIf="!loading">{{ allMovies.length }} titles</p>
+    </div>
+
+    <!-- Skeleton -->
+    <div class="movies-grid" *ngIf="loading">
+      <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="movies-card-skeleton">
+        <div class="movies-card-skeleton__img skeleton"></div>
+        <div class="movies-card-skeleton__body">
+          <div class="h-3 rounded skeleton w-3/4 mb-1"></div>
+          <div class="h-3 rounded skeleton w-1/2"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" *ngIf="!loading">
-    <article *ngFor="let m of visibleMovies" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
-      <img [src]="m.posterPath || 'https://placehold.co/300x220'" class="h-32 w-full object-cover">
-      <div class="p-3">
-        <h3 class="text-sm font-semibold truncate">{{ m.title }}</h3>
-        <p class="text-xs text-slate-400">{{ m.releaseYear }} • {{ m.language }}</p>
-        <p class="text-xs text-amber-300">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
-        <p class="text-xs text-emerald-300">Rent: ₹ {{ getRentalPrice(m.id) ?? '-' }} / day</p>
-      </div>
-    </article>
-  </div>
+    <!-- Movie grid -->
+    <div class="movies-grid" *ngIf="!loading">
+      <article *ngFor="let m of visibleMovies" class="mcard" (click)="openMovie(m.id)">
+        <div class="mcard__poster">
+          <img [src]="m.posterPath || 'https://placehold.co/640x360'" [alt]="m.title" />
+          <div class="mcard__overlay">
+            <div class="mcard__genres">
+              <span *ngFor="let g of (m.genres || []).slice(0,2)" class="mcard__genre">{{ g }}</span>
+            </div>
+            <span class="mcard__rating">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
+          </div>
+        </div>
+        <div class="mcard__info">
+          <h3 class="mcard__title">{{ m.title }}</h3>
+          <div class="mcard__meta">
+            <span>{{ m.releaseYear }}</span>
+            <span class="mcard__dot"></span>
+            <span>{{ m.language }}</span>
+            <span class="mcard__price">₹{{ getRentalPrice(m.id) ?? '—' }}/day</span>
+          </div>
+        </div>
+      </article>
+    </div>
 
-  <p *ngIf="!loading && visibleMovies.length === 0" class="text-slate-400 py-12">No movies found.</p>
+    <p *ngIf="!loading && visibleMovies.length === 0" class="movies-empty">No movies found.</p>
 
-  <!-- Sentinel for IntersectionObserver -->
-  <div #sentinel class="h-10 flex items-center justify-center mt-4">
-    <span *ngIf="loadingMore" class="text-slate-500 text-sm">Loading more...</span>
-    <span *ngIf="!loadingMore && !hasMore && visibleMovies.length > 0" class="text-slate-600 text-xs">All movies loaded</span>
+    <!-- Infinite scroll sentinel -->
+    <div #sentinel class="movies-sentinel">
+      <span *ngIf="loadingMore" class="movies-sentinel__text">Loading more...</span>
+      <span *ngIf="!loadingMore && !hasMore && visibleMovies.length > 0" class="movies-sentinel__text movies-sentinel__text--done">All titles loaded</span>
+    </div>
+
   </div>
-</section>
+</div>

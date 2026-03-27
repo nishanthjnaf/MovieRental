@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CurrentUserService } from '../services/current-user';
 import { PaymentService } from '../services/payment';
 import { RentalService } from '../services/rental';
@@ -9,7 +10,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 @Component({
   selector: 'app-customer-transactions',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, FormsModule],
   templateUrl: './customer-transactions.html'
 })
 export class CustomerTransactions implements OnInit {
@@ -21,6 +22,33 @@ export class CustomerTransactions implements OnInit {
   loadingRentalMovies = false;
   showRefundPopup = false;
   selectedRefund: any = null;
+
+  // Filters
+  filterMethod = '';   // '' | '0' | '1' | '2' | '3'
+  filterStatus = '';   // '' | '0' | '1' | '2'
+  sortOrder = 'desc';  // 'desc' | 'asc'
+
+  get filteredTransactions(): any[] {
+    let list = [...this.transactions];
+    if (this.filterMethod !== '') {
+      list = list.filter(t => (t.paymentMethod ?? t.method) === Number(this.filterMethod));
+    }
+    if (this.filterStatus !== '') {
+      list = list.filter(t => (t.paymentStatus ?? t.status) === Number(this.filterStatus));
+    }
+    list.sort((a, b) => {
+      const da = new Date(a.paymentDate).getTime();
+      const db = new Date(b.paymentDate).getTime();
+      return this.sortOrder === 'desc' ? db - da : da - db;
+    });
+    return list;
+  }
+
+  clearFilters() {
+    this.filterMethod = '';
+    this.filterStatus = '';
+    this.sortOrder = 'desc';
+  }
 
   constructor(
     private currentUser: CurrentUserService,

@@ -1,28 +1,62 @@
 <div class="min-h-screen bg-slate-950 text-slate-100 flex">
-  <aside class="sticky top-0 h-screen bg-slate-900/95 border-r border-slate-800 p-3 flex flex-col transition-all duration-200 overflow-y-auto flex-shrink-0" [class.w-64]="isSidebarOpen" [class.w-14]="!isSidebarOpen">
-    <div class="flex items-center justify-between mb-8" [class.justify-center]="!isSidebarOpen">
-      <div class="text-3xl font-bold text-amber-300" *ngIf="isSidebarOpen">cinefilia</div>
-      <button class="text-slate-300 hover:text-white text-xl" [class.ml-auto]="isSidebarOpen" (click)="toggleSidebar()">
-        {{ isSidebarOpen ? '✕' : '☰' }}
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar sticky top-0 h-screen flex flex-col flex-shrink-0 transition-all duration-300"
+    [class.sidebar--open]="isSidebarOpen"
+    [class.sidebar--collapsed]="!isSidebarOpen">
+
+    <!-- Logo + toggle -->
+    <div class="sidebar__header">
+      <span class="sidebar__logo" *ngIf="isSidebarOpen">cinefilia</span>
+      <button class="sidebar__toggle" (click)="toggleSidebar()" [title]="isSidebarOpen ? 'Collapse' : 'Expand'">
+        <svg *ngIf="isSidebarOpen" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/></svg>
+        <svg *ngIf="!isSidebarOpen" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7"/></svg>
       </button>
     </div>
 
-    <nav class="space-y-2 text-sm" *ngIf="isSidebarOpen">
-      <button class="nav-btn" routerLink="/dashboard/home">Home</button>
-      <button class="nav-btn" routerLink="/dashboard/movies">Movies</button>
-      <button class="nav-btn" routerLink="/dashboard/rentals">My Rentals</button>
-      <button class="nav-btn" routerLink="/dashboard/transactions">My Transactions</button>
-      <button class="nav-btn" routerLink="/dashboard/watchlist">Watchlist</button>
-      <button class="nav-btn" routerLink="/dashboard/my-ratings">My Ratings</button>
-      <button class="nav-btn" routerLink="/dashboard/profile">Profile</button>
+    <!-- Nav -->
+    <nav class="sidebar__nav">
+      <a class="nav-item" routerLink="/dashboard/home" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'Home' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">Home</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard/movies" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'Movies' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">Movies</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard/rentals" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'My Rentals' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.53 15.47 0 12.36 0c-1.73 0-3.24.86-4.19 2.18L12 6H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">My Rentals</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard/transactions" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'Transactions' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">Transactions</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard/watchlist" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'Watchlist' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">Watchlist</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard/my-ratings" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'My Ratings' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">My Ratings</span>
+      </a>
+      <a class="nav-item" routerLink="/dashboard/profile" routerLinkActive="nav-item--active" [title]="!isSidebarOpen ? 'Profile' : ''">
+        <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        <span class="nav-item__label" *ngIf="isSidebarOpen">Profile</span>
+      </a>
     </nav>
 
-    <button class="mt-auto text-red-300 hover:text-red-200 px-2" [class.text-left]="isSidebarOpen" [class.text-center]="!isSidebarOpen" (click)="logout()">{{ isSidebarOpen ? 'Logout' : '⎋' }}</button>
+    <!-- Logout -->
+    <button class="sidebar__logout" (click)="logout()" [title]="!isSidebarOpen ? 'Logout' : ''">
+      <svg class="nav-item__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      <span class="nav-item__label" *ngIf="isSidebarOpen">Logout</span>
+    </button>
   </aside>
 
-  <main class="flex-1">
-    <header class="sticky top-0 z-20 bg-slate-950/95 border-b border-slate-800 px-6 py-4">
-      <div class="flex items-center gap-4 transition-all duration-200" [class.mt-3]="isSearchFocused">
+  <!-- ===== MAIN ===== -->
+  <main class="flex-1 min-w-0">
+    <header class="sticky top-0 z-20 bg-slate-950/95 border-b border-slate-800 px-6 py-3">
+      <div class="flex items-center gap-4">
         <div class="flex-1 max-w-3xl relative flex items-center">
           <input
             [formControl]="searchControl"
@@ -34,43 +68,30 @@
           <button *ngIf="searchControl.value" class="absolute right-3 text-slate-400 hover:text-white text-sm" (click)="clearSearch()" title="Clear search">✕</button>
         </div>
         <div class="flex items-center gap-2 ml-auto">
-          <!-- Notification bell with dropdown -->
+          <!-- Notification bell -->
           <div class="relative">
             <button class="top-icon-btn relative" (click)="toggleNotifDropdown()" title="Notifications">
               🔔
               <span *ngIf="unreadNotifications > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5">{{ unreadNotifications }}</span>
             </button>
-
-            <!-- Dropdown -->
             <div *ngIf="showNotifDropdown"
               class="absolute right-0 top-12 w-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
               <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
                 <span class="font-semibold text-base">Notifications</span>
                 <button class="text-slate-500 hover:text-white text-sm" (click)="closeNotifDropdown()">✕</button>
               </div>
-
-              <div *ngIf="recentNotifications.length === 0" class="px-5 py-8 text-center text-slate-500 text-sm">
-                No notifications
-              </div>
-
+              <div *ngIf="recentNotifications.length === 0" class="px-5 py-8 text-center text-slate-500 text-sm">No notifications</div>
               <div *ngFor="let n of recentNotifications"
                 class="px-5 py-4 border-b border-slate-800 hover:bg-slate-800 cursor-pointer transition"
-                [class.opacity-60]="n.isRead"
-                (click)="closeNotifDropdown()">
-                <p class="text-sm font-semibold truncate" [class.text-white]="!n.isRead" [class.text-slate-400]="n.isRead">
-                  {{ n.title }}
-                </p>
+                [class.opacity-60]="n.isRead" (click)="closeNotifDropdown()">
+                <p class="text-sm font-semibold truncate" [class.text-white]="!n.isRead" [class.text-slate-400]="n.isRead">{{ n.title }}</p>
                 <p class="text-xs text-slate-500 truncate mt-1">{{ n.message }}</p>
               </div>
-
               <div class="px-5 py-3 text-center">
-                <button class="text-fuchsia-400 hover:text-fuchsia-300 text-sm font-medium" (click)="openNotifPage()">
-                  See all notifications
-                </button>
+                <button class="text-fuchsia-400 hover:text-fuchsia-300 text-sm font-medium" (click)="openNotifPage()">See all notifications</button>
               </div>
             </div>
           </div>
-
           <button class="top-icon-btn relative" routerLink="/dashboard/cart" title="Cart">
             🛒
             <span class="absolute -top-2 -right-2 bg-amber-500 text-black text-xs rounded-full px-1.5">{{ cartCount }}</span>
@@ -85,4 +106,3 @@
     </section>
   </main>
 </div>
-

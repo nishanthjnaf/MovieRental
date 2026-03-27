@@ -213,10 +213,12 @@ namespace MovieRentalAPI.Services
             if (count <= 0)
                 throw new BadRequestException("Count must be greater than zero");
 
-            var movies = await _movieRepository.GetAll();
+            var movies = await _movieRepository.GetAllIncluding(m => m.Genres);
 
             if (movies == null || !movies.Any())
                 throw new NotFoundException("No movies found");
+
+            var avgByMovieId = await GetAverageRatingsByMovieId();
 
             return movies
                 .OrderByDescending(m => m.RentalCount)
@@ -228,8 +230,10 @@ namespace MovieRentalAPI.Services
                     RentalCount = m.RentalCount,
                     ReleaseYear = m.ReleaseYear,
                     Language = m.Language,
-                    PosterPath=m.PosterPath,
-                    TrailerUrl=m.TrailerUrl
+                    PosterPath = m.PosterPath,
+                    TrailerUrl = m.TrailerUrl,
+                    Genres = m.Genres?.Select(g => g.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList() ?? new List<string>(),
+                    Rating = avgByMovieId.TryGetValue(m.Id, out var avg) ? avg : 0
                 })
                 .ToList();
         }
@@ -239,12 +243,11 @@ namespace MovieRentalAPI.Services
             if (count <= 0)
                 throw new BadRequestException("Count must be greater than zero");
 
-            var movies = await _movieRepository.GetAll();
+            var movies = await _movieRepository.GetAllIncluding(m => m.Genres);
 
             if (movies == null || !movies.Any())
                 throw new NotFoundException("No movies found");
 
-            // Ensure correct ordering even if existing Movie.Rating values are stale.
             var allReviews = await _reviewRepository.GetAll();
             var avgByMovieId = allReviews?
                 .GroupBy(r => r.MovieId)

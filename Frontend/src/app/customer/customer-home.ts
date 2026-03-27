@@ -47,7 +47,7 @@ export class CustomerHome implements OnInit {
   @HostListener('window:resize')
   onResize() {
     const w = window.innerWidth;
-    this.visibleCount = w < 640 ? 2 : w < 1024 ? 3 : 5;
+    this.visibleCount = w < 640 ? 1 : w < 1024 ? 2 : 3;
     this.cdr.detectChanges();
   }
 
@@ -118,7 +118,7 @@ export class CustomerHome implements OnInit {
   trackTranslate(key: string): string {
     const offset = this.offsets[key] ?? 0;
     // Each card is (100 / visibleCount)% wide, gap is handled via padding trick
-    return `translateX(calc(-${offset} * (100% / ${this.visibleCount}) - ${offset} * 0.75rem))`;
+    return `translateX(calc(-${offset} * (100% / ${this.visibleCount}) - ${offset} * 1rem))`;
   }
 
   prev(key: string) {

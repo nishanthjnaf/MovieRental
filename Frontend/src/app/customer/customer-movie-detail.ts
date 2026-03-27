@@ -31,6 +31,9 @@ export class CustomerMovieDetail implements OnInit {
   rating = 5;
   comment = '';
   genreNames: string[] = [];
+  isInWatchlist = false;
+  existingReview: any = null;   // null = not rated yet
+  private movieId = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -61,10 +64,11 @@ export class CustomerMovieDetail implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
-      const movieId = Number(params.get('id'));
-      if (!movieId) return;
+      this.movieId = Number(params.get('id'));
+      if (!this.movieId) return;
       this.loading = true;
       this.isAlreadyRented = false;
+      this.isInWatchlist = false;
 
       const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
       let pending = userId ? 3 : 2;
@@ -77,61 +81,79 @@ export class CustomerMovieDetail implements OnInit {
         }
       };
 
-      this.movieService.getById(movieId).pipe(
-        timeout(10000),
-        catchError(() => of(null)),
-        finalize(done)
+      this.movieService.getById(this.movieId).pipe(
+        timeout(10000), catchError(() => of(null)), finalize(done)
       ).subscribe({
         next: (m) => {
           this.movie = m;
           const genres = Array.isArray(m?.genres) ? m.genres : [];
-          this.genreNames = genres
-            .map((g: any) => (typeof g === 'string' ? g : g?.name))
-            .filter((g: any) => !!g);
-        },
-        error: () => (this.movie = null)
+          this.genreNames = genres.map((g: any) => (typeof g === 'string' ? g : g?.name)).filter((g: any) => !!g);
+          // Check watchlist
+          if (userId) {
+            this.watchlistService.getByUser(userId).pipe(catchError(() => of([]))).subscribe((list: any[]) => {
+              this.isInWatchlist = (list || []).some((w: any) => w.movieId === this.movieId);
+              this.cdr.detectChanges();
+            });
+          }
+        }
       });
 
-      this.inventoryService.getByMovie(movieId).pipe(
-        timeout(10000),
-        catchError(() => of([])),
-        finalize(done)
+      this.inventoryService.getByMovie(this.movieId).pipe(
+        timeout(10000), catchError(() => of([])), finalize(done)
       ).subscribe({
         next: (inv) => {
           const list = Array.isArray(inv) ? inv : [inv];
           this.isAvailableToRent = list.some((i: any) => i?.isAvailable);
           const firstAvailable = list.find((i: any) => i?.isAvailable);
-          const fallback = list[0];
-          const rawPrice = firstAvailable?.rentalPrice ?? fallback?.rentalPrice;
+          const rawPrice = firstAvailable?.rentalPrice ?? list[0]?.rentalPrice;
           const parsed = Number(rawPrice);
           this.rentalPrice = Number.isFinite(parsed) ? parsed : null;
         },
-        error: () => {
-          this.isAvailableToRent = false;
-          this.rentalPrice = null;
-        }
+        error: () => { this.isAvailableToRent = false; this.rentalPrice = null; }
       });
 
       if (userId) {
         this.userService.getRentedMovies(userId).pipe(
-          catchError(() => of([])),
-          finalize(done)
+          catchError(() => of([])), finalize(done)
         ).subscribe({
           next: (items) => {
-            this.isAlreadyRented = (items || []).some((i: any) => i.movieId === movieId && i.isActive);
+            this.isAlreadyRented = (items || []).some((i: any) => i.movieId === this.movieId && i.isActive);
+            // Check existing review for this movie
+            this.reviewService.getByUser(userId).pipe(catchError(() => of([]))).subscribe((reviews: any[]) => {
+              const found = (reviews || []).find((r: any) => r.movieId === this.movieId);
+              if (found) {
+                this.existingReview = found;
+                this.rating = found.rating ?? 5;
+                this.comment = found.comment ?? '';
+              }
+              this.cdr.detectChanges();
+            });
           }
         });
       }
     });
   }
 
-  addToWatchlist() {
+  toggleWatchlist() {
     const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
     if (!userId || !this.movie?.id) return;
-    this.watchlistService.add(userId, this.movie.id).subscribe({
-      next: () => this.toastr.success('Added to watchlist'),
-      error: () => this.toastr.info('Already in watchlist')
-    });
+    if (this.isInWatchlist) {
+      // Find the watchlist item id and remove
+      this.watchlistService.getByUser(userId).pipe(catchError(() => of([]))).subscribe((list: any[]) => {
+        const item = (list || []).find((w: any) => w.movieId === this.movie.id);
+        if (item) {
+          this.watchlistService.remove(item.id).subscribe({
+            next: () => { this.isInWatchlist = false; this.toastr.success('Removed from watchlist'); this.cdr.detectChanges(); },
+            error: () => this.toastr.error('Could not remove')
+          });
+        }
+      });
+    } else {
+      this.watchlistService.add(userId, this.movie.id).subscribe({
+        next: () => { this.isInWatchlist = true; this.toastr.success('Added to watchlist'); this.cdr.detectChanges(); },
+        error: () => this.toastr.info('Already in watchlist')
+      });
+    }
   }
 
   addToCart() {
@@ -174,7 +196,8 @@ export class CustomerMovieDetail implements OnInit {
     if (this.movie?.id) this.router.navigate(['/dashboard/watch', this.movie.id]);
   }
 
-  submitReview() {    const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
+  submitReview() {
+    const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
     if (!userId || !this.movie?.id || !this.isAlreadyRented) return;
     this.reviewService.addReview({
       userId,
@@ -182,8 +205,16 @@ export class CustomerMovieDetail implements OnInit {
       rating: this.rating,
       comment: this.comment || ''
     }).subscribe({
-      next: () => this.toastr.success('Review submitted'),
-      error: () => this.toastr.info('You already reviewed this movie')
+      next: (res: any) => {
+        this.existingReview = { rating: this.rating, comment: this.comment, ...(res || {}) };
+        this.toastr.success('Review submitted');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.toastr.info('You already reviewed this movie');
+        this.existingReview = { rating: this.rating, comment: this.comment };
+        this.cdr.detectChanges();
+      }
     });
   }
 }

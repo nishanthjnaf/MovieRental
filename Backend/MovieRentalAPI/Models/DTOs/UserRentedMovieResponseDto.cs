@@ -22,6 +22,8 @@ namespace MovieRentalAPI.Models.DTOs
 
         public float TotalAmount { get; set; }
 
+        public string? PosterPath { get; set; }
+
         public bool IsActive { get; set; }
 
         public RentalStatus RentalStatus { get; set; }

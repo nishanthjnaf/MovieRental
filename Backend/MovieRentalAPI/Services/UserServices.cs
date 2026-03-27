@@ -169,6 +169,7 @@ namespace MovieRentalAPI.Services
                         PricePerDay = item.PricePerDay,
                         RentalDays = rentalDays,
                         TotalAmount = item.PricePerDay * rentalDays,
+                        PosterPath = movie?.PosterPath,
                         IsActive = item.IsActive,
                         RentalStatus = rental.Status
                     });

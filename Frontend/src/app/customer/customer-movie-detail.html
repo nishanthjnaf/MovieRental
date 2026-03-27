@@ -1,86 +1,145 @@
-<div *ngIf="movie && !loading" class="space-y-6">
-  <section class="relative rounded-2xl overflow-hidden border border-slate-800">
-    <img [src]="movie.posterPath || 'https://placehold.co/1200x420'" class="w-full h-80 object-cover opacity-50">
-    <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
-      <h1 class="text-5xl font-bold text-amber-200">{{ movie.title }}</h1>
-      <p class="text-slate-200">{{ movie.releaseYear }} • {{ movie.durationMinutes }} mins • {{ movie.language }}</p>
-      <p class="text-fuchsia-200 mt-1">★ {{ (movie.rating || 0) | number:'1.1-1' }}</p>
-    </div>
-  </section>
-
-  <section class="grid md:grid-cols-3 gap-4">
-    <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-4">
-      <h3 class="font-semibold text-lg mb-2">About</h3>
-      <p class="text-slate-300">{{ movie.description }}</p>
-      <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
-        <p><span class="text-slate-400">Director:</span> {{ movie.director || '-' }}</p>
-        <p><span class="text-slate-400">Cast:</span> {{ (movie.cast || []).join(', ') || '-' }}</p>
-        <p><span class="text-slate-400">Content Rating:</span> {{ movie.contentRating || '-' }}</p>
-        <p><span class="text-slate-400">Genre:</span> {{ genreNames.length ? genreNames.join(', ') : '-' }}</p>
-        <p><span class="text-slate-400">Content Advisory:</span> {{ (movie.contentAdvisory || []).join(', ') || '-' }}</p>
-        <p><span class="text-slate-400">Rental Price:</span> <span class="text-emerald-300">₹ {{ rentalPrice ?? '-' }} / day</span></p>
-      </div>
-    </div>
-
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-      <button *ngIf="!isAlreadyRented" class="w-full bg-fuchsia-700 hover:bg-fuchsia-600 rounded-lg px-4 py-2" (click)="addToWatchlist()">
-        Add to Watchlist
-      </button>
-      <button *ngIf="!isAlreadyRented && isAvailableToRent" class="w-full bg-amber-600 hover:bg-amber-500 rounded-lg px-4 py-3 flex flex-col items-center gap-0.5" (click)="addToCart()">
-        <span class="font-semibold text-base">Add to Cart</span>
-        <span class="text-xs text-amber-100">₹ {{ rentalPrice ?? '-' }} / day</span>
-      </button>
-      <div *ngIf="!isAlreadyRented && !isAvailableToRent" class="w-full text-center bg-slate-700 rounded-lg px-4 py-2">
-        Not available to rent
-      </div>
-      <div *ngIf="isAlreadyRented" class="w-full text-center bg-green-700 rounded-lg px-4 py-2">
-        Already Rented
-      </div>
-      <button *ngIf="isAlreadyRented" class="w-full bg-blue-700 hover:bg-blue-600 rounded-lg px-4 py-2" (click)="watchMovie()">
-        Watch Movie
-      </button>
-    </div>
-  </section>
-
-  <section class="bg-slate-900 border border-slate-800 rounded-xl p-4" *ngIf="isAlreadyRented">
-    <h3 class="font-semibold mb-2">Rate this movie</h3>
-    <div class="flex gap-2 items-center mb-2">
-      <input type="number" min="0" max="10" step="0.1" [(ngModel)]="rating" class="bg-slate-800 border border-slate-700 rounded px-3 py-2 w-28">
-      <input [(ngModel)]="comment" placeholder="Add a short comment" class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2">
-      <button class="bg-fuchsia-700 hover:bg-fuchsia-600 rounded px-4 py-2" (click)="submitReview()">Submit</button>
-    </div>
-    <p class="text-xs text-slate-400">Rating scale: 0.0 to 10.0</p>
-  </section>
-
-  <section class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-    <h3 class="font-semibold text-lg mb-3">Trailer</h3>
-    <div class="relative w-full max-w-2xl rounded-xl overflow-hidden" style="padding-top: 42%">
-      <iframe
-        class="absolute inset-0 w-full h-full"
-        [src]="trailerEmbedUrl"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-    </div>
-  </section>
-
-</div>
-
-<div *ngIf="loading" class="space-y-4">
-  <div class="h-80 rounded-2xl skeleton"></div>
-  <div class="grid md:grid-cols-3 gap-4">
-    <div class="md:col-span-2 space-y-3">
-      <div class="h-6 w-1/3 rounded skeleton"></div>
-      <div class="h-4 rounded skeleton"></div>
-      <div class="h-4 rounded skeleton"></div>
-      <div class="h-4 w-2/3 rounded skeleton"></div>
-    </div>
-    <div class="space-y-3">
-      <div class="h-6 w-1/2 rounded skeleton"></div>
-      <div class="h-10 rounded skeleton"></div>
-      <div class="h-10 rounded skeleton"></div>
-    </div>
+<!-- Loading skeleton -->
+<div *ngIf="loading" class="detail-skeleton">
+  <div class="detail-skeleton__hero skeleton"></div>
+  <div class="detail-skeleton__body">
+    <div class="h-5 w-1/3 rounded skeleton mb-3"></div>
+    <div class="h-4 rounded skeleton mb-2"></div>
+    <div class="h-4 w-2/3 rounded skeleton"></div>
   </div>
 </div>
 
+<!-- Main detail page -->
+<div *ngIf="movie && !loading" class="detail-page">
+
+  <!-- ── HERO ── -->
+  <div class="detail-hero">
+    <img [src]="movie.posterPath || 'https://placehold.co/1400x500'" class="detail-hero__bg" [alt]="movie.title" />
+    <div class="detail-hero__scrim"></div>
+
+    <div class="detail-hero__content">
+      <!-- Genre chips -->
+      <div class="detail-hero__genres">
+        <span *ngFor="let g of genreNames" class="detail-genre-chip">{{ g }}</span>
+      </div>
+
+      <h1 class="detail-hero__title">{{ movie.title }}</h1>
+
+      <div class="detail-hero__meta">
+        <span>{{ movie.releaseYear }}</span>
+        <span class="detail-meta-dot"></span>
+        <span>{{ movie.durationMinutes }} min</span>
+        <span class="detail-meta-dot"></span>
+        <span>{{ movie.language }}</span>
+        <span class="detail-meta-dot"></span>
+        <span class="detail-hero__rating">★ {{ (movie.rating || 0) | number:'1.1-1' }}</span>
+        <span *ngIf="movie.contentRating" class="detail-cert">{{ movie.contentRating }}</span>
+      </div>
+
+      <p class="detail-hero__desc">{{ movie.description }}</p>
+
+      <!-- Action buttons -->
+      <div class="detail-hero__actions">
+        <button *ngIf="isAlreadyRented" class="detail-btn detail-btn--watch" (click)="watchMovie()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Watch Now
+        </button>
+        <button *ngIf="!isAlreadyRented && isAvailableToRent" class="detail-btn detail-btn--cart" (click)="addToCart()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM7.2 14.8l.1.2H19c.6 0 1-.4 1-1s-.4-1-1-1H7.4L5.5 5H3c-.6 0-1 .4-1 1s.4 1 1 1h1l2.2 7.8z"/></svg>
+          Add to Cart &nbsp;·&nbsp; ₹{{ rentalPrice ?? '-' }}/day
+        </button>
+        <div *ngIf="!isAlreadyRented && !isAvailableToRent" class="detail-btn detail-btn--unavailable">
+          Currently Unavailable
+        </div>
+        <div *ngIf="isAlreadyRented" class="detail-btn detail-btn--rented">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+          Already Rented
+        </div>
+        <button class="detail-btn detail-btn--watchlist" [class.detail-btn--watchlist-active]="isInWatchlist" (click)="toggleWatchlist()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path *ngIf="!isInWatchlist" d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+            <path *ngIf="isInWatchlist" d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm-2 9l-3-3-3 3-1-1 3-3-3-3 1-1 3 3 3-3 1 1-3 3 3 3-1 1z"/>
+          </svg>
+          {{ isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BODY ── -->
+  <div class="detail-body">
+    <div class="detail-body__grid">
+
+      <!-- LEFT: Rating + Cast -->
+      <div class="detail-body__left">
+
+        <!-- Rating card -->
+        <div class="detail-card detail-card--rate" *ngIf="isAlreadyRented">
+          <h2 class="detail-card__title">Your Rating</h2>
+          <div *ngIf="existingReview" class="detail-rated">
+            <div class="detail-rated__row">
+              <div class="detail-rated__badge">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <span class="detail-rated__score">{{ existingReview.rating | number:'1.1-1' }}</span>
+                <span class="detail-rated__max">/ 10</span>
+              </div>
+              <span class="detail-rated__label">Already Rated</span>
+            </div>
+            <p class="detail-rated__comment" *ngIf="existingReview.comment">"{{ existingReview.comment }}"</p>
+          </div>
+          <div *ngIf="!existingReview" class="detail-review-form">
+            <div class="detail-slider-row">
+              <span class="detail-slider-label">0</span>
+              <div class="detail-slider-wrap">
+                <input type="range" min="0" max="10" step="0.1" [(ngModel)]="rating" class="detail-slider" />
+                <div class="detail-slider-fill" [style.width.%]="rating * 10"></div>
+              </div>
+              <span class="detail-slider-label">10</span>
+              <span class="detail-slider-value">{{ rating | number:'1.1-1' }}</span>
+            </div>
+            <div class="detail-review-inputs">
+              <input [(ngModel)]="comment" placeholder="Share your thoughts..." class="detail-review__comment" />
+              <button class="detail-btn detail-btn--submit" (click)="submitReview()">Submit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cast & Crew -->
+        <div class="detail-card">
+          <h2 class="detail-card__title">Cast & Crew</h2>
+          <div class="detail-info-grid">
+            <div class="detail-info-item">
+              <span class="detail-info-label">Director</span>
+              <span class="detail-info-value">{{ movie.director || '—' }}</span>
+            </div>
+            <div class="detail-info-item">
+              <span class="detail-info-label">Cast</span>
+              <span class="detail-info-value">{{ (movie.cast || []).join(', ') || '—' }}</span>
+            </div>
+            <div class="detail-info-item">
+              <span class="detail-info-label">Content Advisory</span>
+              <span class="detail-info-value">{{ (movie.contentAdvisory || []).join(', ') || '—' }}</span>
+            </div>
+            <div class="detail-info-item">
+              <span class="detail-info-label">Rental Price</span>
+              <span class="detail-info-value detail-info-value--price">₹ {{ rentalPrice ?? '—' }} / day</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Trailer -->
+      <div class="detail-body__right">
+        <div class="detail-card detail-card--trailer">
+          <h2 class="detail-card__title">Trailer</h2>
+          <div class="detail-trailer">
+            <iframe [src]="trailerEmbedUrl" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

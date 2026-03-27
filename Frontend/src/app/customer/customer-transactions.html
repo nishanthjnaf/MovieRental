@@ -1,84 +1,169 @@
-<h2 class="text-4xl font-bold text-amber-300 mb-6">My Transactions</h2>
+<div class="txn-header">
+  <div class="txn-header__top">
+    <div>
+      <h1 class="txn-header__title">My Transactions</h1>
+      <p class="txn-header__sub" *ngIf="!loading && transactions.length > 0">{{ filteredTransactions.length }} of {{ transactions.length }} transaction{{ transactions.length === 1 ? '' : 's' }}</p>
+    </div>
+  </div>
 
-<div *ngIf="loading" class="space-y-3">
-  <div *ngFor="let i of [1,2,3]" class="h-14 rounded-xl skeleton"></div>
-</div>
+  <!-- Filter bar -->
+  <div class="txn-filters" *ngIf="!loading && transactions.length > 0">
 
-<div *ngIf="!loading && transactions.length > 0" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-  <table class="w-full text-sm">
-    <thead class="bg-slate-800 text-slate-300">
-      <tr>
-        <th class="text-left p-3">Movies</th>
-        <th class="text-left p-3">Payment ID</th>
-        <th class="text-left p-3">Rental ID</th>
-        <th class="text-left p-3">Amount</th>
-        <th class="text-left p-3">Method</th>
-        <th class="text-left p-3">Status</th>
-        <th class="text-left p-3">Date</th>
-        <th class="text-left p-3">Refund Details</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let t of transactions" class="border-t border-slate-800">
-        <td class="p-3">
-          <button class="bg-fuchsia-700 hover:bg-fuchsia-600 rounded px-2 py-1" (click)="openRentalMovies(t.rentalId)">+</button>
-        </td>
-        <td class="p-3">{{ t.paymentId || '-' }}</td>
-        <td class="p-3">{{ t.rentalId }}</td>
-        <td class="p-3">₹ {{ t.amount }}</td>
-        <td class="p-3">{{ getPaymentMethod(t.paymentMethod ?? t.method) }}</td>
-        <td class="p-3">
-          <span [class.text-green-400]="(t.paymentStatus ?? t.status) === 0"
-                [class.text-red-400]="(t.paymentStatus ?? t.status) === 1"
-                [class.text-amber-400]="(t.paymentStatus ?? t.status) === 2">
-            {{ getStatusText(t.paymentStatus ?? t.status) }}
-          </span>
-        </td>
-        <td class="p-3">{{ t.paymentDate | date:'medium' }}</td>
-        <td class="p-3">
-          <button *ngIf="(t.paymentStatus ?? t.status) === 2"
-            class="bg-amber-700 hover:bg-amber-600 rounded px-2 py-1 text-xs"
-            (click)="openRefundDetails(t)">+</button>
-          <span *ngIf="(t.paymentStatus ?? t.status) !== 2" class="text-slate-600">—</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<p *ngIf="!loading && transactions.length === 0" class="text-slate-400">No transactions yet.</p>
-
-<div *ngIf="showRefundPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-sm">
-    <h3 class="text-xl font-semibold mb-4">Refund Details</h3>
-    <div class="space-y-2 text-sm">
-      <div class="flex justify-between">
-        <span class="text-slate-400">Amount Refunded</span>
-        <span class="text-green-400 font-semibold">₹ {{ selectedRefund?.refundAmount | number:'1.2-2' }}</span>
-      </div>
-      <div class="flex justify-between">
-        <span class="text-slate-400">Returned At</span>
-        <span>{{ selectedRefund?.refundedAt | date:'medium' }}</span>
+    <!-- Method -->
+    <div class="txn-filter-group">
+      <span class="txn-filter-group__label txn-filter-group__label--method">Method</span>
+      <div class="txn-pill-group">
+        <button class="txn-pill" [class.txn-pill--active]="filterMethod === ''" (click)="filterMethod = ''">All</button>
+        <button class="txn-pill" [class.txn-pill--active]="filterMethod === '0'" (click)="filterMethod = '0'">Debit</button>
+        <button class="txn-pill" [class.txn-pill--active]="filterMethod === '1'" (click)="filterMethod = '1'">Credit</button>
+        <button class="txn-pill" [class.txn-pill--active]="filterMethod === '2'" (click)="filterMethod = '2'">Net Banking</button>
+        <button class="txn-pill" [class.txn-pill--active]="filterMethod === '3'" (click)="filterMethod = '3'">UPI</button>
       </div>
     </div>
-    <div class="text-right mt-5">
-      <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="closeRefundDetails()">Close</button>
+
+    <div class="txn-filter-divider"></div>
+
+    <!-- Status -->
+    <div class="txn-filter-group">
+      <span class="txn-filter-group__label txn-filter-group__label--status">Status</span>
+      <div class="txn-pill-group">
+        <button class="txn-pill" [class.txn-pill--active]="filterStatus === ''" (click)="filterStatus = ''">All</button>
+        <button class="txn-pill txn-pill--success" [class.txn-pill--active]="filterStatus === '0'" (click)="filterStatus = '0'">Success</button>
+        <button class="txn-pill txn-pill--failed" [class.txn-pill--active]="filterStatus === '1'" (click)="filterStatus = '1'">Failed</button>
+        <button class="txn-pill txn-pill--refunded" [class.txn-pill--active]="filterStatus === '2'" (click)="filterStatus = '2'">Refunded</button>
+      </div>
+    </div>
+
+    <div class="txn-filter-divider"></div>
+
+    <!-- Sort -->
+    <div class="txn-filter-group">
+      <span class="txn-filter-group__label txn-filter-group__label--sort">Sort</span>
+      <div class="txn-pill-group">
+        <button class="txn-pill" [class.txn-pill--active]="sortOrder === 'desc'" (click)="sortOrder = 'desc'">Newest</button>
+        <button class="txn-pill" [class.txn-pill--active]="sortOrder === 'asc'" (click)="sortOrder = 'asc'">Oldest</button>
+      </div>
+    </div>
+
+    <button *ngIf="filterMethod || filterStatus || sortOrder !== 'desc'" class="txn-filter-reset" (click)="clearFilters()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      Reset
+    </button>
+
+  </div>
+</div>
+
+<!-- Skeleton -->
+<div *ngIf="loading" class="txn-list">
+  <div *ngFor="let i of [1,2,3,4]" class="txn-card-skeleton">
+    <div class="txn-card-skeleton__icon skeleton"></div>
+    <div class="txn-card-skeleton__body">
+      <div class="h-3 w-1/3 rounded skeleton mb-2"></div>
+      <div class="h-3 w-1/2 rounded skeleton"></div>
+    </div>
+    <div class="txn-card-skeleton__amount skeleton"></div>
+  </div>
+</div>
+
+<!-- Transaction list -->
+<div *ngIf="!loading && transactions.length > 0" class="txn-list">
+  <div *ngFor="let t of filteredTransactions" class="txn-card">
+
+    <!-- Method icon -->
+    <div class="txn-card__icon" [class.txn-card__icon--success]="(t.paymentStatus ?? t.status) === 0"
+      [class.txn-card__icon--failed]="(t.paymentStatus ?? t.status) === 1"
+      [class.txn-card__icon--refunded]="(t.paymentStatus ?? t.status) === 2">
+      <svg *ngIf="(t.paymentMethod ?? t.method) === 3" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      <svg *ngIf="(t.paymentMethod ?? t.method) !== 3" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+    </div>
+
+    <!-- Main info -->
+    <div class="txn-card__body">
+      <div class="txn-card__top">
+        <span class="txn-card__method">{{ getPaymentMethod(t.paymentMethod ?? t.method) }}</span>
+        <span class="txn-card__status"
+          [class.txn-card__status--success]="(t.paymentStatus ?? t.status) === 0"
+          [class.txn-card__status--failed]="(t.paymentStatus ?? t.status) === 1"
+          [class.txn-card__status--refunded]="(t.paymentStatus ?? t.status) === 2">
+          {{ getStatusText(t.paymentStatus ?? t.status) }}
+        </span>
+      </div>
+      <span class="txn-card__date">{{ t.paymentDate | date:'MMM d, y · h:mm a' }}</span>
+    </div>
+
+    <!-- Middle: Payment ID only -->
+    <div class="txn-card__middle">
+      <div class="txn-card__mid-item">
+        <span class="txn-card__mid-label">Payment ID</span>
+        <span class="txn-card__mid-value">{{ t.paymentId || '—' }}</span>
+      </div>
+    </div>
+
+    <!-- Amount -->
+    <div class="txn-card__right">
+      <span class="txn-card__amount"
+        [class.txn-card__amount--success]="(t.paymentStatus ?? t.status) === 0"
+        [class.txn-card__amount--failed]="(t.paymentStatus ?? t.status) === 1"
+        [class.txn-card__amount--refunded]="(t.paymentStatus ?? t.status) === 2">
+        {{ (t.paymentStatus ?? t.status) === 1 ? '' : '₹' }}{{ (t.paymentStatus ?? t.status) === 1 ? 'Failed' : (t.amount | number:'1.2-2') }}
+      </span>
+      <div class="txn-card__actions">
+        <button class="txn-btn" (click)="openRentalMovies(t.rentalId)" title="View movies">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+          Movies
+        </button>
+        <button *ngIf="(t.paymentStatus ?? t.status) === 2" class="txn-btn txn-btn--refund" (click)="openRefundDetails(t)" title="Refund details">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          Refund
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p *ngIf="!loading && transactions.length === 0" class="txn-empty">No transactions yet.</p>
+
+<!-- Refund popup -->
+<div *ngIf="showRefundPopup" class="rental-popup-backdrop">
+  <div class="rental-popup">
+    <div class="rental-popup__header">
+      <h3 class="rental-popup__title">Refund Details</h3>
+      <button class="rental-popup__close" (click)="closeRefundDetails()">✕</button>
+    </div>
+    <div class="rental-popup__body">
+      <div class="rental-popup__row">
+        <span class="rental-popup__label">Amount Refunded</span>
+        <span class="rental-popup__value rental-popup__value--green">₹ {{ selectedRefund?.refundAmount | number:'1.2-2' }}</span>
+      </div>
+      <div class="rental-popup__row">
+        <span class="rental-popup__label">Returned At</span>
+        <span class="rental-popup__value">{{ selectedRefund?.refundedAt | date:'medium' }}</span>
+      </div>
+    </div>
+    <div class="rental-popup__footer">
+      <button class="rental-btn rental-btn--close" (click)="closeRefundDetails()">Close</button>
     </div>
   </div>
 </div>
 
-<div *ngIf="showMoviesPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-[92%] max-w-lg">
-    <h3 class="text-xl font-semibold mb-3">Movies in Rental #{{ selectedRentalId }}</h3>
-    <p *ngIf="loadingRentalMovies" class="text-slate-400">Loading movies...</p>
-    <div *ngIf="!loadingRentalMovies" class="space-y-2 max-h-64 overflow-auto">
-      <p *ngFor="let m of selectedRentalMovies" class="text-sm">
-        <span class="text-slate-400">#{{ m.movieId }}:</span> {{ m.title }}
-      </p>
-      <p *ngIf="selectedRentalMovies.length === 0" class="text-slate-400 text-sm">No movies found for this rental.</p>
+<!-- Movies popup -->
+<div *ngIf="showMoviesPopup" class="rental-popup-backdrop">
+  <div class="rental-popup" style="max-width:480px">
+    <div class="rental-popup__header">
+      <h3 class="rental-popup__title">Movies in Rental #{{ selectedRentalId }}</h3>
+      <button class="rental-popup__close" (click)="closeRentalMovies()">✕</button>
     </div>
-    <div class="text-right mt-4">
-      <button class="bg-slate-700 hover:bg-slate-600 rounded px-4 py-2" (click)="closeRentalMovies()">Close</button>
+    <div class="rental-popup__body" style="max-height:280px;overflow-y:auto">
+      <p *ngIf="loadingRentalMovies" class="rental-popup__label">Loading...</p>
+      <div *ngFor="let m of selectedRentalMovies" class="txn-movie-row">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+        <span class="txn-movie-row__title">{{ m.title }}</span>
+      </div>
+      <p *ngIf="!loadingRentalMovies && selectedRentalMovies.length === 0" class="rental-popup__label">No movies found.</p>
+    </div>
+    <div class="rental-popup__footer">
+      <button class="rental-btn rental-btn--close" (click)="closeRentalMovies()">Close</button>
     </div>
   </div>
 </div>

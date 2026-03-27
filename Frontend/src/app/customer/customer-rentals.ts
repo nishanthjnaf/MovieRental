@@ -35,6 +35,19 @@ export class CustomerRentals implements OnInit {
   refundAmount = 0;
   refundTotal = 0;
 
+  // Search
+  searchQuery = '';
+
+  get searchResults(): any[] {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return this.rentals.filter(r => r.movieTitle?.toLowerCase().includes(q));
+  }
+
+  get isSearching(): boolean {
+    return this.searchQuery.trim().length > 0;
+  }
+
   constructor(
     private userService: UserService,
     private currentUser: CurrentUserService,
@@ -277,6 +290,27 @@ export class CustomerRentals implements OnInit {
 
   openMovie(movieId: number) {
     this.router.navigate(['/dashboard/movie', movieId]);
+  }
+
+  getStatusLabel(r: any): string {
+    const now = new Date();
+    if (new Date(r.endDate) <= now) return 'expired';
+    if (r.isActive) return 'active';
+    return 'returned';
+  }
+
+  getExpiryCountdown(endDate: string): string {
+    const diff = new Date(endDate).getTime() - Date.now();
+    if (diff <= 0) return 'Expired';
+    const hours = diff / (1000 * 60 * 60);
+    if (hours < 24) return `${Math.ceil(hours)}h left`;
+    const days = Math.ceil(hours / 24);
+    return `${days} day${days === 1 ? '' : 's'} left`;
+  }
+
+  isExpiringSoon(endDate: string): boolean {
+    const diff = new Date(endDate).getTime() - Date.now();
+    return diff > 0 && diff < 24 * 60 * 60 * 1000;
   }
 
   watchMovie(movieId: number) {
