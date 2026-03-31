@@ -17,7 +17,7 @@ namespace MovieRentalAPI.Models
 
         public User? User { get; set; }
         public ICollection<RentalItem>? RentalItems { get; set; }
-        public Payment? Payment { get; set; }
+        public ICollection<Payment>? Payments { get; set; }
 
         public int CompareTo(Rental? other)
         {

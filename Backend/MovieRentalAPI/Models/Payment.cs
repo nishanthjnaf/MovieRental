@@ -12,14 +12,16 @@ namespace MovieRentalAPI.Models
         public int UserId { get; set; }
         public Rental Rental { get; set; }
         public float Amount { get; set; }
-        public PaymentMethod PaymentMethod { get; set; } 
+        public PaymentMethod PaymentMethod { get; set; }
         public DateTime PaymentDate { get; set; }
         public PaymentStatus Status { get; set; }
+        public PaymentType PaymentType { get; set; }
         public string PaymentId { get; set; }
         public User User { get; set; }
+
+        // Kept for backward compat on refund records (populated only when PaymentType == Refund)
         public double? RefundAmount { get; set; }
         public DateTime? RefundedAt { get; set; }
-
 
         public int CompareTo(Payment? other)
         {
@@ -33,7 +35,7 @@ namespace MovieRentalAPI.Models
 
         public override string ToString()
         {
-            return $"Payment Id: {Id}, Amount: {Amount}, Method: {PaymentMethod}";
+            return $"Payment Id: {Id}, Type: {PaymentType}, Amount: {Amount}, Status: {Status}";
         }
     }
 }

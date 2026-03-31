@@ -71,24 +71,44 @@
           <!-- Notification bell -->
           <div class="relative">
             <button class="top-icon-btn relative" (click)="toggleNotifDropdown()" title="Notifications">
-              🔔
-              <span *ngIf="unreadNotifications > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5">{{ unreadNotifications }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+              <span *ngIf="unreadNotifications > 0" class="notif-badge">{{ unreadNotifications }}</span>
             </button>
-            <div *ngIf="showNotifDropdown"
-              class="absolute right-0 top-12 w-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-              <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
-                <span class="font-semibold text-base">Notifications</span>
-                <button class="text-slate-500 hover:text-white text-sm" (click)="closeNotifDropdown()">✕</button>
+
+            <!-- Dropdown -->
+            <div *ngIf="showNotifDropdown" class="notif-dropdown">
+              <div class="notif-dropdown__header">
+                <span class="notif-dropdown__title">Notifications</span>
+                <div class="flex items-center gap-2">
+                  <span *ngIf="unreadNotifications > 0" class="notif-dropdown__unread-count">{{ unreadNotifications }} new</span>
+                  <button class="notif-dropdown__close" (click)="closeNotifDropdown()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
               </div>
-              <div *ngIf="recentNotifications.length === 0" class="px-5 py-8 text-center text-slate-500 text-sm">No notifications</div>
-              <div *ngFor="let n of recentNotifications"
-                class="px-5 py-4 border-b border-slate-800 hover:bg-slate-800 cursor-pointer transition"
-                [class.opacity-60]="n.isRead" (click)="closeNotifDropdown()">
-                <p class="text-sm font-semibold truncate" [class.text-white]="!n.isRead" [class.text-slate-400]="n.isRead">{{ n.title }}</p>
-                <p class="text-xs text-slate-500 truncate mt-1">{{ n.message }}</p>
+
+              <div *ngIf="recentNotifications.length === 0" class="notif-dropdown__empty">
+                <p>All caught up</p>
               </div>
-              <div class="px-5 py-3 text-center">
-                <button class="text-fuchsia-400 hover:text-fuchsia-300 text-sm font-medium" (click)="openNotifPage()">See all notifications</button>
+
+              <div class="notif-dropdown__list">
+                <div *ngFor="let n of recentNotifications" class="notif-dropdown__item"
+                  [class.notif-dropdown__item--unread]="!n.isRead"
+                  (click)="handleNotifClick(n)">
+                  <div class="notif-dropdown__type-bar" [attr.data-type]="n.type"></div>
+                  <div class="notif-dropdown__content">
+                    <p class="notif-dropdown__item-title">{{ n.title }}</p>
+                    <p class="notif-dropdown__item-msg">{{ n.message }}</p>
+                  </div>
+                  <span *ngIf="!n.isRead" class="notif-dropdown__dot"></span>
+                </div>
+              </div>
+
+              <div class="notif-dropdown__footer">
+                <button class="notif-dropdown__see-all" (click)="openNotifPage()">
+                  View all notifications
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
               </div>
             </div>
           </div>

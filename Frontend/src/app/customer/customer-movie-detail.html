@@ -37,6 +37,14 @@
 
       <p class="detail-hero__desc">{{ movie.description }}</p>
 
+      <!-- Rental countdown bar (shown when already rented) -->
+      <div *ngIf="isAlreadyRented && rentalCountdown" class="detail-rental-countdown"
+        [class.detail-rental-countdown--urgent]="rentalExpiringSoon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span>{{ rentalCountdown }}</span>
+        <span class="detail-rental-countdown__expiry">· Expires {{ rentalEndDate | date:'MMM d, y' }}</span>
+      </div>
+
       <!-- Action buttons -->
       <div class="detail-hero__actions">
         <button *ngIf="isAlreadyRented" class="detail-btn detail-btn--watch" (click)="watchMovie()">

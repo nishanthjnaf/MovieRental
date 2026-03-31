@@ -14,19 +14,22 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, Inventory> _inventoryRepository;
         private readonly IRepository<int, User> _userRepository;
         private readonly IRepository<int, Movie> _movieRepository;
+        private readonly IActivityLogService _activityLog;
 
         public RentalService(
             IRepository<int, Rental> rentalRepository,
             IRepository<int, RentalItem> rentalItemRepository,
             IRepository<int, Inventory> inventoryRepository,
             IRepository<int, Movie> movieRepository,
-            IRepository<int, User> userRepository)
+            IRepository<int, User> userRepository,
+            IActivityLogService activityLog)
         {
             _rentalRepository = rentalRepository;
             _rentalItemRepository = rentalItemRepository;
             _inventoryRepository = inventoryRepository;
             _movieRepository = movieRepository;
             _userRepository = userRepository;
+            _activityLog = activityLog;
         }
 
 
@@ -110,6 +113,10 @@ namespace MovieRentalAPI.Services
 
             addedRental!.TotalAmount = totalAmount;
             await _rentalRepository.Update(addedRental.Id, addedRental);
+
+            await _activityLog.Log(user.Id, user.Username ?? user.Name ?? "Unknown", "Customer",
+                "Rental", "CreateRental",
+                $"Rental #{addedRental.Id} created with {request.MovieIds.Count} movie(s). Total: ₹{totalAmount:F2}");
 
             return new RentalResponseDto
             {
@@ -214,8 +221,11 @@ namespace MovieRentalAPI.Services
                 throw new ConflictException("Rental item already ended");
 
             item.IsActive = false;
-
             await _rentalItemRepository.Update(item.Id, item);
+
+            await _activityLog.Log(item.RentalId, "Admin", "Admin",
+                "Rental", "EndRentalItem",
+                $"Rental item #{rentalItemId} (MovieId: {item.MovieId}) ended.");
 
             return true;
         }

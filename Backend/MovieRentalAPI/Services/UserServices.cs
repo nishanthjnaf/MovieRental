@@ -20,6 +20,7 @@ namespace MovieRentalAPI.Services
         private readonly IRepository<int, User> _userRepository;
         private readonly MovieRentalContext _context;
         private readonly NotificationService _notifications;
+        private readonly IActivityLogService _activityLog;
 
         public UserServices(
             MovieRentalContext context,
@@ -29,7 +30,8 @@ namespace MovieRentalAPI.Services
             IRepository<int, Movie> movieRepository,
             IRepository<int, User> userRepository,
             IRepository<int, RentalItem> rentalitemRepository,
-            NotificationService notifications)
+            NotificationService notifications,
+            IActivityLogService activityLog)
             : base(context)
         {
             _tokenService = tokenService;
@@ -40,6 +42,7 @@ namespace MovieRentalAPI.Services
             _rentalitemRepository = rentalitemRepository;
             _context = context;
             _notifications = notifications;
+            _activityLog = activityLog;
         }
 
         public async Task<CheckUserResponseDto> CheckUser(CheckUserRequestDto request)
@@ -69,6 +72,9 @@ namespace MovieRentalAPI.Services
             };
 
             var token = _tokenService.CreateToken(tokenPayload);
+
+            await _activityLog.Log(user.Id, user.Username, user.Role.ToString(),
+                "User", "Login", $"User \"{user.Username}\" logged in.");
 
             return new CheckUserResponseDto
             {
@@ -108,6 +114,9 @@ namespace MovieRentalAPI.Services
 
             if (addedUser == null)
                 throw new Exception("User registration failed");
+
+            await _activityLog.Log(addedUser.Id, addedUser.Username, "Customer",
+                "User", "Register", $"New customer \"{addedUser.Username}\" registered.");
 
             return new RegisterUserResponseDto
             {

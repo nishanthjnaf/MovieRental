@@ -1,42 +1,64 @@
-<div class="min-h-screen flex items-center justify-center px-4">
-  <div class="absolute top-4 right-4">
-    <app-theme-toggle />
-  </div>
-  <form [formGroup]="form" (ngSubmit)="submit()" class="glass-panel neon-border w-full max-w-md p-8 space-y-5">
-    <h2 class="text-3xl font-bold text-center text-amber-300">Welcome Back</h2>
+<div class="auth-page">
 
-    <div class="space-y-2">
-      <label for="login-username" class="text-sm text-slate-300">Username</label>
-      <input id="login-username" type="text" formControlName="username" placeholder="Enter username"
-        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
-      <p *ngIf="f.username.touched && f.username.invalid" class="text-red-400 text-xs">Username required</p>
-    </div>
-
-    <div class="space-y-2">
-      <label for="login-password" class="text-sm text-slate-300">Password</label>
-      <div class="relative">
-        <input id="login-password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter password"
-          class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-14 outline-none focus:ring-2 focus:ring-fuchsia-500" />
-        <button type="button" (click)="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-fuchsia-300 text-sm">
-          {{ showPassword ? 'Hide' : 'Show' }}
-        </button>
+  <!-- Left brand panel -->
+  <div class="auth-brand">
+    <div class="auth-brand__content">
+      <div class="auth-brand__logo">cinefilia</div>
+      <h2 class="auth-brand__tagline">Your cinema,<br>your schedule.</h2>
+      <p class="auth-brand__sub">Thousands of films available to rent instantly. Watch on any device, anytime.</p>
+      <div class="auth-brand__dots">
+        <span class="auth-brand__dot auth-brand__dot--active"></span>
+        <span class="auth-brand__dot"></span>
+        <span class="auth-brand__dot"></span>
       </div>
-      <p *ngIf="f.password.touched && f.password.invalid" class="text-red-400 text-xs">Password required</p>
     </div>
+    <div class="auth-brand__overlay"></div>
+  </div>
 
-    <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-      <input type="checkbox" formControlName="remember" class="accent-fuchsia-500 w-4 h-4" />
-      Remember Me
-    </label>
+  <!-- Right form panel -->
+  <div class="auth-form-panel">
+    <div class="auth-form-wrap">
 
-    <button [disabled]="form.invalid"
-      class="w-full bg-fuchsia-700 hover:bg-fuchsia-600 disabled:bg-slate-700 text-white py-2 rounded-lg transition">
-      Login
-    </button>
+      <div class="auth-form-header">
+        <h1 class="auth-form-header__title">Welcome back</h1>
+        <p class="auth-form-header__sub">Sign in to continue watching</p>
+      </div>
 
-    <p class="text-center text-sm text-slate-300">
-      Create Account?
-      <a routerLink="/register" class="text-amber-300 font-medium">Register</a>
-    </p>
-  </form>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+
+        <div class="auth-field">
+          <label class="auth-field__label">Username</label>
+          <input type="text" formControlName="username" placeholder="Enter your username"
+            class="auth-field__input" [class.auth-field__input--error]="f.username.touched && f.username.invalid" />
+          <p *ngIf="f.username.touched && f.username.invalid" class="auth-field__error">Username is required</p>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-field__label">Password</label>
+          <div class="auth-field__input-wrap">
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password"
+              class="auth-field__input" [class.auth-field__input--error]="f.password.touched && f.password.invalid" />
+            <button type="button" class="auth-field__toggle" (click)="togglePassword()">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <p *ngIf="f.password.touched && f.password.invalid" class="auth-field__error">Password is required</p>
+        </div>
+
+        <label class="auth-remember">
+          <input type="checkbox" formControlName="remember" class="auth-remember__check" />
+          <span>Remember me</span>
+        </label>
+
+        <button type="submit" class="auth-submit" [disabled]="form.invalid">Sign In</button>
+
+        <p class="auth-switch">
+          Don't have an account?
+          <a routerLink="/register" class="auth-switch__link">Create one</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+
 </div>

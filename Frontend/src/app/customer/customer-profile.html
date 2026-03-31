@@ -1,27 +1,4 @@
-<h2 class="text-5xl font-bold text-amber-300 mb-6">Profile</h2>
-
-<div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 max-w-4xl">
-  <h3 class="text-2xl font-semibold">{{ user?.name || user?.username || 'User' }}</h3>
-  <div class="grid md:grid-cols-2 gap-3 text-slate-300">
-    <p><span class="text-slate-400">Name:</span> {{ user?.name || '-' }}</p>
-    <p><span class="text-slate-400">Username:</span> {{ user?.username || '-' }}</p>
-    <p><span class="text-slate-400">Role:</span> {{ user?.role || '-' }}</p>
-    <p><span class="text-slate-400">Email:</span> {{ user?.email || '-' }}</p>
-    <p><span class="text-slate-400">Phone:</span> {{ user?.phone || '-' }}</p>
-  </div>
-
-  <div class="flex flex-wrap gap-3 pt-2">
-    <button class="rounded px-4 py-2 border border-slate-600 hover:bg-slate-800 flex items-center gap-2" (click)="theme.toggle()">
-      {{ theme.isDark ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode' }}
-    </button>
-    <button class="bg-amber-600 hover:bg-amber-500 rounded px-4 py-2" (click)="showEditPopup = true">Edit Details</button>
-    <button class="bg-fuchsia-700 hover:bg-fuchsia-600 rounded px-4 py-2" (click)="showPasswordPopup = true">Reset Password</button>
-    <button class="bg-slate-600 hover:bg-slate-500 rounded px-4 py-2" (click)="showPreferencesPopup = true">Edit Preferences</button>
-    <button class="bg-red-700 hover:bg-red-600 rounded px-4 py-2" (click)="deleteAccount()">Delete Account</button>
-  </div>
-</div>
-
-<!-- Preferences Popup -->
+<!-- Preferences popup -->
 <app-preferences-setup
   *ngIf="showPreferencesPopup"
   [userId]="user?.id"
@@ -30,32 +7,184 @@
   (cancelled)="showPreferencesPopup = false">
 </app-preferences-setup>
 
-<!-- Edit Popup -->
-<div *ngIf="showEditPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-full max-w-md space-y-3">
-    <h3 class="text-xl font-semibold">Edit Details</h3>
-    <input [(ngModel)]="edit.name" placeholder="Name" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <input [(ngModel)]="edit.username" placeholder="Username" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <input [(ngModel)]="edit.email" placeholder="Email" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <input [(ngModel)]="edit.phone" placeholder="Phone" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <div class="flex justify-end gap-2 pt-2">
-      <button class="px-4 py-2 rounded bg-slate-700" (click)="showEditPopup = false">Cancel</button>
-      <button class="px-4 py-2 rounded bg-amber-600 hover:bg-amber-500" (click)="saveProfile()">Save</button>
+<div class="profile-page">
+
+  <!-- ── LEFT: Avatar + actions ── -->
+  <aside class="profile-aside">
+    <!-- Avatar -->
+    <div class="profile-avatar">
+      <span class="profile-avatar__initials">{{ (user?.name || user?.username || 'U').charAt(0).toUpperCase() }}</span>
+    </div>
+    <h2 class="profile-aside__name">{{ user?.name || user?.username || 'User' }}</h2>
+    <span class="profile-aside__role">{{ user?.role || 'Customer' }}</span>
+
+    <!-- Actions -->
+    <div class="profile-actions">
+      <button class="profile-action-btn profile-action-btn--theme" (click)="theme.toggle()">
+        <svg *ngIf="theme.isDark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/></svg>
+        <svg *ngIf="!theme.isDark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+        {{ theme.isDark ? 'Light Mode' : 'Dark Mode' }}
+      </button>
+      <button class="profile-action-btn profile-action-btn--edit" (click)="showEditPopup = true">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        Edit Details
+      </button>
+      <button class="profile-action-btn profile-action-btn--password" (click)="showPasswordPopup = true">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        Reset Password
+      </button>
+      <button class="profile-action-btn profile-action-btn--prefs" (click)="showPreferencesPopup = true">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        Edit Preferences
+      </button>
+      <button class="profile-action-btn profile-action-btn--delete" (click)="deleteAccount()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        Delete Account
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── RIGHT: Info cards ── -->
+  <div class="profile-main">
+
+    <div class="profile-card">
+      <div class="profile-card__header">
+        <h3 class="profile-card__title">Personal Information</h3>
+        <button class="profile-card__edit-btn" (click)="showEditPopup = true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Edit
+        </button>
+      </div>
+      <div class="profile-info-grid">
+        <div class="profile-info-item">
+          <span class="profile-info-label">Full Name</span>
+          <span class="profile-info-value">{{ user?.name || '—' }}</span>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Username</span>
+          <span class="profile-info-value">{{ user?.username || '—' }}</span>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Email</span>
+          <span class="profile-info-value">{{ user?.email || '—' }}</span>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Phone</span>
+          <span class="profile-info-value">{{ user?.phone || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences card -->
+    <div class="profile-card">
+      <div class="profile-card__header">
+        <h3 class="profile-card__title">My Preferences</h3>
+        <button class="profile-card__edit-btn" (click)="showPreferencesPopup = true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Edit
+        </button>
+      </div>
+      <ng-container *ngIf="preferences?.isSet; else noPrefs">
+        <div class="profile-info-item" style="margin-bottom:1rem">
+          <span class="profile-info-label">Preferred Genres</span>
+          <div class="profile-pref-chips" *ngIf="preferences?.preferredGenres?.length">
+            <span *ngFor="let g of preferences.preferredGenres" class="profile-pref-chip">{{ g }}</span>
+          </div>
+          <span class="profile-info-value" *ngIf="!preferences?.preferredGenres?.length">—</span>
+        </div>
+        <div class="profile-info-item" style="margin-bottom:1rem">
+          <span class="profile-info-label">Preferred Languages</span>
+          <div class="profile-pref-chips" *ngIf="preferences?.preferredLanguages?.length">
+            <span *ngFor="let l of preferences.preferredLanguages" class="profile-pref-chip profile-pref-chip--lang">{{ l }}</span>
+          </div>
+          <span class="profile-info-value" *ngIf="!preferences?.preferredLanguages?.length">—</span>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Theme</span>
+          <span class="profile-info-value">{{ preferences?.theme === 'dark' ? 'Dark' : 'Light' }}</span>
+        </div>
+      </ng-container>
+      <ng-template #noPrefs>
+        <p class="profile-no-prefs">No preferences set yet.
+          <button class="profile-no-prefs__link" (click)="showPreferencesPopup = true">Set up now</button>
+        </p>
+      </ng-template>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Edit popup ── -->
+<div *ngIf="showEditPopup" class="rental-popup-backdrop">
+  <div class="rental-popup" style="max-width:460px">
+    <div class="rental-popup__header">
+      <h3 class="rental-popup__title">Edit Details</h3>
+      <button class="rental-popup__close" (click)="showEditPopup = false">✕</button>
+    </div>
+    <div class="rental-popup__body" style="gap:0.75rem">
+      <input [(ngModel)]="edit.name" placeholder="Full Name" class="rental-popup__input" />
+      <input [(ngModel)]="edit.email" placeholder="Email" class="rental-popup__input" />
+      <input [(ngModel)]="edit.phone" placeholder="Phone" class="rental-popup__input" />
+    </div>
+    <div class="rental-popup__footer">
+      <button class="rental-btn rental-btn--close" (click)="showEditPopup = false">Cancel</button>
+      <button class="rental-btn rental-btn--watch" (click)="saveProfile()">Save Changes</button>
     </div>
   </div>
 </div>
 
-<!-- Password Popup -->
-<div *ngIf="showPasswordPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-  <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-full max-w-md space-y-3">
-    <h3 class="text-xl font-semibold">Reset Password</h3>
-    <input type="password" [(ngModel)]="pwd.oldPassword" placeholder="Old password" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <input type="password" [(ngModel)]="pwd.newPassword" placeholder="New password" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <input type="password" [(ngModel)]="pwd.confirmPassword" placeholder="Confirm new password" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2">
-    <div class="flex justify-end gap-2 pt-2">
-      <button class="px-4 py-2 rounded bg-slate-700" (click)="showPasswordPopup = false">Cancel</button>
-      <button class="px-4 py-2 rounded bg-fuchsia-700 hover:bg-fuchsia-600" (click)="resetPassword()">Update</button>
+<!-- ── Password popup ── -->
+<div *ngIf="showPasswordPopup" class="rental-popup-backdrop">
+  <div class="rental-popup" style="max-width:460px">
+    <div class="rental-popup__header">
+      <h3 class="rental-popup__title">Reset Password</h3>
+      <button class="rental-popup__close" (click)="showPasswordPopup = false">✕</button>
+    </div>
+    <div class="rental-popup__body" style="gap:0.75rem">
+      <!-- Old password -->
+      <div style="position:relative">
+        <label class="auth-field__label" style="display:block;margin-bottom:0.3rem">Current Password</label>
+        <input [type]="showOldPwd ? 'text' : 'password'" [(ngModel)]="pwd.oldPassword"
+          placeholder="Current password" class="rental-popup__input" style="padding-right:3.5rem" />
+        <button type="button" class="auth-field__toggle" (click)="showOldPwd = !showOldPwd">{{ showOldPwd ? 'Hide' : 'Show' }}</button>
+      </div>
+      <!-- New password -->
+      <div style="position:relative">
+        <label class="auth-field__label" style="display:block;margin-bottom:0.3rem">New Password</label>
+        <input [type]="showNewPwd ? 'text' : 'password'" [(ngModel)]="pwd.newPassword"
+          placeholder="New password" class="rental-popup__input" style="padding-right:3.5rem" />
+        <button type="button" class="auth-field__toggle" (click)="showNewPwd = !showNewPwd">{{ showNewPwd ? 'Hide' : 'Show' }}</button>
+      </div>
+      <!-- Strength -->
+      <div *ngIf="pwd.newPassword" class="auth-strength" style="margin-top:-0.25rem">
+        <div class="auth-strength__bar"><div [class]="pwdStrengthClass"></div></div>
+        <span class="auth-strength__text">{{ pwdStrengthText }}</span>
+      </div>
+      <!-- Constraints -->
+      <div *ngIf="pwd.newPassword" class="pwd-constraints">
+        <span class="pwd-constraint" [class.pwd-constraint--met]="pwdHasMinLength">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Min 6 characters
+        </span>
+        <span class="pwd-constraint" [class.pwd-constraint--met]="pwdHasUppercase">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Uppercase letter
+        </span>
+        <span class="pwd-constraint" [class.pwd-constraint--met]="pwdHasNumber">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Number
+        </span>
+        <span class="pwd-constraint" [class.pwd-constraint--met]="pwdHasSpecial">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Special character
+        </span>
+      </div>
+      <!-- Confirm -->
+      <input type="password" [(ngModel)]="pwd.confirmPassword" placeholder="Confirm new password" class="rental-popup__input" />
+    </div>
+    <div class="rental-popup__footer">
+      <button class="rental-btn rental-btn--close" (click)="showPasswordPopup = false">Cancel</button>
+      <button class="rental-btn rental-btn--watch" (click)="resetPassword()">Update Password</button>
     </div>
   </div>
 </div>
-

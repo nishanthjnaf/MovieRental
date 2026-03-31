@@ -78,6 +78,19 @@ export class CustomerShell implements OnInit {
     this.currentPath = this.router.url;
   }
 
+  iconFor(type: string): string {
+    switch (type) {
+      case 'new_movie': return '🎬';
+      case 'payment': return '💳';
+      case 'expiry': return '⏰';
+      case 'rate_movie': return '⭐';
+      case 'refund': return '💰';
+      case 'password': return '🔒';
+      case 'admin_message': return '📢';
+      default: return '🔔';
+    }
+  }
+
   toggleNotifDropdown() {
     // If already open, just close
     if (this.showNotifDropdown) {
@@ -95,6 +108,7 @@ export class CustomerShell implements OnInit {
         this.notifService.refreshUnread(resolvedUid);
         this.showNotifDropdown = true;
         this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
     };
 
@@ -114,6 +128,25 @@ export class CustomerShell implements OnInit {
       this.recentNotifications = (res || []).slice(0, 5);
       this.notifService.refreshUnread(uid);
     });
+  }
+
+  handleNotifClick(n: any) {
+    // Mark as read
+    if (!n.isRead) {
+      this.notifService.markRead(n.id).subscribe(() => {
+        n.isRead = true;
+        this.notifService.refreshUnread(this.currentUserId);
+      });
+    }
+    this.closeNotifDropdown();
+    // Route based on type
+    switch (n.type) {
+      case 'new_movie': case 'rate_movie':
+        if (n.relatedId) this.router.navigate(['/dashboard/movie', n.relatedId]); break;
+      case 'payment': this.router.navigate(['/dashboard/transactions']); break;
+      case 'expiry': case 'refund': this.router.navigate(['/dashboard/rentals']); break;
+      case 'password': this.router.navigate(['/dashboard/profile']); break;
+    }
   }
 
   closeNotifDropdown() {

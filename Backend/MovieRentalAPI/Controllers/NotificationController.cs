@@ -92,6 +92,14 @@ namespace MovieRentalAPI.Controllers
             return Ok();
         }
 
+        // POST api/Notification/check-expired
+        [HttpPost("check-expired")]
+        public async Task<IActionResult> CheckExpired()
+        {
+            await _svc.CheckExpiredRentals();
+            return Ok();
+        }
+
         // POST api/Notification/push  (generic single push)
         [HttpPost("push")]
         public async Task<IActionResult> Push([FromBody] PushNotificationDto dto)

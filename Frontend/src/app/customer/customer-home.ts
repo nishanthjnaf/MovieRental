@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MovieService } from '../services/movie';
 import { CurrentUserService } from '../services/current-user';
 import { UserService } from '../services/user';
+import { InventoryService } from '../services/inventory';
 import { PreferencesSetup } from './preferences-setup';
 import { finalize } from 'rxjs/operators';
 import { catchError, of, timeout } from 'rxjs';
@@ -15,7 +16,7 @@ import { catchError, of, timeout } from 'rxjs';
   templateUrl: './customer-home.html',
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class CustomerHome implements OnInit {
+export class CustomerHome implements OnInit, OnDestroy {
   newMovies: any[] = [];
   topRatedMovies: any[] = [];
   topRentedMovies: any[] = [];
@@ -25,6 +26,12 @@ export class CustomerHome implements OnInit {
 
   showPreferencesPopup = false;
   userId = 0;
+
+  // Hero slideshow
+  heroMovies: any[] = [];
+  heroIndex = 0;
+  private heroTimer: any;
+  rentedMovieIds = new Set<number>();
 
   // Carousel offsets per section
   offsets: Record<string, number> = {
@@ -40,9 +47,12 @@ export class CustomerHome implements OnInit {
     private movieService: MovieService,
     private currentUser: CurrentUserService,
     private userService: UserService,
+    private inventoryService: InventoryService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
+
+  private availableMovieIds = new Set<number>();
 
   @HostListener('window:resize')
   onResize() {
@@ -58,6 +68,36 @@ export class CustomerHome implements OnInit {
       if (this.loading) { this.loading = false; this.cdr.markForCheck(); }
     }, 5000);
 
+    // Load inventory availability first, then movies
+    this.inventoryService.getAll().pipe(
+      timeout(8000), catchError(() => of([]))
+    ).subscribe((rows: any[]) => {
+      (rows || []).forEach((r: any) => {
+        if (r?.isAvailable && r?.movieId) this.availableMovieIds.add(Number(r.movieId));
+      });
+      this.loadMovieSections();
+    });
+
+    this.currentUser.loadCurrentUser().subscribe(user => {
+      this.userId = user?.id ?? this.currentUser.decodedUserId;
+      if (this.userId > 0) {
+        this.userService.getRentedMovies(this.userId).pipe(catchError(() => of([]))).subscribe((items: any[]) => {
+          this.rentedMovieIds = new Set((items || []).filter((i: any) => i.isActive).map((i: any) => i.movieId));
+          this.cdr.detectChanges();
+        });
+        this.userService.getPreferences(this.userId).pipe(catchError(() => of(null))).subscribe(pref => {
+          if (!pref || !pref.isSet) {
+            this.showPreferencesPopup = true;
+          } else {
+            this.loadSuggestions();
+          }
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
+
+  private loadMovieSections() {
     let pending = 3;
     const done = () => {
       pending--;
@@ -70,32 +110,60 @@ export class CustomerHome implements OnInit {
       timeout(10000), catchError(() => of([])), finalize(done)
     ).subscribe({
       next: (movies) => {
-        const sortedByAdded = [...(movies || [])].sort((a, b) => (b.id || 0) - (a.id || 0));
+        // Filter to only available movies for home page carousels
+        const available = (movies || []).filter(m => this.availableMovieIds.has(m.id));
+        const sortedByAdded = [...available].sort((a, b) => (b.id || 0) - (a.id || 0));
         this.newMovies = sortedByAdded.slice(0, 10);
+        this.heroMovies = sortedByAdded.slice(0, 3);
+        this.startHeroTimer();
       }
     });
 
     this.movieService.getTopUserRated(10).pipe(
       timeout(10000), catchError(() => of([])), finalize(done)
-    ).subscribe({ next: (res) => (this.topRatedMovies = res || []) });
+    ).subscribe({
+      next: (res) => (this.topRatedMovies = (res || []).filter((m: any) => this.availableMovieIds.has(m.id)))
+    });
 
     this.movieService.getTopRented(10).pipe(
       timeout(10000), catchError(() => of([])), finalize(done)
-    ).subscribe({ next: (res) => (this.topRentedMovies = res || []) });
-
-    this.currentUser.loadCurrentUser().subscribe(user => {
-      this.userId = user?.id ?? this.currentUser.decodedUserId;
-      if (this.userId > 0) {
-        this.userService.getPreferences(this.userId).pipe(catchError(() => of(null))).subscribe(pref => {
-          if (!pref || !pref.isSet) {
-            this.showPreferencesPopup = true;
-          } else {
-            this.loadSuggestions();
-          }
-          this.cdr.detectChanges();
-        });
-      }
+    ).subscribe({
+      next: (res) => (this.topRentedMovies = (res || []).filter((m: any) => this.availableMovieIds.has(m.movieId ?? m.id)))
     });
+  }
+
+  ngOnDestroy() {
+    this.stopHeroTimer();
+  }
+
+  private startHeroTimer() {
+    this.stopHeroTimer();
+    this.heroTimer = setInterval(() => {
+      this.heroIndex = (this.heroIndex + 1) % Math.max(1, this.heroMovies.length);
+      this.cdr.detectChanges();
+    }, 5000);
+  }
+
+  private stopHeroTimer() {
+    if (this.heroTimer) { clearInterval(this.heroTimer); this.heroTimer = null; }
+  }
+
+  setHeroIndex(i: number) {
+    this.heroIndex = i;
+    this.startHeroTimer(); // reset timer on manual click
+    this.cdr.detectChanges();
+  }
+
+  isRented(movieId: number): boolean {
+    return this.rentedMovieIds.has(movieId);
+  }
+
+  heroAction(movie: any) {
+    if (this.isRented(movie.id)) {
+      this.router.navigate(['/dashboard/watch', movie.id]);
+    } else {
+      this.router.navigate(['/dashboard/movie', movie.id]);
+    }
   }
 
   loadSuggestions() {

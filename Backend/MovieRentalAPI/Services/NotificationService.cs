@@ -157,9 +157,10 @@ namespace MovieRentalAPI.Services
 
             foreach (var item in expiringItems)
             {
-                // Avoid duplicate notifications
+                // Avoid duplicate notifications within the last 24 hours
                 var alreadyNotified = await _context.Notifications.AnyAsync(n =>
-                    n.Type == "expiry" && n.RelatedId == item.Id &&
+                    n.Type == "expiry" && n.RelatedId == item.MovieId &&
+                    n.UserId == _context.Set<Rental>().Where(r => r.Id == item.RentalId).Select(r => r.UserId).FirstOrDefault() &&
                     n.CreatedAt >= now.AddHours(-24));
 
                 if (alreadyNotified) continue;
@@ -178,8 +179,51 @@ namespace MovieRentalAPI.Services
                     Message = $"Your rental of \"{movie?.Title ?? "a movie"}\" expires in {hoursLeft} hour(s). Renew now to keep watching.",
                     IsRead = false,
                     CreatedAt = now,
-                    RelatedId = item.Id
+                    RelatedId = item.MovieId  // navigate to movie detail page
                 });
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        // ── Check just-expired rentals ───────────────────────────────────────
+        public async Task CheckExpiredRentals()
+        {
+            var now = IstDateTime.Now;
+            // Items that expired in the last 30 minutes (window matches scheduler interval)
+            var windowStart = now.AddMinutes(-30);
+
+            var justExpiredItems = await _context.Set<RentalItem>()
+                .Where(i => i.IsActive && i.EndDate >= windowStart && i.EndDate <= now)
+                .ToListAsync();
+
+            foreach (var item in justExpiredItems)
+            {
+                var rental = await _context.Set<Rental>().FindAsync(item.RentalId);
+                if (rental == null) continue;
+
+                // Avoid duplicate expired notifications for the same item
+                var alreadyNotified = await _context.Notifications.AnyAsync(n =>
+                    n.Type == "expired" && n.RelatedId == item.Id &&
+                    n.UserId == rental.UserId);
+
+                if (alreadyNotified) continue;
+
+                var movie = await _context.Set<Movie>().FindAsync(item.MovieId);
+
+                _context.Notifications.Add(new Notification
+                {
+                    UserId = rental.UserId,
+                    Type = "expired",
+                    Title = "Rental Expired",
+                    Message = $"Your rental of \"{movie?.Title ?? "a movie"}\" has expired. Renew to continue watching.",
+                    IsRead = false,
+                    CreatedAt = now,
+                    RelatedId = item.Id  // navigate to Expired section in My Rentals
+                });
+
+                // Deactivate the item
+                item.IsActive = false;
+                _context.Set<RentalItem>().Update(item);
             }
             await _context.SaveChangesAsync();
         }

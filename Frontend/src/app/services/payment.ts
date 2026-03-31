@@ -31,4 +31,12 @@ export class PaymentService {
   getItemRefund(rentalItemId: number) {
     return this.http.get<any>(`${this.baseUrl}/item-refund/${rentalItemId}`);
   }
+
+  getPromos() {
+    return this.http.get<any[]>('http://localhost:5287/api/Promo');
+  }
+
+  applyPromo(code: string, itemCount: number) {
+    return this.http.post<any>('http://localhost:5287/api/Promo/apply', { code, itemCount });
+  }
 }

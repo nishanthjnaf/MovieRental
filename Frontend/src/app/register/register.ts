@@ -70,6 +70,12 @@ toggleConfirmPassword() {
   this.showConfirmPassword = !this.showConfirmPassword;
 }
 
+  get pwdValue(): string { return this.form.get('password')?.value || ''; }
+  get hasUppercase(): boolean { return /[A-Z]/.test(this.pwdValue); }
+  get hasNumber(): boolean { return /\d/.test(this.pwdValue); }
+  get hasSpecial(): boolean { return /[^A-Za-z0-9]/.test(this.pwdValue); }
+  get hasMinLength(): boolean { return this.pwdValue.length >= 6; }
+
 passwordStrengthClass() {
   const value = this.form.get('password')?.value || '';
   const strength = this.getStrengthScore(value);

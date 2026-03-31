@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { UserService } from '../services/user';
 import { CurrentUserService } from '../services/current-user';
@@ -7,14 +7,16 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PaymentService } from '../services/payment';
 import { NotificationService } from '../services/notification';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-customer-rentals',
   standalone: true,
   imports: [CommonModule, DatePipe, FormsModule],
   templateUrl: './customer-rentals.html'
 })
-export class CustomerRentals implements OnInit {
+export class CustomerRentals implements OnInit, AfterViewInit {
+  @ViewChild('expiredSection') expiredSectionRef!: ElementRef;
+
   rentals: any[] = [];
   activeRentals: any[] = [];
   returnedRentals: any[] = [];
@@ -56,11 +58,28 @@ export class CustomerRentals implements OnInit {
     private notifService: NotificationService,
     private toastr: ToastrService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.load();
+  }
+
+  ngAfterViewInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      if (params.get('section') === 'expired') {
+        // Wait for data to load then scroll
+        const tryScroll = () => {
+          if (this.expiredSectionRef?.nativeElement) {
+            this.expiredSectionRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            setTimeout(tryScroll, 300);
+          }
+        };
+        setTimeout(tryScroll, 400);
+      }
+    });
   }
 
   load() {

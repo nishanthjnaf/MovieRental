@@ -4,8 +4,10 @@ import { Router } from '@angular/router';
 import { WatchlistService } from '../services/watchlist';
 import { CurrentUserService } from '../services/current-user';
 import { MovieService } from '../services/movie';
+import { UserService } from '../services/user';
 import { ToastrService } from 'ngx-toastr';
 import { CartStateService } from '../services/cart-state';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-customer-watchlist',
@@ -18,11 +20,13 @@ export class CustomerWatchlist implements OnInit {
   loading = true;
   showConfirmPopup = false;
   pendingRemoveId: number | null = null;
+  rentedMovieIds = new Set<number>();
 
   constructor(
     private watchlistService: WatchlistService,
     private currentUser: CurrentUserService,
     private movieService: MovieService,
+    private userService: UserService,
     private cart: CartStateService,
     private router: Router,
     private toastr: ToastrService,
@@ -35,52 +39,40 @@ export class CustomerWatchlist implements OnInit {
 
   load() {
     const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
-    if (!userId) {
-      this.loading = false;
+    if (!userId) { this.loading = false; this.cdr.detectChanges(); return; }
+
+    // Load rented movie IDs
+    this.userService.getRentedMovies(userId).pipe(catchError(() => of([]))).subscribe((items: any[]) => {
+      this.rentedMovieIds = new Set((items || []).filter((i: any) => i.isActive).map((i: any) => i.movieId));
       this.cdr.detectChanges();
-      return;
-    }
+    });
+
     this.watchlistService.getByUser(userId).subscribe({
       next: (list) => {
         const src = list || [];
-        if (!src.length) {
-          this.items = [];
-          this.loading = false;
-          this.cdr.detectChanges();
-          return;
-        }
+        if (!src.length) { this.items = []; this.loading = false; this.cdr.detectChanges(); return; }
         let pending = src.length;
         src.forEach((i) => {
           this.movieService.getById(i.movieId).subscribe({
             next: (movie) => {
               this.items = [...this.items.filter((x) => x.id !== i.id), { ...i, movie }];
               pending--;
-              if (pending <= 0) {
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
+              if (pending <= 0) { this.loading = false; this.cdr.detectChanges(); }
             },
-            error: () => {
-              pending--;
-              if (pending <= 0) {
-                this.loading = false;
-                this.cdr.detectChanges();
-              }
-            }
+            error: () => { pending--; if (pending <= 0) { this.loading = false; this.cdr.detectChanges(); } }
           });
         });
       },
-      error: () => {
-        this.items = [];
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.items = []; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
-  open(movieId: number) {
-    this.router.navigate(['/dashboard/movie', movieId]);
+  isRented(movieId: number): boolean {
+    return this.rentedMovieIds.has(movieId);
   }
+
+  open(movieId: number) { this.router.navigate(['/dashboard/movie', movieId]); }
+  watchMovie(movieId: number) { this.router.navigate(['/dashboard/watch', movieId]); }
 
   addToCart(item: any) {
     const movie = item?.movie;
@@ -89,19 +81,10 @@ export class CustomerWatchlist implements OnInit {
     if (!result) return;
     result.subscribe({
       next: (res) => {
-        if (res === null) {
-          this.toastr.error('Could not add to cart');
-        } else if (res === 'exists') {
-          this.toastr.info('Already in cart');
-        } else {
-          this.watchlistService.remove(item.id).subscribe({
-            next: () => {
-              this.items = this.items.filter((i) => i.id !== item.id);
-              this.toastr.success('Added to cart and removed from watchlist');
-            },
-            error: () => this.toastr.success('Added to cart')
-          });
-        }
+        if (res === null) this.toastr.error('Could not add to cart');
+        else if (res === 'exists') this.toastr.info('Already in cart');
+        else this.toastr.success('Added to cart');
+        // Do NOT remove from watchlist
       },
       error: () => this.toastr.error('Could not add to cart')
     });

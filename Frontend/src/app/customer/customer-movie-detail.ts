@@ -25,6 +25,7 @@ import { catchError, of, timeout } from 'rxjs';
 export class CustomerMovieDetail implements OnInit {
   movie: any = null;
   isAlreadyRented = false;
+  rentalEndDate: string | null = null;
   isAvailableToRent = true;
   rentalPrice: number | null = null;
   loading = true;
@@ -51,6 +52,22 @@ export class CustomerMovieDetail implements OnInit {
     private cdr: ChangeDetectorRef,
     private sanitizer: DomSanitizer
   ) {}
+
+  get rentalCountdown(): string | null {
+    if (!this.rentalEndDate) return null;
+    const diff = new Date(this.rentalEndDate).getTime() - Date.now();
+    if (diff <= 0) return 'Expired';
+    const hours = diff / (1000 * 60 * 60);
+    if (hours < 24) return `${Math.ceil(hours)}h left`;
+    const days = Math.ceil(hours / 24);
+    return `${days} day${days === 1 ? '' : 's'} left`;
+  }
+
+  get rentalExpiringSoon(): boolean {
+    if (!this.rentalEndDate) return false;
+    const diff = new Date(this.rentalEndDate).getTime() - Date.now();
+    return diff > 0 && diff < 24 * 60 * 60 * 1000;
+  }
 
   get trailerEmbedUrl(): SafeResourceUrl {
     const url = this.movie?.trailerUrl;
@@ -117,7 +134,9 @@ export class CustomerMovieDetail implements OnInit {
           catchError(() => of([])), finalize(done)
         ).subscribe({
           next: (items) => {
-            this.isAlreadyRented = (items || []).some((i: any) => i.movieId === this.movieId && i.isActive);
+            const activeRental = (items || []).find((i: any) => i.movieId === this.movieId && i.isActive);
+            this.isAlreadyRented = !!activeRental;
+            this.rentalEndDate = activeRental?.endDate ?? null;
             // Check existing review for this movie
             this.reviewService.getByUser(userId).pipe(catchError(() => of([]))).subscribe((reviews: any[]) => {
               const found = (reviews || []).find((r: any) => r.movieId === this.movieId);

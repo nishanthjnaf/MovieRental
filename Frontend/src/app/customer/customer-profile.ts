@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { PreferencesSetup } from './preferences-setup';
 import { ThemeService } from '../services/theme';
 import { NotificationService } from '../services/notification';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-customer-profile',
@@ -17,8 +18,39 @@ import { NotificationService } from '../services/notification';
 })
 export class CustomerProfile implements OnInit {
   user: any = null;
+  preferences: any = null;
   edit = { name: '', username: '', role: 'Customer', email: '', phone: '' };
   pwd = { oldPassword: '', newPassword: '', confirmPassword: '' };
+  showOldPwd = false;
+  showNewPwd = false;
+
+  get newPwdValue(): string { return this.pwd.newPassword || ''; }
+  get pwdHasUppercase(): boolean { return /[A-Z]/.test(this.newPwdValue); }
+  get pwdHasNumber(): boolean { return /\d/.test(this.newPwdValue); }
+  get pwdHasSpecial(): boolean { return /[^A-Za-z0-9]/.test(this.newPwdValue); }
+  get pwdHasMinLength(): boolean { return this.newPwdValue.length >= 6; }
+  get pwdStrengthClass(): string {
+    let s = 0;
+    if (this.pwdHasUppercase) s++;
+    if (this.pwdHasNumber) s++;
+    if (this.pwdHasSpecial) s++;
+    if (this.pwdHasMinLength) s++;
+    if (s <= 1) return 'auth-strength__fill bg-red-500 w-1/4';
+    if (s <= 3) return 'auth-strength__fill bg-yellow-500 w-2/4';
+    if (s === 4) return 'auth-strength__fill bg-green-500 w-full';
+    return 'auth-strength__fill bg-lime-500 w-3/4';
+  }
+  get pwdStrengthText(): string {
+    if (!this.newPwdValue) return '';
+    let s = 0;
+    if (this.pwdHasUppercase) s++;
+    if (this.pwdHasNumber) s++;
+    if (this.pwdHasSpecial) s++;
+    if (this.pwdHasMinLength) s++;
+    if (s <= 1) return 'Weak';
+    if (s <= 3) return 'Medium';
+    return 'Strong';
+  }
   showEditPopup = false;
   showPasswordPopup = false;
   showPreferencesPopup = false;
@@ -43,6 +75,12 @@ export class CustomerProfile implements OnInit {
         email: u?.email || '',
         phone: u?.phone || ''
       };
+      if (u?.id) {
+        this.userService.getPreferences(u.id).pipe(catchError(() => of(null))).subscribe(p => {
+          this.preferences = p;
+          this.cdr.detectChanges();
+        });
+      }
     });
   }
 
@@ -90,6 +128,12 @@ export class CustomerProfile implements OnInit {
   onPreferencesSaved() {
     this.showPreferencesPopup = false;
     this.toastr.success('Preferences updated');
+    if (this.user?.id) {
+      this.userService.getPreferences(this.user.id).pipe(catchError(() => of(null))).subscribe(p => {
+        this.preferences = p;
+        this.cdr.detectChanges();
+      });
+    }
   }
 }
 

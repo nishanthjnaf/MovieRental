@@ -16,6 +16,21 @@ namespace MovieRentalAPI.Controllers
         {
             _paymentService = paymentService;
         }
+
+        //[Authorize(Roles = "Customer")]
+        [HttpPost]
+        public async Task<IActionResult> MakePayment(MakePaymentRequestDto request)
+        {
+            try
+            {
+                var result = await _paymentService.MakePayment(request);
+                return Ok(result);
+            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (ConflictException ex) { return Conflict(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+        }
+
         //[Authorize(Roles = "Customer")]
         [HttpPost("refund/{rentalItemId}")]
         public async Task<IActionResult> ProcessRefund(int rentalItemId)
@@ -31,30 +46,6 @@ namespace MovieRentalAPI.Controllers
         }
 
         //[Authorize(Roles = "Customer")]
-        [HttpPost]
-        public async Task<IActionResult> MakePayment(
-            MakePaymentRequestDto request)
-        {
-            try
-            {
-                var result = await _paymentService.MakePayment(request);
-                return Ok(result);
-            }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ConflictException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
-        //[Authorize(Roles = "Customer")]
         [HttpGet("item-refund/{rentalItemId}")]
         public async Task<IActionResult> GetItemRefund(int rentalItemId)
         {
@@ -63,19 +54,19 @@ namespace MovieRentalAPI.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Returns all payment records for a rental (purchase + any refund records).
+        /// </summary>
         //[Authorize(Roles = "Admin,Customer")]
         [HttpGet("rental/{rentalId}")]
         public async Task<IActionResult> GetByRental(int rentalId)
         {
             try
             {
-                var result = await _paymentService.GetPaymentByRental(rentalId);
+                var result = await _paymentService.GetPaymentsByRental(rentalId);
                 return Ok(result);
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
         }
 
         //[Authorize(Roles = "Admin,Customer")]
@@ -87,12 +78,8 @@ namespace MovieRentalAPI.Controllers
                 var result = await _paymentService.GetPaymentByUser(userId);
                 return Ok(result);
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
         }
-
 
         //[Authorize(Roles = "Admin")]
         [HttpGet]
@@ -103,10 +90,7 @@ namespace MovieRentalAPI.Controllers
                 var result = await _paymentService.GetAllPayments();
                 return Ok(result);
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
         }
     }
 }

@@ -1,554 +1,337 @@
-<div class="min-h-screen admin-theme text-slate-100">
+﻿<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar__logo"><span class="admin-sidebar__logo-icon">🎬</span><span class="admin-sidebar__logo-text">CineAdmin</span></div>
+    <nav class="admin-sidebar__nav">
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='services'" (click)="viewMode='services'"><span class="admin-nav-item__icon">🏠</span> Dashboard</button>
+      <div class="admin-sidebar__divider"></div>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='genre'" (click)="openService('genre')"><span class="admin-nav-item__icon">🏷️</span> Genres</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='inventory'" (click)="openService('inventory')"><span class="admin-nav-item__icon">📦</span> Inventory</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='movie'" (click)="openService('movie')"><span class="admin-nav-item__icon">🎥</span> Movies</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='rental'" (click)="openService('rental')"><span class="admin-nav-item__icon">📋</span> Rentals</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='payment'" (click)="openService('payment')"><span class="admin-nav-item__icon">💳</span> Payments</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='broadcast'" (click)="openService('broadcast')"><span class="admin-nav-item__icon">📢</span> Broadcast</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='logs'" (click)="openService('logs')"><span class="admin-nav-item__icon">📜</span> Activity Logs</button>
+    </nav>
+    <div class="admin-sidebar__divider"></div>
+    <button class="admin-sidebar__logout" (click)="logout()"><span>🚪</span> Logout</button>
+  </aside>
 
-  <!-- ================= SERVICES VIEW ================= -->
-  <ng-container *ngIf="viewMode === 'services'">
-    <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-3xl font-bold text-amber-300">Admin Panel</h2>
-        <div class="flex items-center gap-3 relative">
-          <button class="top-icon-btn" (click)="toggleProfileMenu()" title="Profile">👤</button>
-          <app-theme-toggle />
-          <button (click)="logout()" class="bg-fuchsia-700 hover:bg-fuchsia-600 text-white px-4 py-2 rounded-lg">Logout</button>
-          <div *ngIf="showProfileMenu" class="absolute right-0 top-12 bg-slate-900 border border-slate-700 rounded-lg w-52 p-3 shadow-2xl z-50">
-            <p class="text-sm text-slate-300">Signed in as</p>
-            <p class="font-semibold text-amber-300 truncate mb-3">{{ currentAdminName }}</p>
-            <button (click)="openProfile()" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800">My Profile</button>
-            <button (click)="logout()" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 text-red-300">Logout</button>
-          </div>
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <span class="admin-topbar__title">{{ getPageTitle() }}</span>
+      <div class="admin-topbar__right">
+        <app-theme-toggle />
+        <button class="admin-topbar__admin-btn" (click)="toggleProfileMenu()">
+          <div class="admin-topbar__avatar">{{ currentAdminName.charAt(0).toUpperCase() }}</div>
+          {{ currentAdminName }}
+        </button>
+        <div *ngIf="showProfileMenu" class="admin-profile-menu">
+          <p class="admin-profile-menu__name">{{ currentAdminName }}</p>
+          <button class="admin-profile-menu__item" (click)="openProfile()">My Profile</button>
+          <button class="admin-profile-menu__item admin-profile-menu__item--danger" (click)="logout()">Logout</button>
         </div>
       </div>
+    </header>
 
-      <section>
-        <h3 class="text-xl font-semibold mb-3">Stats</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <article class="glass-panel border border-slate-700 rounded-xl p-4">
-            <p class="text-slate-400 text-sm">Active Users</p>
-            <p class="text-2xl font-bold text-amber-300">{{ stats.activeUsers }}</p>
-          </article>
-          <article class="glass-panel border border-slate-700 rounded-xl p-4">
-            <p class="text-slate-400 text-sm">Active Rental Items</p>
-            <p class="text-2xl font-bold text-fuchsia-300">{{ stats.activeRentalItems }}</p>
-          </article>
-          <article class="glass-panel border border-slate-700 rounded-xl p-4">
-            <p class="text-slate-400 text-sm">Top Rented Movie</p>
-            <p class="text-lg font-semibold text-slate-100 truncate">{{ stats.topRentedMovie }}</p>
-          </article>
-          <article class="glass-panel border border-slate-700 rounded-xl p-4">
-            <p class="text-slate-400 text-sm">Revenue Collected</p>
-            <p class="text-2xl font-bold text-emerald-300">₹ {{ stats.revenueCollected | number:'1.0-0' }}</p>
-          </article>
+    <div class="admin-content">
+
+      <!-- ═══════════════ DASHBOARD ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'services'">
+        <p class="admin-dash__greeting">Welcome back, {{ currentAdminName }} 👋</p>
+        <p class="admin-dash__sub">Here's what's happening with your platform today.</p>
+        <div class="admin-stats">
+          <div class="admin-stat-card"><span class="admin-stat-card__label">Active Users</span><span class="admin-stat-card__value admin-stat-card__value--amber">{{ stats.activeUsers }}</span></div>
+          <div class="admin-stat-card"><span class="admin-stat-card__label">Active Rentals</span><span class="admin-stat-card__value admin-stat-card__value--fuchsia">{{ stats.activeRentalItems }}</span></div>
+          <div class="admin-stat-card"><span class="admin-stat-card__label">Top Rented</span><span class="admin-stat-card__value admin-stat-card__value--sky" style="font-size:1rem;line-height:1.3">{{ stats.topRentedMovie }}</span></div>
+          <div class="admin-stat-card"><span class="admin-stat-card__label">Revenue</span><span class="admin-stat-card__value admin-stat-card__value--emerald">₹{{ stats.revenueCollected | number:'1.0-0' }}</span></div>
         </div>
-      </section>
-
-      <section>
-        <h3 class="text-xl font-semibold mb-3">Services</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <div (click)="openService('genre')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
-            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-fuchsia-400">Genre</span></div>
-            <div class="p-3"><p class="text-xs text-slate-400">Manage genres</p></div>
-          </div>
-          <div (click)="openService('inventory')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
-            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-amber-400">Inventory</span></div>
-            <div class="p-3"><p class="text-xs text-slate-400">Manage inventory</p></div>
-          </div>
-          <div (click)="openService('movie')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
-            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-emerald-400">Movie</span></div>
-            <div class="p-3"><p class="text-xs text-slate-400">Manage movies</p></div>
-          </div>
-          <div (click)="openService('rental')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
-            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-sky-400">Rental</span></div>
-            <div class="p-3"><p class="text-xs text-slate-400">Manage rentals</p></div>
-          </div>
-          <div (click)="openService('payment')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
-            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-rose-400">Payment</span></div>
-            <div class="p-3"><p class="text-xs text-slate-400">Manage payments</p></div>
-          </div>
-          <div (click)="openService('broadcast')" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition">
-            <div class="h-24 bg-slate-800 flex items-center justify-center"><span class="text-2xl font-bold text-amber-400">Broadcast</span></div>
-            <div class="p-3"><p class="text-xs text-slate-400">Send notifications</p></div>
-          </div>
+        <div class="admin-services-grid">
+          <div class="admin-service-card" (click)="openService('genre')"><div class="admin-service-card__icon admin-service-card__icon--fuchsia">🏷️</div><div class="admin-service-card__body"><p class="admin-service-card__title">Genres</p><p class="admin-service-card__desc">Add, edit and assign genres to movies</p></div></div>
+          <div class="admin-service-card" (click)="openService('inventory')"><div class="admin-service-card__icon admin-service-card__icon--amber">📦</div><div class="admin-service-card__body"><p class="admin-service-card__title">Inventory</p><p class="admin-service-card__desc">Manage stock and rental pricing</p></div></div>
+          <div class="admin-service-card" (click)="openService('movie')"><div class="admin-service-card__icon admin-service-card__icon--emerald">🎥</div><div class="admin-service-card__body"><p class="admin-service-card__title">Movies</p><p class="admin-service-card__desc">Add, update and remove movies</p></div></div>
+          <div class="admin-service-card" (click)="openService('rental')"><div class="admin-service-card__icon admin-service-card__icon--sky">📋</div><div class="admin-service-card__body"><p class="admin-service-card__title">Rentals</p><p class="admin-service-card__desc">View and manage all rental records</p></div></div>
+          <div class="admin-service-card" (click)="openService('payment')"><div class="admin-service-card__icon admin-service-card__icon--rose">💳</div><div class="admin-service-card__body"><p class="admin-service-card__title">Payments</p><p class="admin-service-card__desc">Track transactions and refunds</p></div></div>
+          <div class="admin-service-card" (click)="openService('broadcast')"><div class="admin-service-card__icon admin-service-card__icon--violet">📢</div><div class="admin-service-card__body"><p class="admin-service-card__title">Broadcast</p><p class="admin-service-card__desc">Send notifications to all customers</p></div></div>
+          <div class="admin-service-card" (click)="openService('logs')"><div class="admin-service-card__icon admin-service-card__icon--sky">📜</div><div class="admin-service-card__body"><p class="admin-service-card__title">Activity Logs</p><p class="admin-service-card__desc">Audit trail of all customer and admin actions</p></div></div>
         </div>
-      </section>
-    </div>
-  </ng-container>
+      </ng-container>
 
-  <!-- ================= MANAGEMENT VIEW ================= -->
-  <ng-container *ngIf="viewMode !== 'services'">
-    <div class="flex h-full">
-
-      <!-- SIDEBAR -->
-      <div class="w-1/5 bg-slate-900/95 border-r border-slate-800 text-white p-5 space-y-4 flex flex-col">
-        <h2 class="text-xl font-bold mb-4">Services</h2>
-        <p (click)="viewMode='services'" class="cursor-pointer text-blue-400">← Back</p>
-        <div class="space-y-3">
-          <p (click)="openService('genre')" [class.text-blue-400]="viewMode==='genre'" class="cursor-pointer hover:text-blue-300">Genre</p>
-          <p (click)="openService('inventory')" [class.text-blue-400]="viewMode==='inventory'" class="cursor-pointer hover:text-blue-300">Inventory</p>
-          <p (click)="openService('movie')" [class.text-blue-400]="viewMode==='movie'" class="cursor-pointer hover:text-blue-300">Movie</p>
-          <p (click)="openService('rental')" [class.text-blue-400]="viewMode==='rental'" class="cursor-pointer hover:text-blue-300">Rental</p>
-          <p (click)="openService('payment')" [class.text-blue-400]="viewMode==='payment'" class="cursor-pointer hover:text-blue-300">Payment</p>
-          <p (click)="openService('broadcast')" [class.text-blue-400]="viewMode==='broadcast'" class="cursor-pointer hover:text-blue-300">Broadcast</p>
+      <!-- ═══════════════ GENRE ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'genre'">
+        <div class="admin-page-header">
+          <h2 class="admin-page-title">Genre Management</h2>
+          <button class="admin-add-btn" (click)="openAddForm()">+ Add Genre</button>
         </div>
-        <button (click)="logout()" class="mt-auto bg-fuchsia-700 hover:bg-fuchsia-600 text-white px-3 py-2 rounded-lg">Logout</button>
-      </div>
-
-      <!-- RIGHT SIDE -->
-      <div class="w-4/5 p-6 overflow-auto">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-amber-300">Management</h2>
-          <div class="relative flex items-center gap-2">
-            <app-theme-toggle />
-            <button class="top-icon-btn" (click)="toggleProfileMenu()" title="Profile">👤</button>
-            <div *ngIf="showProfileMenu" class="absolute right-0 top-12 bg-slate-900 border border-slate-700 rounded-lg w-52 p-3 shadow-2xl z-50">
-              <p class="text-sm text-slate-300">Signed in as</p>
-              <p class="font-semibold text-amber-300 truncate mb-3">{{ currentAdminName }}</p>
-              <button (click)="openProfile()" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800">My Profile</button>
-              <button (click)="logout()" class="w-full text-left px-3 py-2 rounded hover:bg-slate-800 text-red-300">Logout</button>
-            </div>
-          </div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">Search by ID</span><input type="number" [(ngModel)]="searchId" (ngModelChange)="searchGenre()" placeholder="ID" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Search by Name</span><input [(ngModel)]="genreSearchName" (ngModelChange)="searchGenre()" placeholder="Genre name..." class="admin-filter-input" style="width:200px" /></div>
+          <button class="admin-filter-reset" (click)="resetSearch()">Reset</button>
         </div>
-
-        <!-- ================= GENRE ================= -->
-        <ng-container *ngIf="viewMode === 'genre'">
-          <h2 class="text-2xl font-bold mb-4">Genre Management</h2>
-          <div class="flex justify-between mb-4">
-            <div class="flex gap-2">
-              <input [(ngModel)]="searchId" type="number" placeholder="Search by ID" class="border p-2 rounded w-36 text-black" />
-              <input [(ngModel)]="genreSearchName" placeholder="Search by Name" class="border p-2 rounded w-48 text-black" />
-              <button (click)="searchGenre()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
-              <button (click)="resetSearch()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
-              <button (click)="refreshGenres()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
-            </div>
-            <button (click)="openAddForm()" class="bg-blue-500 text-white px-4 py-2 rounded">+ Add Genre</button>
-          </div>
-          <table class="w-full bg-white text-black shadow rounded">
-            <thead class="bg-gray-200">
-              <tr><th class="p-2">ID</th><th class="p-2">Name</th><th class="p-2">Description</th><th class="p-2">Actions</th></tr>
-            </thead>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
             <tbody>
-              <tr *ngFor="let g of genres" class="border-t text-center">
-                <td class="p-2">{{ g.id }}</td>
-                <td class="p-2">{{ g.name }}</td>
-                <td class="p-2">{{ g.description }}</td>
-                <td class="p-2 space-x-2">
-                  <button (click)="editGenre(g)">✏️</button>
-                  <button (click)="deleteGenre(g.id)">🗑️</button>
-                  <button (click)="openAssign(g)">🎬</button>
-                </td>
+              <tr *ngFor="let g of genres">
+                <td>{{ g.id }}</td><td>{{ g.name }}</td><td style="color:#94a3b8">{{ g.description }}</td>
+                <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editGenre(g)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteGenre(g.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Assign Movie" (click)="openAssign(g)">🎬</button></div></td>
               </tr>
+              <tr *ngIf="genres.length === 0"><td colspan="4" class="admin-empty">No genres found.</td></tr>
             </tbody>
           </table>
-        </ng-container>
+        </div>
+      </ng-container>
 
-        <!-- ================= INVENTORY ================= -->
-        <ng-container *ngIf="viewMode === 'inventory'">
-          <h2 class="text-2xl font-bold mb-4">Inventory Management</h2>
-          <div class="flex justify-between mb-4">
-            <div class="flex gap-2 flex-wrap">
-              <input [(ngModel)]="inventorySearchId" type="number" placeholder="Inventory ID" class="border p-2 rounded w-32 text-black" />
-              <input [(ngModel)]="inventorySearchMovieId" type="number" placeholder="Movie ID" class="border p-2 rounded w-28 text-black" />
-              <input [(ngModel)]="inventorySearchMovieName" placeholder="Movie Name" class="border p-2 rounded w-40 text-black" />
-              <select [(ngModel)]="inventoryStatusFilter" class="border p-2 rounded text-black">
-                <option value="">All Status</option>
-                <option value="available">Available</option>
-                <option value="unavailable">Not Available</option>
-              </select>
-              <button (click)="searchInventory()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
-              <button (click)="resetInventory()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
-              <button (click)="refreshInventory()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
-            </div>
-            <button (click)="openInventoryForm()" class="bg-blue-500 text-white px-4 py-2 rounded">+ Add Inventory</button>
-          </div>
-          <table class="w-full bg-white text-black shadow rounded">
-            <thead class="bg-gray-200">
-              <tr><th class="p-2">ID</th><th class="p-2">Movie ID</th><th class="p-2">Movie Name</th><th class="p-2">Price</th><th class="p-2">Status</th><th class="p-2">Actions</th></tr>
-            </thead>
+      <!-- ═══════════════ INVENTORY ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'inventory'">
+        <div class="admin-page-header">
+          <h2 class="admin-page-title">Inventory Management</h2>
+          <button class="admin-add-btn" (click)="openInventoryForm()">+ Add Inventory</button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">Inventory ID</span><input type="number" [(ngModel)]="inventorySearchId" (ngModelChange)="searchInventory()" placeholder="ID" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Movie ID</span><input type="number" [(ngModel)]="inventorySearchMovieId" (ngModelChange)="searchInventory()" placeholder="Movie ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Movie Name</span><input [(ngModel)]="inventorySearchMovieName" (ngModelChange)="searchInventory()" placeholder="Movie name..." class="admin-filter-input" style="width:180px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="inventoryStatusFilter" (ngModelChange)="searchInventory()" class="admin-filter-select" style="width:140px"><option value="">All Status</option><option value="available">Available</option><option value="unavailable">Not Available</option></select></div>
+          <button class="admin-filter-reset" (click)="resetInventory()">Reset</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>ID</th><th>Movie ID</th><th>Movie Name</th><th>Price/day</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
-              <tr *ngFor="let i of inventories" class="border-t text-center">
-                <td class="p-2">{{ i.id }}</td>
-                <td class="p-2">{{ i.movieId }}</td>
-                <td class="p-2">{{ i.movieName }}</td>
-                <td class="p-2">{{ i.rentalPrice }}</td>
-                <td class="p-2"><span [class]="i.isAvailable ? 'text-green-600' : 'text-red-500'">{{ i.isAvailable ? 'Available' : 'Not Available' }}</span></td>
-                <td class="p-2 space-x-2">
-                  <button (click)="editInventory(i)">✏️</button>
-                  <button (click)="deleteInventory(i.id)">🗑️</button>
-                  <button (click)="toggleAvailability(i.id)">🔄</button>
-                </td>
+              <tr *ngFor="let i of inventories">
+                <td>{{ i.id }}</td><td>{{ i.movieId }}</td><td>{{ i.movieName }}</td><td>₹{{ i.rentalPrice }}</td>
+                <td><span class="admin-badge" [class.admin-badge--green]="i.isAvailable" [class.admin-badge--red]="!i.isAvailable">{{ i.isAvailable ? 'Available' : 'Unavailable' }}</span></td>
+                <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editInventory(i)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteInventory(i.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Toggle" (click)="toggleAvailability(i.id)">🔄</button></div></td>
               </tr>
+              <tr *ngIf="inventories.length === 0"><td colspan="6" class="admin-empty">No inventory items found.</td></tr>
             </tbody>
           </table>
-        </ng-container>
+        </div>
+      </ng-container>
 
-        <!-- ================= MOVIE ================= -->
-        <ng-container *ngIf="viewMode === 'movie'">
-          <h2 class="text-2xl font-bold mb-4">Movie Management</h2>
-          <div class="flex justify-between mb-4">
-            <div class="flex gap-2 flex-wrap">
-              <input [(ngModel)]="movieSearchId" type="number" placeholder="Movie ID" class="border p-2 rounded w-28 text-black" />
-              <input [(ngModel)]="movieSearchName" placeholder="Movie Name" class="border p-2 rounded w-44 text-black" />
-              <select [(ngModel)]="movieSearchLanguage" class="border p-2 rounded text-black w-36">
-                <option value="">All Languages</option>
-                <option *ngFor="let lang of movieLanguages" [value]="lang">{{ lang }}</option>
-              </select>
-              <input [(ngModel)]="movieMinYear" type="number" placeholder="Min Year" class="border p-2 rounded w-24 text-black" />
-              <input [(ngModel)]="movieMaxYear" type="number" placeholder="Max Year" class="border p-2 rounded w-24 text-black" />
-              <select [(ngModel)]="movieSort" class="border p-2 rounded text-black w-52">
-                <option value="">Sort By</option>
-                <option value="rentalCount_desc">Rental Count (High → Low)</option>
-                <option value="rentalCount_asc">Rental Count (Low → High)</option>
-                <option value="rating_desc">Rating (High → Low)</option>
-                <option value="rating_asc">Rating (Low → High)</option>
-              </select>
-              <button (click)="searchMovie()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
-              <button (click)="resetMovie()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
-              <button (click)="refreshMovies()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
-            </div>
-            <button (click)="openMovieForm()" class="bg-blue-500 text-white px-4 py-2 rounded">+ Add Movie</button>
-          </div>
-          <table class="w-full bg-white text-black shadow rounded">
-            <thead class="bg-gray-200">
+      <!-- ═══════════════ MOVIES ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'movie'">
+        <div class="admin-page-header">
+          <h2 class="admin-page-title">Movie Management</h2>
+          <button class="admin-add-btn" (click)="openMovieForm()">+ Add Movie</button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">Movie ID</span><input type="number" [(ngModel)]="movieSearchId" (ngModelChange)="searchMovie()" placeholder="ID" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Title</span><input [(ngModel)]="movieSearchName" (ngModelChange)="searchMovie()" placeholder="Movie title..." class="admin-filter-input" style="width:180px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Language</span><select [(ngModel)]="movieSearchLanguage" (ngModelChange)="searchMovie()" class="admin-filter-select" style="width:130px"><option value="">All Languages</option><option *ngFor="let lang of movieLanguages" [value]="lang">{{ lang }}</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Min Year</span><input type="number" [(ngModel)]="movieMinYear" (ngModelChange)="searchMovie()" placeholder="From" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Max Year</span><input type="number" [(ngModel)]="movieMaxYear" (ngModelChange)="searchMovie()" placeholder="To" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort By</span><select [(ngModel)]="movieSort" (ngModelChange)="searchMovie()" class="admin-filter-select" style="width:190px"><option value="">Default</option><option value="rentalCount_desc">Rental Count ↓</option><option value="rentalCount_asc">Rental Count ↑</option><option value="rating_desc">Rating ↓</option><option value="rating_asc">Rating ↑</option></select></div>
+          <button class="admin-filter-reset" (click)="resetMovie()">Reset</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>ID</th><th>Title</th><th>Year</th><th>Duration</th><th>Language</th><th>Genres</th><th>Rating</th><th>Rentals</th><th>Poster</th><th>Trailer</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let m of movies">
+                <td>{{ m.id }}</td>
+                <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.title }}</td>
+                <td>{{ m.releaseYear }}</td><td>{{ m.durationMinutes }}m</td><td>{{ m.language }}</td>
+                <td><div class="admin-genre-tags"><span *ngFor="let g of (m.genres || [])" class="admin-genre-tag">{{ g }}</span><span *ngIf="!m.genres?.length" style="color:#475569">—</span></div></td>
+                <td>{{ m.rating || '—' }}</td><td>{{ m.rentalCount ?? '—' }}</td>
+                <td><button class="admin-tbl-btn" title="View poster" (click)="showPosterPopup(m.posterPath)">🖼️</button></td>
+                <td><button class="admin-tbl-btn" title="View trailer" (click)="showTrailerPopup(m.trailerUrl)">▶️</button></td>
+                <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editMovie(m)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteMovie(m.id)">🗑️</button></div></td>
+              </tr>
+              <tr *ngIf="movies.length === 0"><td colspan="11" class="admin-empty">No movies found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ═══════════════ RENTALS ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'rental'">
+        <div class="admin-page-header"><h2 class="admin-page-title">Rental Management</h2></div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">User ID</span><input type="number" [(ngModel)]="rentalSearchUserId" (ngModelChange)="searchRental()" placeholder="User ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="rentalStatusFilter" (ngModelChange)="searchRental()" class="admin-filter-select" style="width:160px"><option value="">All Status</option><option value="0">Payment Pending</option><option value="1">Available</option><option value="2">Payment Declined</option><option value="3">Payment Not Done</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="rentalDateFrom" [max]="rentalDateTo || todayStr" (ngModelChange)="onRentalDateFromChange($any($event)); searchRental()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">To</span><input type="date" [(ngModel)]="rentalDateTo" [min]="rentalDateFrom" [max]="todayStr" (ngModelChange)="onRentalDateToChange($any($event)); searchRental()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="rentalSortDate" (ngModelChange)="searchRental()" class="admin-filter-select" style="width:140px"><option value="">Default</option><option value="desc">Newest First</option><option value="asc">Oldest First</option></select></div>
+          <button class="admin-filter-reset" (click)="resetRental()">Reset</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>ID</th><th>User ID</th><th>Date</th><th>Status</th><th>Total</th><th>Items</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let r of rentals">
+                <td>{{ r.id }}</td><td>{{ r.userId }}</td><td>{{ r.rentalDate | date:'MMM d, y' }}</td>
+                <td><span class="admin-badge" [class.admin-badge--yellow]="r.status===0" [class.admin-badge--green]="r.status===1" [class.admin-badge--red]="r.status===2||r.status===3">{{ getStatusText(r.status) }}</span></td>
+                <td>₹{{ r.totalAmount }}</td>
+                <td><button class="admin-tbl-btn admin-tbl-btn--info" title="View items" (click)="openRentalItems(r.id)">📂</button></td>
+              </tr>
+              <tr *ngIf="rentals.length === 0"><td colspan="6" class="admin-empty">No rentals found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ═══════════════ PAYMENTS ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'payment'">
+        <div class="admin-page-header"><h2 class="admin-page-title">Payment Management</h2></div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">Rental ID</span><input type="number" [(ngModel)]="paymentSearchRentalId" (ngModelChange)="searchPayment()" placeholder="Rental ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">User ID</span><input type="number" [(ngModel)]="paymentSearchUserId" (ngModelChange)="searchPayment()" placeholder="User ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Method</span><select [(ngModel)]="paymentMethodFilter" (ngModelChange)="searchPayment()" class="admin-filter-select" style="width:130px"><option value="">All Methods</option><option value="0">Debit Card</option><option value="1">Credit Card</option><option value="2">Net Banking</option><option value="3">UPI</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="paymentStatusFilter" (ngModelChange)="searchPayment()" class="admin-filter-select" style="width:120px"><option value="">All Status</option><option value="0">Success</option><option value="1">Failed</option><option value="2">Refunded</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="paymentDateFrom" [max]="paymentDateTo || todayStr" (ngModelChange)="onPaymentDateFromChange($any($event)); searchPayment()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">To</span><input type="date" [(ngModel)]="paymentDateTo" [min]="paymentDateFrom" [max]="todayStr" (ngModelChange)="onPaymentDateToChange($any($event)); searchPayment()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="paymentSortDate" (ngModelChange)="searchPayment()" class="admin-filter-select" style="width:140px"><option value="">Default</option><option value="desc">Newest First</option><option value="asc">Oldest First</option></select></div>
+          <button class="admin-filter-reset" (click)="resetPayment()">Reset</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Rental ID</th><th>User</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th><th>Status</th><th>Payment ID</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let p of payments">
+                <td>{{ p.rentalId }}</td><td>{{ p.userName || p.userId }}</td><td>₹{{ p.amount }}</td>
+                <td><span class="admin-badge" [class.admin-badge--fuchsia]="p.paymentType===1" [class.admin-badge--slate]="p.paymentType===0">{{ p.paymentType === 1 ? 'Refund' : 'Purchase' }}</span></td>
+                <td>{{ getPaymentMethod(p.method) }}</td>
+                <td>{{ p.paymentDate | date:'MMM d, y' }}</td>
+                <td><span class="admin-badge" [class.admin-badge--green]="p.status===0" [class.admin-badge--red]="p.status===1" [class.admin-badge--fuchsia]="p.status===2">{{ getPaymentStatus(p.status) }}</span></td>
+                <td style="font-size:0.7rem;color:#64748b">{{ p.paymentId }}</td>
+              </tr>
+              <tr *ngIf="payments.length === 0"><td colspan="8" class="admin-empty">No payments found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ═══════════════ BROADCAST ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'broadcast'">
+        <div class="admin-page-header"><h2 class="admin-page-title">Broadcast Notifications</h2></div>
+        <div class="admin-broadcast-form">
+          <p class="admin-broadcast-form__title">📣 Send to All Customers</p>
+          <div class="admin-field" style="margin-bottom:0.75rem"><label class="admin-field__label">Title</label><input [(ngModel)]="broadcastTitle" placeholder="Notification title" class="admin-field__input" /></div>
+          <div class="admin-field" style="margin-bottom:1rem"><label class="admin-field__label">Message</label><textarea [(ngModel)]="broadcastMessage" rows="3" placeholder="Write your message..." class="admin-field__textarea"></textarea></div>
+          <button class="admin-btn admin-btn--amber" (click)="sendBroadcast()">Send to All Customers</button>
+        </div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#f1f5f9;margin-bottom:1rem">Broadcast History</h3>
+        <div class="admin-filter-bar" style="margin-bottom:1rem">
+          <div class="admin-filter-group"><span class="admin-filter-label">Sent By</span><input [(ngModel)]="broadcastFilterUsername" (ngModelChange)="applyBroadcastFilters()" placeholder="Username..." class="admin-filter-input" style="width:160px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="broadcastDateFrom" [max]="broadcastDateTo || todayStr" (ngModelChange)="onBroadcastDateFromChange($any($event)); applyBroadcastFilters()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">To</span><input type="date" [(ngModel)]="broadcastDateTo" [min]="broadcastDateFrom" [max]="todayStr" (ngModelChange)="onBroadcastDateToChange($any($event)); applyBroadcastFilters()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="broadcastSortDate" (ngModelChange)="applyBroadcastFilters()" class="admin-filter-select" style="width:140px"><option value="">Default</option><option value="desc">Newest First</option><option value="asc">Oldest First</option></select></div>
+          <button class="admin-filter-reset" (click)="resetBroadcastFilters()">Reset</button>
+        </div>
+        <div *ngIf="broadcastsLoading" class="admin-empty">Loading...</div>
+        <div *ngIf="!broadcastsLoading" class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>ID</th><th>Title</th><th>Message</th><th>Sent By</th><th>Sent At</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let b of filteredBroadcasts">
+                <td>{{ b.id }}</td><td style="font-weight:600">{{ b.title }}</td><td style="max-width:240px;color:#94a3b8">{{ b.message }}</td>
+                <td><span class="admin-badge admin-badge--fuchsia">{{ b.sentByUsername }}</span></td>
+                <td style="white-space:nowrap">{{ b.sentAt | date:'MMM d, y, h:mm a' }}</td>
+                <td><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteBroadcast(b.id)">🗑️</button></td>
+              </tr>
+              <tr *ngIf="filteredBroadcasts.length === 0"><td colspan="6" class="admin-empty">No broadcasts found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ═══════════════ ACTIVITY LOGS ═══════════════ -->
+      <ng-container *ngIf="viewMode === 'logs'">
+        <div class="admin-page-header"><h2 class="admin-page-title">Activity Logs</h2></div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">User ID</span><input type="number" [(ngModel)]="logFilterUserId" (ngModelChange)="searchLogs()" placeholder="User ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Role</span><select [(ngModel)]="logFilterRole" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:130px">
+            <option value="">All Roles</option>
+            <option value="Customer">Customer</option>
+            <option value="Admin">Admin</option>
+            <option value="System">System</option>
+          </select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Entity</span><select [(ngModel)]="logFilterEntity" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:130px">
+            <option value="">All Entities</option>
+            <option value="User">User</option>
+            <option value="Rental">Rental</option>
+            <option value="Payment">Payment</option>
+            <option value="Movie">Movie</option>
+          </select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Action</span><input [(ngModel)]="logFilterAction" (ngModelChange)="searchLogs()" placeholder="e.g. Login" class="admin-filter-input" style="width:130px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="logFilterStatus" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:120px">
+            <option value="">All</option>
+            <option value="Success">Success</option>
+            <option value="Failure">Failure</option>
+          </select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="logFilterFrom" [max]="logFilterTo || todayStr" (ngModelChange)="onLogDateFromChange($any($event)); searchLogs()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">To</span><input type="date" [(ngModel)]="logFilterTo" [min]="logFilterFrom" [max]="todayStr" (ngModelChange)="onLogDateToChange($any($event)); searchLogs()" class="admin-filter-input" style="width:140px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="logSortOrder" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:140px">
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select></div>
+          <button class="admin-filter-reset" (click)="resetLogs()">Reset</button>
+        </div>
+
+        <div *ngIf="logsLoading" class="admin-empty">Loading...</div>
+
+        <div *ngIf="!logsLoading" class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
               <tr>
-                <th class="p-2">ID</th><th class="p-2">Name</th><th class="p-2">Year</th><th class="p-2">Duration</th>
-                <th class="p-2">Language</th><th class="p-2">Rating</th><th class="p-2">Rental Count</th>
-                <th class="p-2">Poster</th><th class="p-2">Trailer</th><th class="p-2">Actions</th>
+                <th>ID</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Entity</th>
+                <th>Action</th>
+                <th>Details</th>
+                <th>Status</th>
+                <th>Performed At</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let m of movies" class="border-t text-center h-16">
-                <td class="p-2">{{ m.id }}</td>
-                <td class="p-2">{{ m.title }}</td>
-                <td class="p-2">{{ m.releaseYear }}</td>
-                <td class="p-2">{{ m.durationMinutes }}</td>
-                <td class="p-2">{{ m.language }}</td>
-                <td class="p-2">{{ m.rating || '-' }}</td>
-                <td class="p-2">{{ m.rentalCount ?? '-' }}</td>
-                <td class="p-2"><button (click)="showPosterPopup(m.posterPath)">🖼️</button></td>
-                <td class="p-2"><button (click)="showTrailerPopup(m.trailerUrl)">🎬</button></td>
-                <td class="p-2 space-x-2">
-                  <button (click)="editMovie(m)">✏️</button>
-                  <button (click)="deleteMovie(m.id)">🗑️</button>
+              <tr *ngFor="let l of logs">
+                <td style="color:#64748b">{{ l.id }}</td>
+                <td>
+                  <span style="font-weight:600">{{ l.userName }}</span><br/>
+                  <span style="font-size:0.7rem;color:#64748b">#{{ l.userId }}</span>
                 </td>
-              </tr>
-            </tbody>
-          </table>
-        </ng-container>
-
-        <!-- ================= RENTAL ================= -->
-        <ng-container *ngIf="viewMode === 'rental'">
-          <h2 class="text-2xl font-bold mb-4">Rental Management</h2>
-          <div class="flex gap-2 flex-wrap mb-4">
-            <input [(ngModel)]="rentalSearchUserId" type="number" placeholder="User ID" class="border p-2 rounded w-28 text-black" />
-            <div class="flex flex-col gap-0.5">
-              <label class="text-xs text-slate-400">From</label>
-              <input [(ngModel)]="rentalDateFrom" type="date" [max]="rentalDateTo || todayStr"
-                (ngModelChange)="onRentalDateFromChange($event)"
-                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <label class="text-xs text-slate-400">To</label>
-              <input [(ngModel)]="rentalDateTo" type="date" [min]="rentalDateFrom" [max]="todayStr"
-                (ngModelChange)="onRentalDateToChange($event)"
-                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
-            </div>
-            <select [(ngModel)]="rentalStatusFilter" class="border p-2 rounded text-black w-44">
-              <option value="">All Status</option>
-              <option value="0">Payment Pending</option>
-              <option value="1">Available</option>
-              <option value="2">Payment Declined</option>
-              <option value="3">Payment Not Done</option>
-            </select>
-            <select [(ngModel)]="rentalSortDate" class="border p-2 rounded text-black w-44">
-              <option value="">Sort by Date</option>
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
-            </select>
-            <button (click)="searchRental()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
-            <button (click)="resetRental()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
-            <button (click)="refreshRentals()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
-          </div>
-          <table class="w-full bg-white text-black shadow rounded">
-            <thead class="bg-gray-200">
-              <tr><th class="p-2">ID</th><th class="p-2">User ID</th><th class="p-2">Date</th><th class="p-2">Status</th><th class="p-2">Total</th><th class="p-2">Items</th></tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let r of rentals" class="border-t text-center h-14">
-                <td class="p-2">{{ r.id }}</td>
-                <td class="p-2">{{ r.userId }}</td>
-                <td class="p-2">{{ r.rentalDate | date:'short' }}</td>
-                <td class="p-2">
-                  <span [ngClass]="{'text-yellow-600': r.status===0, 'text-green-600': r.status===1, 'text-red-500': r.status===2||r.status===3}">
-                    {{ getStatusText(r.status) }}
+                <td>
+                  <span class="admin-badge"
+                    [class.admin-badge--fuchsia]="l.role==='Admin'"
+                    [class.admin-badge--slate]="l.role==='Customer'"
+                    [class.admin-badge--yellow]="l.role==='System'">
+                    {{ l.role }}
                   </span>
                 </td>
-                <td class="p-2">₹ {{ r.totalAmount }}</td>
-                <td class="p-2"><button (click)="openRentalItems(r.id)" class="text-blue-500 text-lg">➕</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </ng-container>
-
-        <!-- ================= PAYMENT ================= -->
-        <ng-container *ngIf="viewMode === 'payment'">
-          <h2 class="text-2xl font-bold mb-4">Payment Management</h2>
-          <div class="flex gap-2 flex-wrap mb-4">
-            <input [(ngModel)]="paymentSearchRentalId" type="number" placeholder="Rental ID" class="border p-2 rounded w-28 text-black" />
-            <input [(ngModel)]="paymentSearchUserId" type="number" placeholder="User ID" class="border p-2 rounded w-28 text-black" />
-            <select [(ngModel)]="paymentMethodFilter" class="border p-2 rounded text-black w-36">
-              <option value="">All Methods</option>
-              <option value="0">Debit Card</option>
-              <option value="1">Credit Card</option>
-              <option value="2">Net Banking</option>
-              <option value="3">UPI</option>
-            </select>
-            <select [(ngModel)]="paymentStatusFilter" class="border p-2 rounded text-black w-32">
-              <option value="">All Status</option>
-              <option value="0">Success</option>
-              <option value="1">Failed</option>
-              <option value="2">Refunded</option>
-            </select>
-            <div class="flex flex-col gap-0.5">
-              <label class="text-xs text-slate-400">From</label>
-              <input [(ngModel)]="paymentDateFrom" type="date" [max]="paymentDateTo || todayStr"
-                (ngModelChange)="onPaymentDateFromChange($event)"
-                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <label class="text-xs text-slate-400">To</label>
-              <input [(ngModel)]="paymentDateTo" type="date" [min]="paymentDateFrom" [max]="todayStr"
-                (ngModelChange)="onPaymentDateToChange($event)"
-                class="border p-2 rounded text-black bg-white cursor-pointer date-input" />
-            </div>
-            <select [(ngModel)]="paymentSortDate" class="border p-2 rounded text-black w-40">
-              <option value="">Sort by Date</option>
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
-            </select>
-            <button (click)="searchPayment()" class="bg-gray-500 text-white px-3 py-2 rounded">Search</button>
-            <button (click)="resetPayment()" class="bg-gray-300 text-black px-3 py-2 rounded">Reset</button>
-            <button (click)="refreshPayments()" class="bg-blue-400 text-white px-3 py-2 rounded">Refresh</button>
-          </div>
-          <table class="w-full bg-white text-black shadow rounded">
-            <thead class="bg-gray-200">
-              <tr>
-                <th class="p-2">Rental ID</th><th class="p-2">User ID</th><th class="p-2">User Name</th>
-                <th class="p-2">Amount</th><th class="p-2">Method</th><th class="p-2">Date</th>
-                <th class="p-2">Status</th><th class="p-2">Payment ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of payments" class="border-t text-center h-14">
-                <td class="p-2">{{ p.rentalId }}</td>
-                <td class="p-2">{{ p.userId }}</td>
-                <td class="p-2">{{ p.userName || '-' }}</td>
-                <td class="p-2">₹ {{ p.amount }}</td>
-                <td class="p-2">{{ getPaymentMethod(p.method) }}</td>
-                <td class="p-2">{{ p.paymentDate | date:'short' }}</td>
-                <td class="p-2">
-                  <span [ngClass]="{'text-green-600': p.status===0, 'text-red-500': p.status===1}">
-                    {{ getPaymentStatus(p.status) }}
+                <td><span class="admin-badge admin-badge--slate">{{ l.entity }}</span></td>
+                <td style="font-weight:600;color:#e2e8f0">{{ l.action }}</td>
+                <td style="max-width:260px;color:#94a3b8;font-size:0.75rem">{{ l.details }}</td>
+                <td>
+                  <span class="admin-badge"
+                    [class.admin-badge--green]="l.status==='Success'"
+                    [class.admin-badge--red]="l.status==='Failure'">
+                    {{ l.status }}
                   </span>
                 </td>
-                <td class="p-2">{{ p.paymentId }}</td>
+                <td style="white-space:nowrap;font-size:0.75rem">{{ l.performedAt | date:'MMM d, y, h:mm a' }}</td>
+              </tr>
+              <tr *ngIf="logs.length === 0">
+                <td colspan="8" class="admin-empty">No activity logs found.</td>
               </tr>
             </tbody>
           </table>
-        </ng-container>
+        </div>
 
-        <!-- ================= BROADCAST ================= -->
-        <ng-container *ngIf="viewMode === 'broadcast'">
-          <h2 class="text-2xl font-bold mb-6">Send Notification to All Customers</h2>
-          <div class="max-w-lg space-y-4 mb-8">
-            <div>
-              <label class="block text-sm text-slate-400 mb-1">Title</label>
-              <input [(ngModel)]="broadcastTitle" placeholder="Notification title" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2" />
-            </div>
-            <div>
-              <label class="block text-sm text-slate-400 mb-1">Message</label>
-              <textarea [(ngModel)]="broadcastMessage" rows="4" placeholder="Write your message..." class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2"></textarea>
-            </div>
-            <button class="bg-amber-600 hover:bg-amber-500 px-6 py-2 rounded font-semibold" (click)="sendBroadcast()">Send to All Customers</button>
+        <div *ngIf="!logsLoading && logsTotalCount > 0"
+          style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;font-size:0.8rem;color:#64748b">
+          <span>
+            Showing {{ (logsPage - 1) * logsPageSize + 1 }}–{{ logsPage * logsPageSize > logsTotalCount ? logsTotalCount : logsPage * logsPageSize }} of {{ logsTotalCount }} entries
+          </span>
+          <div style="display:flex;gap:0.5rem">
+            <button class="admin-filter-reset" [disabled]="logsPage === 1" (click)="logsPrevPage()">← Prev</button>
+            <span style="padding:0.45rem 0.75rem;color:#e2e8f0">{{ logsPage }} / {{ logsTotalPages }}</span>
+            <button class="admin-filter-reset" [disabled]="logsPage >= logsTotalPages" (click)="logsNextPage()">Next →</button>
           </div>
+        </div>
+      </ng-container>
 
-          <h3 class="text-xl font-semibold mb-3">Broadcast History</h3>
-
-          <!-- Filters -->
-          <div class="flex gap-2 flex-wrap mb-4">
-            <input [(ngModel)]="broadcastFilterUsername" placeholder="Sent by username" class="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm w-44" />
-            <div class="flex flex-col gap-0.5">
-              <label class="text-xs text-slate-400">From</label>
-              <input [(ngModel)]="broadcastDateFrom" type="date" [max]="broadcastDateTo || todayStr"
-                (ngModelChange)="onBroadcastDateFromChange($event)"
-                class="border p-2 rounded text-black bg-white cursor-pointer date-input text-sm" />
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <label class="text-xs text-slate-400">To</label>
-              <input [(ngModel)]="broadcastDateTo" type="date" [min]="broadcastDateFrom" [max]="todayStr"
-                (ngModelChange)="onBroadcastDateToChange($event)"
-                class="border p-2 rounded text-black bg-white cursor-pointer date-input text-sm" />
-            </div>
-            <select [(ngModel)]="broadcastSortDate" class="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm w-40">
-              <option value="">Sort by Date</option>
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
-            </select>
-            <button class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded text-sm" (click)="applyBroadcastFilters()">Apply</button>
-            <button class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm" (click)="resetBroadcastFilters()">Reset</button>
-          </div>
-
-          <div *ngIf="broadcastsLoading" class="text-slate-400">Loading...</div>
-          <div *ngIf="!broadcastsLoading && filteredBroadcasts.length === 0" class="text-slate-500 text-sm">No broadcasts found.</div>
-          <div *ngIf="!broadcastsLoading && filteredBroadcasts.length > 0" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <table class="w-full text-sm">
-              <thead class="bg-slate-800 text-slate-300">
-                <tr>
-                  <th class="text-left p-3">ID</th>
-                  <th class="text-left p-3">Title</th>
-                  <th class="text-left p-3">Message</th>
-                  <th class="text-left p-3">Sent By</th>
-                  <th class="text-left p-3">Sent At</th>
-                  <th class="text-left p-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let b of filteredBroadcasts" class="border-t border-slate-800 align-top">
-                  <td class="p-3 text-slate-400">{{ b.id }}</td>
-                  <td class="p-3 font-semibold">{{ b.title }}</td>
-                  <td class="p-3 text-slate-300 max-w-xs">{{ b.message }}</td>
-                  <td class="p-3 text-fuchsia-300">{{ b.sentByUsername }}</td>
-                  <td class="p-3 text-slate-400 whitespace-nowrap">{{ b.sentAt | date:'MMM d, y, h:mm a' }}</td>
-                  <td class="p-3">
-                    <button class="text-red-400 hover:text-red-300 text-xs" (click)="deleteBroadcast(b.id)">Delete</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </ng-container>
-
-      </div>
-    </div>
-  </ng-container>
-
-  <!-- ================= GENRE FORM MODAL ================= -->
-  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-[400px]">
-      <h3 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit Genre' : 'Add Genre' }}</h3>
-      <label class="block text-sm mb-1">Name</label>
-      <input [(ngModel)]="formData.name" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Description</label>
-      <textarea [(ngModel)]="formData.description" class="border p-2 w-full mb-4 rounded"></textarea>
-      <div class="flex justify-between">
-        <button (click)="cancelForm()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-        <button (click)="saveGenre()" class="bg-green-500 text-white px-4 py-2 rounded">Save</button>
-      </div>
     </div>
   </div>
-
-  <!-- ================= ASSIGN GENRE MODAL ================= -->
-  <div *ngIf="showAssign" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-[360px]">
-      <h3 class="text-xl font-bold mb-4">Assign Movie to Genre</h3>
-      <label class="block text-sm mb-1">Movie ID</label>
-      <input type="number" [(ngModel)]="assignMovieId" class="border p-2 w-full mb-4 rounded" placeholder="Enter Movie ID" />
-      <div class="flex justify-between">
-        <button (click)="cancelAssign()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-        <button (click)="assignMovie()" class="bg-blue-500 text-white px-4 py-2 rounded">Assign</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= INVENTORY FORM MODAL ================= -->
-  <div *ngIf="showInventoryForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-[400px]">
-      <h3 class="text-xl font-bold mb-4">{{ isInventoryEdit ? 'Edit Inventory' : 'Add Inventory' }}</h3>
-      <label class="block text-sm mb-1">Movie ID</label>
-      <input type="number" [(ngModel)]="inventoryForm.movieId" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Rental Price</label>
-      <input type="number" [(ngModel)]="inventoryForm.rentalPrice" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Available</label>
-      <select [(ngModel)]="inventoryForm.isAvailable" class="border p-2 w-full mb-4 rounded">
-        <option [ngValue]="true">Yes</option>
-        <option [ngValue]="false">No</option>
-      </select>
-      <div class="flex justify-between">
-        <button (click)="cancelInventoryForm()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-        <button (click)="saveInventory()" class="bg-green-500 text-white px-4 py-2 rounded">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MOVIE FORM MODAL ================= -->
-  <div *ngIf="showMovieForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-[500px] max-h-[90vh] overflow-auto">
-      <h3 class="text-xl font-bold mb-4 text-center">{{ isMovieEdit ? 'Edit Movie' : 'Add Movie' }}</h3>
-      <label class="block text-sm mb-1">Title</label>
-      <input [(ngModel)]="movieForm.title" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Description</label>
-      <textarea [(ngModel)]="movieForm.description" class="border p-2 w-full mb-3 rounded"></textarea>
-      <label class="block text-sm mb-1">Release Year</label>
-      <input type="number" [(ngModel)]="movieForm.releaseYear" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Duration (minutes)</label>
-      <input type="number" [(ngModel)]="movieForm.durationMinutes" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Language</label>
-      <input [(ngModel)]="movieForm.language" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Director</label>
-      <input [(ngModel)]="movieForm.director" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Cast (comma-separated)</label>
-      <input [(ngModel)]="movieForm.cast" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Content Rating</label>
-      <input [(ngModel)]="movieForm.contentRating" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Content Advisory (comma-separated)</label>
-      <input [(ngModel)]="movieForm.contentAdvisory" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Poster URL</label>
-      <input [(ngModel)]="movieForm.posterPath" class="border p-2 w-full mb-3 rounded" />
-      <label class="block text-sm mb-1">Trailer URL</label>
-      <input [(ngModel)]="movieForm.trailerUrl" class="border p-2 w-full mb-4 rounded" />
-      <div class="flex justify-between">
-        <button (click)="cancelMovieForm()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-        <button (click)="saveMovie()" class="bg-green-500 text-white px-4 py-2 rounded">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= RENTAL ITEMS POPUP ================= -->
-  <div *ngIf="showRentalItems" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl w-[90%] max-h-[90vh] overflow-auto">
-      <h3 class="text-xl font-bold mb-4 text-center">Rental Items (ID: {{ selectedRentalId }})</h3>
-      <table class="w-full bg-white shadow rounded">
-        <thead class="bg-gray-200">
-          <tr><th class="p-2">Movie ID</th><th class="p-2">Price</th><th class="p-2">Start</th><th class="p-2">End</th><th class="p-2">Status</th><th class="p-2">Action</th></tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of rentalItems" class="text-center border-t">
-            <td class="p-2">{{ item.movieId }}</td>
-            <td class="p-2">{{ item.pricePerDay }}</td>
-            <td class="p-2">{{ item.startDate | date:'short' }}</td>
-            <td class="p-2">{{ item.endDate | date:'short' }}</td>
-            <td class="p-2"><span [class]="item.isActive ? 'text-green-600' : 'text-gray-400'">{{ item.isActive ? 'Active' : 'Ended' }}</span></td>
-            <td class="p-2"><button (click)="endRentalItem(item)" class="bg-red-500 text-white px-2 py-1 rounded">End</button></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="text-right mt-4">
-        <button (click)="closeRentalItems()" class="bg-gray-400 text-white px-4 py-2 rounded">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= POSTER POPUP ================= -->
-  <div *ngIf="showPoster" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-4 rounded-xl max-w-sm w-full">
-      <p class="break-all mb-3">{{ showPoster }}</p>
-      <button (click)="showPoster=''" class="bg-gray-400 text-white px-3 py-1 rounded">Close</button>
-    </div>
-  </div>
-
-  <!-- ================= TRAILER POPUP ================= -->
-  <div *ngIf="showTrailer" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-4 rounded-xl max-w-sm w-full">
-      <p class="break-all mb-3">{{ showTrailer }}</p>
-      <button (click)="showTrailer=''" class="bg-gray-400 text-white px-3 py-1 rounded">Close</button>
-    </div>
-  </div>
-
 </div>

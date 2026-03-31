@@ -62,11 +62,9 @@ namespace MovieRentalAPI.Services
             {
                 foreach (var genreId in request.GenreIds)
                 {
-                    var genre = await _genreRepository.Get(genreId);
-
-                    if (genre == null)
-                        throw new NotFoundException($"Genre {genreId} not found");
-
+                    // Use a stub entity so EF attaches by FK without re-tracking
+                    var genre = new Genre { Id = genreId };
+                    _context.Attach(genre);
                     movie.Genres.Add(genre);
                 }
             }
@@ -76,11 +74,16 @@ namespace MovieRentalAPI.Services
             if (addedMovie == null)
                 throw new Exception("Movie creation failed");
 
-            // Notify users whose preferences match
-            var genreNames = addedMovie.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>();
-            await _notifications.NotifyNewMovie(addedMovie.Id, addedMovie.Title, genreNames, addedMovie.Language ?? "");
+            // Reload with genres so names are populated in the response
+            var movieWithGenres = await _context.Movies
+                .Include(m => m.Genres)
+                .FirstOrDefaultAsync(m => m.Id == addedMovie.Id) ?? addedMovie;
 
-            return MapToResponseDto(addedMovie);
+            // Notify users whose preferences match
+            var genreNames = movieWithGenres.Genres?.Select(g => g.Name) ?? Enumerable.Empty<string>();
+            await _notifications.NotifyNewMovie(movieWithGenres.Id, movieWithGenres.Title, genreNames, movieWithGenres.Language ?? "");
+
+            return MapToResponseDto(movieWithGenres);
         }
 
         public async Task<CreateMovieResponseDto> GetMovieById(int id)
@@ -117,7 +120,9 @@ namespace MovieRentalAPI.Services
 
         public async Task<CreateMovieResponseDto> UpdateMovie(int id, CreateMovieRequestDto request)
         {
-            var existingMovie = await _movieRepository.Get(id);
+            var existingMovie = await _context.Movies
+                .Include(m => m.Genres)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (existingMovie == null)
                 throw new NotFoundException("Movie not found");
@@ -137,13 +142,26 @@ namespace MovieRentalAPI.Services
             existingMovie.ContentRating = request.ContentRating ?? string.Empty;
             existingMovie.ContentAdvisory = request.ContentAdvisory?.Trim() ?? string.Empty;
 
-            var updatedMovie =
-                await _movieRepository.Update(id, existingMovie);
+            // Update genres if provided
+            if (request.GenreIds != null)
+            {
+                existingMovie.Genres!.Clear();
+                foreach (var genreId in request.GenreIds)
+                {
+                    var genre = new Genre { Id = genreId };
+                    _context.Attach(genre);
+                    existingMovie.Genres!.Add(genre);
+                }
+            }
 
-            if (updatedMovie == null)
-                throw new Exception("Movie update failed");
+            await _context.SaveChangesAsync();
 
-            return MapToResponseDto(updatedMovie);
+            // Reload with genres so names are populated
+            var reloaded = await _context.Movies
+                .Include(m => m.Genres)
+                .FirstOrDefaultAsync(m => m.Id == id) ?? existingMovie;
+
+            return MapToResponseDto(reloaded);
         }
 
         public async Task<bool> DeleteMovie(int id)

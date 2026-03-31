@@ -189,7 +189,7 @@
 
 <!-- ── EXPIRED ── -->
 <ng-container *ngIf="!loading && !isSearching">
-  <div class="rentals-section" *ngIf="expiredRentals.length > 0">
+  <div class="rentals-section" *ngIf="expiredRentals.length > 0" #expiredSection>
     <div class="rentals-section__header">
       <span class="rentals-section__tag rentals-section__tag--expired">Expired</span>
       <h2 class="rentals-section__title">Expired</h2>

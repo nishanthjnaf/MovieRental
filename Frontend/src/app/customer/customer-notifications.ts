@@ -74,9 +74,32 @@ export class CustomerNotifications implements OnInit {
 
   handleClick(n: any) {
     this.markRead(n);
-    if (n.type === 'new_movie' && n.relatedId) this.router.navigate(['/dashboard/movie', n.relatedId]);
-    if (n.type === 'rate_movie' && n.relatedId) this.router.navigate(['/dashboard/movie', n.relatedId]);
-    if (n.type === 'expiry') this.router.navigate(['/dashboard/rentals']);
+    switch (n.type) {
+      case 'new_movie':
+      case 'rate_movie':
+        if (n.relatedId) this.router.navigate(['/dashboard/movie', n.relatedId]);
+        break;
+      case 'expiry':
+        // relatedId = movieId — go to movie detail so user can renew
+        if (n.relatedId) this.router.navigate(['/dashboard/movie', n.relatedId]);
+        break;
+      case 'expired':
+        // relatedId = rentalItemId — go to Expired section in My Rentals
+        this.router.navigate(['/dashboard/rentals'], { queryParams: { section: 'expired' } });
+        break;
+      case 'payment':
+        this.router.navigate(['/dashboard/transactions']);
+        break;
+      case 'refund':
+        this.router.navigate(['/dashboard/rentals']);
+        break;
+      case 'password':
+        this.router.navigate(['/dashboard/profile']);
+        break;
+      case 'admin_message':
+      default:
+        break;
+    }
   }
 
   iconFor(type: string): string {

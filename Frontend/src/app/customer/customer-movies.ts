@@ -35,12 +35,14 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
   private previousQ = '';
 
   rentalPriceByMovieId: Record<number, number> = {};
+  availableMovieIds = new Set<number>();
   minYear?: number;
   maxYear?: number;
   minPrice?: number;
   maxPrice?: number;
   priceSliderMin = 0;
   priceSliderMax = 500;
+  sortOption = '';
 
   constructor(
     private genreService: GenreService,
@@ -132,6 +134,7 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
     this.maxYear = undefined;
     this.minPrice = undefined;
     this.maxPrice = undefined;
+    this.sortOption = '';
     this.fetchMovies();
   }
 
@@ -155,6 +158,10 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
     this.availableLanguages = Array.from(langs).sort((a, b) => a.localeCompare(b));
   }
 
+  isAvailable(movieId: number): boolean {
+    return this.availableMovieIds.has(movieId);
+  }
+
   private fetchMovies() {
     this.loading = true;
     this.cdr.detectChanges();
@@ -172,10 +179,14 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
       timeout(15000),
       catchError(() => of([]))
     ).subscribe((movies: any[]) => {
-      const list = movies || [];
-      // On unfiltered load, refresh language chips from full result
+      let list = movies || [];
       if (!this.selectedLanguages.size && !this.q) {
         this.refreshAvailableLanguages(list);
+      }
+      // When browsing (no search), hide unavailable movies entirely
+      // When searching, keep them but mark as unavailable (greyed out)
+      if (!this.q) {
+        list = list.filter(m => this.availableMovieIds.has(m.id));
       }
       this.allMovies = list;
       this.resetVisible();
@@ -190,13 +201,16 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
       timeout(10000), catchError(() => of([]))
     ).subscribe((rows: any[]) => {
       const map: Record<number, number> = {};
+      const available = new Set<number>();
       (rows || []).forEach((r: any) => {
         const movieId = Number(r?.movieId);
         const price = Number(r?.rentalPrice);
         if (!movieId || !Number.isFinite(price)) return;
         if (!Number.isFinite(map[movieId]) || price < map[movieId]) map[movieId] = price;
+        if (r?.isAvailable) available.add(movieId);
       });
       this.rentalPriceByMovieId = map;
+      this.availableMovieIds = available;
       const prices = Object.values(map).filter(Number.isFinite);
       if (prices.length) {
         this.priceSliderMin = Math.floor(Math.min(...prices));
@@ -217,6 +231,53 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
     this.maxPrice = val;
     if (Number.isFinite(this.minPrice) && (this.minPrice ?? 0) > val) this.minPrice = val;
     this.applyRangeFilters();
+  }
+
+  onMinPriceInput(event: Event) {
+    const raw = (event.target as HTMLInputElement).value;
+    if (raw === '' || raw === null) {
+      this.minPrice = undefined;
+      this.applyRangeFilters();
+      return;
+    }
+    const val = parseFloat(raw);
+    if (!isNaN(val)) {
+      this.minPrice = val;
+      this.applyRangeFilters();
+    }
+  }
+
+  onMaxPriceInput(event: Event) {
+    const raw = (event.target as HTMLInputElement).value;
+    if (raw === '' || raw === null) {
+      this.maxPrice = undefined;
+      this.applyRangeFilters();
+      return;
+    }
+    const val = parseFloat(raw);
+    if (!isNaN(val)) {
+      this.maxPrice = val;
+      this.applyRangeFilters();
+    }
+  }
+
+  applySort() {
+    if (!this.sortOption) {
+      this.resetVisible();
+      return;
+    }
+    const sorted = [...this.allMovies];
+    if (this.sortOption === 'price-asc') {
+      sorted.sort((a, b) => (this.rentalPriceByMovieId[a.id] ?? Infinity) - (this.rentalPriceByMovieId[b.id] ?? Infinity));
+    } else if (this.sortOption === 'price-desc') {
+      sorted.sort((a, b) => (this.rentalPriceByMovieId[b.id] ?? -Infinity) - (this.rentalPriceByMovieId[a.id] ?? -Infinity));
+    } else if (this.sortOption === 'year-desc') {
+      sorted.sort((a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0));
+    } else if (this.sortOption === 'year-asc') {
+      sorted.sort((a, b) => (a.releaseYear ?? 0) - (b.releaseYear ?? 0));
+    }
+    this.allMovies = sorted;
+    this.resetVisible();
   }
 
   getPriceMinPct(): number {

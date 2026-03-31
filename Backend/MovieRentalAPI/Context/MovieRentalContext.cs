@@ -23,6 +23,7 @@ namespace MovieRentalModels
         public DbSet<RentalItemRefund> RentalItemRefunds => Set<RentalItemRefund>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<BroadcastMessage> BroadcastMessages => Set<BroadcastMessage>();
+        public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -68,8 +69,8 @@ namespace MovieRentalModels
                 .HasKey(p => p.Id);
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Rental)
-                .WithOne(r => r.Payment)
-                .HasForeignKey<Payment>(p => p.RentalId)
+                .WithMany(r => r.Payments)
+                .HasForeignKey(p => p.RentalId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Payment>()
@@ -129,6 +130,9 @@ namespace MovieRentalModels
 
             modelBuilder.Entity<BroadcastMessage>()
                 .HasKey(b => b.Id);
+
+            modelBuilder.Entity<ActivityLog>()
+                .HasKey(a => a.Id);
         }
     }
 }

@@ -37,6 +37,63 @@ namespace MovieRentalAPI.Migrations
                     b.ToTable("GenreMovie");
                 });
 
+            modelBuilder.Entity("MovieRentalAPI.Models.BroadcastMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SentByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SentByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BroadcastMessages");
+                });
+
+            modelBuilder.Entity("MovieRentalAPI.Models.CartItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RentalDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MovieId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CartItems");
+                });
+
             modelBuilder.Entity("MovieRentalAPI.Models.Genre", b =>
                 {
                     b.Property<int>("Id")
@@ -144,6 +201,43 @@ namespace MovieRentalAPI.Migrations
                     b.ToTable("Movies");
                 });
 
+            modelBuilder.Entity("MovieRentalAPI.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RelatedId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("MovieRentalAPI.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -165,6 +259,15 @@ namespace MovieRentalAPI.Migrations
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
+                    b.Property<int>("PaymentType")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("RefundAmount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("RefundedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("RentalId")
                         .HasColumnType("int");
 
@@ -176,8 +279,7 @@ namespace MovieRentalAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RentalId")
-                        .IsUnique();
+                    b.HasIndex("RentalId");
 
                     b.HasIndex("UserId");
 
@@ -250,6 +352,34 @@ namespace MovieRentalAPI.Migrations
                     b.HasIndex("RentalId");
 
                     b.ToTable("RentalItems");
+                });
+
+            modelBuilder.Entity("MovieRentalAPI.Models.RentalItemRefund", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("RefundAmount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("RefundedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RentalId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RentalItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RentalItemRefunds");
                 });
 
             modelBuilder.Entity("MovieRentalAPI.Models.Review", b =>
@@ -330,6 +460,40 @@ namespace MovieRentalAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MovieRentalAPI.Models.UserPreference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsSet")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PreferredGenres")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PreferredLanguages")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Theme")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserPreferences");
+                });
+
             modelBuilder.Entity("MovieRentalAPI.Models.Watchlist", b =>
                 {
                     b.Property<int>("Id")
@@ -368,6 +532,25 @@ namespace MovieRentalAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MovieRentalAPI.Models.CartItem", b =>
+                {
+                    b.HasOne("MovieRentalAPI.Models.Movie", "Movie")
+                        .WithMany()
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MovieRentalAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MovieRentalAPI.Models.Inventory", b =>
                 {
                     b.HasOne("MovieRentalAPI.Models.Movie", "Movie")
@@ -382,15 +565,15 @@ namespace MovieRentalAPI.Migrations
             modelBuilder.Entity("MovieRentalAPI.Models.Payment", b =>
                 {
                     b.HasOne("MovieRentalAPI.Models.Rental", "Rental")
-                        .WithOne("Payment")
-                        .HasForeignKey("MovieRentalAPI.Models.Payment", "RentalId")
+                        .WithMany("Payments")
+                        .HasForeignKey("RentalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MovieRentalAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Rental");
@@ -445,6 +628,17 @@ namespace MovieRentalAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MovieRentalAPI.Models.UserPreference", b =>
+                {
+                    b.HasOne("MovieRentalAPI.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("MovieRentalAPI.Models.UserPreference", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MovieRentalAPI.Models.Watchlist", b =>
                 {
                     b.HasOne("MovieRentalAPI.Models.Movie", "Movie")
@@ -460,17 +654,6 @@ namespace MovieRentalAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Movie");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MovieRentalAPI.Models.UserPreference", b =>
-                {
-                    b.HasOne("MovieRentalAPI.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("MovieRentalAPI.Models.UserPreference", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

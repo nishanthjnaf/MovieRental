@@ -11,14 +11,17 @@ import { Router } from '@angular/router';
 import { CurrentUserService } from '../services/current-user';
 import { UserService } from '../services/user';
 import { NotificationService } from '../services/notification';
+import { ActivityLogService } from '../services/activity-log';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ThemeToggle } from '../components/theme-toggle';
+import { SafeUrlPipe } from '../pipes/safe-url.pipe';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   templateUrl: './admin.html',
-  imports: [CommonModule, FormsModule, ThemeToggle]
+  styleUrl: './admin.css',
+  imports: [CommonModule, FormsModule, ThemeToggle, SafeUrlPipe]
 })
 export class Admin implements OnInit {
 
@@ -31,12 +34,13 @@ export class Admin implements OnInit {
     private userService: UserService,
     private currentUser: CurrentUserService,
     private notifService: NotificationService,
+    private activityLogService: ActivityLogService,
     private router: Router,
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  viewMode: 'services' | 'genre' | 'inventory' | 'movie' | 'rental' | 'payment' | 'broadcast' = 'services';
+  viewMode: 'services' | 'genre' | 'inventory' | 'movie' | 'rental' | 'payment' | 'broadcast' | 'logs' = 'services';
 
   // ---- BROADCAST ----
   broadcastTitle = '';
@@ -51,6 +55,7 @@ export class Admin implements OnInit {
 
   // ---- GENRE ----
   genres: any[] = [];
+  allGenres: any[] = [];
   searchId: any;
   genreSearchName = '';
   showForm = false;
@@ -63,6 +68,7 @@ export class Admin implements OnInit {
 
   // ---- INVENTORY ----
   inventories: any[] = [];
+  private allInventories: any[] = [];
   inventorySearchId: any;
   inventorySearchMovieId: any;
   inventorySearchMovieName = '';
@@ -74,6 +80,7 @@ export class Admin implements OnInit {
 
   // ---- MOVIE ----
   movies: any[] = [];
+  private allMovies: any[] = [];
   movieLanguages: string[] = [];
   movieSearchId: any;
   movieSearchName = '';
@@ -89,11 +96,22 @@ export class Admin implements OnInit {
     language: '', director: '', cast: '', contentRating: '',
     contentAdvisory: '', posterPath: '', trailerUrl: ''
   };
+  movieFormGenreIds: number[] = [];
+  genreDropdownOpen = false;
+
+  get selectedGenreNames(): string {
+    if (!this.movieFormGenreIds.length) return 'Select genres...';
+    return this.allGenres
+      .filter(g => this.movieFormGenreIds.includes(g.id))
+      .map(g => g.name)
+      .join(', ');
+  }
   showPoster = '';
   showTrailer = '';
 
   // ---- RENTAL ----
   rentals: any[] = [];
+  private allRentals: any[] = [];
   rentalSearchUserId: any;
   rentalDateFrom = '';
   rentalDateTo = '';
@@ -109,6 +127,7 @@ export class Admin implements OnInit {
 
   // ---- PAYMENT ----
   payments: any[] = [];
+  private allPayments: any[] = [];
   paymentSearchRentalId: any;
   paymentSearchUserId: any;
   paymentMethodFilter = '';
@@ -121,6 +140,21 @@ export class Admin implements OnInit {
   currentAdminName = 'Admin';
   showProfileMenu = false;
   stats = { activeUsers: 0, activeRentalItems: 0, topRentedMovie: '-', revenueCollected: 0 };
+
+  // ---- LOGS ----
+  logs: any[] = [];
+  logsLoading = false;
+  logsTotalCount = 0;
+  logsPage = 1;
+  logsPageSize = 50;
+  logFilterUserId: any;
+  logFilterRole = '';
+  logFilterEntity = '';
+  logFilterAction = '';
+  logFilterStatus = '';
+  logFilterFrom = '';
+  logFilterTo = '';
+  logSortOrder = 'desc';
 
   ngOnInit() {
     this.currentUser.loadCurrentUser().subscribe((u) => {
@@ -139,6 +173,7 @@ export class Admin implements OnInit {
     if (service === 'rental') this.loadRentals();
     if (service === 'payment') this.loadPayments();
     if (service === 'broadcast') this.loadBroadcasts();
+    if (service === 'logs') this.loadLogs();
   }
 
   // ================= STATS =================
@@ -193,10 +228,19 @@ export class Admin implements OnInit {
   toggleProfileMenu() { this.showProfileMenu = !this.showProfileMenu; this.cdr.detectChanges(); }
   openProfile() { this.showProfileMenu = false; this.router.navigate(['/admin/profile']); }
 
+  getPageTitle(): string {
+    if (this.viewMode === 'services') return 'Dashboard';
+    const map: Record<string, string> = {
+      genre: 'Genre', inventory: 'Inventory', movie: 'Movie',
+      rental: 'Rental', payment: 'Payment', broadcast: 'Broadcast', logs: 'Activity Logs'
+    };
+    return (map[this.viewMode] ?? this.viewMode) + ' Management';
+  }
+
   // ================= GENRE =================
   loadGenres() {
     this.genreService.getAllGenres().subscribe({
-      next: (res) => { this.genres = [...res]; this.cdr.detectChanges(); },
+      next: (res) => { this.allGenres = [...(res || [])]; this.genres = [...this.allGenres]; this.cdr.detectChanges(); },
       error: () => this.toastr.error('Failed to load genres')
     });
   }
@@ -204,31 +248,19 @@ export class Admin implements OnInit {
   refreshGenres() { this.loadGenres(); this.toastr.success('Refreshed'); }
 
   searchGenre() {
+    let list = [...this.allGenres];
     if (this.searchId) {
-      this.genreService.getGenreById(this.searchId).subscribe({
-        next: (res) => { this.genres = [res]; this.cdr.detectChanges(); },
-        error: () => this.toastr.error('Genre not found')
-      });
-      return;
+      list = list.filter((g: any) => g.id === Number(this.searchId));
     }
     if (this.genreSearchName.trim()) {
-      this.genreService.getAllGenres().subscribe({
-        next: (res) => {
-          const term = this.genreSearchName.trim().toLowerCase();
-          this.genres = (res || []).filter((g: any) =>
-            g.name?.toLowerCase().includes(term)
-          );
-          if (!this.genres.length) this.toastr.info('No genres matched');
-          this.cdr.detectChanges();
-        },
-        error: () => this.toastr.error('Search failed')
-      });
-      return;
+      const term = this.genreSearchName.trim().toLowerCase();
+      list = list.filter((g: any) => g.name?.toLowerCase().includes(term));
     }
-    this.loadGenres();
+    this.genres = list;
+    this.cdr.detectChanges();
   }
 
-  resetSearch() { this.searchId = null; this.genreSearchName = ''; this.loadGenres(); }
+  resetSearch() { this.searchId = null; this.genreSearchName = ''; this.genres = [...this.allGenres]; this.cdr.detectChanges(); }
 
   openAddForm() {
     this.isEdit = false;
@@ -289,7 +321,7 @@ export class Admin implements OnInit {
   // ================= INVENTORY =================
   loadInventory() {
     this.inventoryService.getAll().subscribe({
-      next: (res) => { this.inventories = [...res]; this.cdr.detectChanges(); },
+      next: (res) => { this.allInventories = [...(res || [])]; this.inventories = [...this.allInventories]; this.cdr.detectChanges(); },
       error: () => this.toastr.error('Failed to load inventory')
     });
   }
@@ -297,41 +329,23 @@ export class Admin implements OnInit {
   refreshInventory() { this.loadInventory(); this.toastr.success('Refreshed'); }
 
   searchInventory() {
-    // Start from full list, then apply filters client-side
-    this.inventoryService.getAll().subscribe({
-      next: (res) => {
-        let list: any[] = res || [];
-
-        if (this.inventorySearchId) {
-          list = list.filter((i: any) => i.id === Number(this.inventorySearchId));
-        }
-        if (this.inventorySearchMovieId) {
-          list = list.filter((i: any) => i.movieId === Number(this.inventorySearchMovieId));
-        }
-        if (this.inventorySearchMovieName.trim()) {
-          const term = this.inventorySearchMovieName.trim().toLowerCase();
-          list = list.filter((i: any) => i.movieName?.toLowerCase().includes(term));
-        }
-        if (this.inventoryStatusFilter === 'available') {
-          list = list.filter((i: any) => i.isAvailable === true);
-        } else if (this.inventoryStatusFilter === 'unavailable') {
-          list = list.filter((i: any) => i.isAvailable === false);
-        }
-
-        this.inventories = list;
-        if (!list.length) this.toastr.info('No inventory items matched');
-        this.cdr.detectChanges();
-      },
-      error: () => this.toastr.error('Search failed')
-    });
+    let list = [...this.allInventories];
+    if (this.inventorySearchId) list = list.filter((i: any) => i.id === Number(this.inventorySearchId));
+    if (this.inventorySearchMovieId) list = list.filter((i: any) => i.movieId === Number(this.inventorySearchMovieId));
+    if (this.inventorySearchMovieName.trim()) {
+      const term = this.inventorySearchMovieName.trim().toLowerCase();
+      list = list.filter((i: any) => i.movieName?.toLowerCase().includes(term));
+    }
+    if (this.inventoryStatusFilter === 'available') list = list.filter((i: any) => i.isAvailable === true);
+    else if (this.inventoryStatusFilter === 'unavailable') list = list.filter((i: any) => i.isAvailable === false);
+    this.inventories = list;
+    this.cdr.detectChanges();
   }
 
   resetInventory() {
-    this.inventorySearchId = null;
-    this.inventorySearchMovieId = null;
-    this.inventorySearchMovieName = '';
-    this.inventoryStatusFilter = '';
-    this.loadInventory();
+    this.inventorySearchId = null; this.inventorySearchMovieId = null;
+    this.inventorySearchMovieName = ''; this.inventoryStatusFilter = '';
+    this.inventories = [...this.allInventories]; this.cdr.detectChanges();
   }
 
   openInventoryForm() {
@@ -385,9 +399,10 @@ export class Admin implements OnInit {
   loadMovies() {
     this.movieService.getAll().subscribe({
       next: (res) => {
-        this.movies = [...res];
+        this.allMovies = Array.isArray(res) ? res : [];
+        this.movies = [...this.allMovies];
         const langs = new Set<string>();
-        this.movies.forEach((m: any) => { if (m.language) langs.add(m.language); });
+        this.allMovies.forEach((m: any) => { if (m.language) langs.add(m.language); });
         this.movieLanguages = Array.from(langs).sort();
         this.cdr.detectChanges();
       },
@@ -398,69 +413,44 @@ export class Admin implements OnInit {
   refreshMovies() { this.loadMovies(); this.toastr.success('Refreshed'); }
 
   searchMovie() {
-    // Fetch all then apply filters + sort client-side
-    this.movieService.getAll().subscribe({
-      next: (res) => {
-        let list: any[] = Array.isArray(res) ? res : [];
-
-        if (this.movieSearchId) {
-          list = list.filter((m: any) => m.id === Number(this.movieSearchId));
-        }
-        if (this.movieSearchName.trim()) {
-          const term = this.movieSearchName.trim().toLowerCase();
-          list = list.filter((m: any) => m.title?.toLowerCase().includes(term));
-        }
-        if (this.movieSearchLanguage.trim()) {
-          const lang = this.movieSearchLanguage.trim().toLowerCase();
-          list = list.filter((m: any) => m.language?.toLowerCase().includes(lang));
-        }
-        if (this.movieMinYear) {
-          list = list.filter((m: any) => Number(m.releaseYear) >= Number(this.movieMinYear));
-        }
-        if (this.movieMaxYear) {
-          list = list.filter((m: any) => Number(m.releaseYear) <= Number(this.movieMaxYear));
-        }
-        if (this.movieSort === 'rentalCount_desc') {
-          list = list.sort((a, b) => (b.rentalCount ?? 0) - (a.rentalCount ?? 0));
-        } else if (this.movieSort === 'rentalCount_asc') {
-          list = list.sort((a, b) => (a.rentalCount ?? 0) - (b.rentalCount ?? 0));
-        } else if (this.movieSort === 'rating_desc') {
-          list = list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-        } else if (this.movieSort === 'rating_asc') {
-          list = list.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
-        }
-        this.movies = list;
-        if (!list.length) this.toastr.info('No movies matched');
-        this.cdr.detectChanges();
-      },
-      error: () => this.toastr.error('Search failed')
-    });
+    let list = [...this.allMovies];
+    if (this.movieSearchId) list = list.filter((m: any) => m.id === Number(this.movieSearchId));
+    if (this.movieSearchName.trim()) {
+      const term = this.movieSearchName.trim().toLowerCase();
+      list = list.filter((m: any) => m.title?.toLowerCase().includes(term));
+    }
+    if (this.movieSearchLanguage.trim()) list = list.filter((m: any) => m.language === this.movieSearchLanguage);
+    if (this.movieMinYear) list = list.filter((m: any) => Number(m.releaseYear) >= Number(this.movieMinYear));
+    if (this.movieMaxYear) list = list.filter((m: any) => Number(m.releaseYear) <= Number(this.movieMaxYear));
+    if (this.movieSort === 'rentalCount_desc') list.sort((a, b) => (b.rentalCount ?? 0) - (a.rentalCount ?? 0));
+    else if (this.movieSort === 'rentalCount_asc') list.sort((a, b) => (a.rentalCount ?? 0) - (b.rentalCount ?? 0));
+    else if (this.movieSort === 'rating_desc') list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    else if (this.movieSort === 'rating_asc') list.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
+    this.movies = list;
+    this.cdr.detectChanges();
   }
 
   resetMovie() {
-    this.movieSearchId = null;
-    this.movieSearchName = '';
-    this.movieSearchLanguage = '';
-    this.movieMinYear = null;
-    this.movieMaxYear = null;
-    this.movieSort = '';
-    this.loadMovies();
+    this.movieSearchId = null; this.movieSearchName = ''; this.movieSearchLanguage = '';
+    this.movieMinYear = null; this.movieMaxYear = null; this.movieSort = '';
+    this.movies = [...this.allMovies]; this.cdr.detectChanges();
   }
 
   openMovieForm() {
     this.isMovieEdit = false;
+    this.movieFormGenreIds = [];
     this.movieForm = {
       title: '', description: '', releaseYear: 2024, durationMinutes: 0,
       language: '', director: '', cast: '', contentRating: '',
       contentAdvisory: '', posterPath: '', trailerUrl: ''
     };
-    this.showMovieForm = true;
-    this.cdr.detectChanges();
+    this.ensureGenresLoaded(() => { this.showMovieForm = true; this.cdr.detectChanges(); });
   }
 
   editMovie(m: any) {
     this.isMovieEdit = true;
     this.selectedMovieId = m.id;
+    this.movieFormGenreIds = Array.isArray(m.genreIds) ? [...m.genreIds] : [];
     this.movieForm = {
       title: m.title ?? '',
       description: m.description ?? '',
@@ -474,25 +464,43 @@ export class Admin implements OnInit {
       posterPath: m.posterPath ?? '',
       trailerUrl: m.trailerUrl ?? ''
     };
-    this.showMovieForm = true;
-    this.cdr.detectChanges();
+    this.ensureGenresLoaded(() => { this.showMovieForm = true; this.cdr.detectChanges(); });
+  }
+
+  private ensureGenresLoaded(callback: () => void) {
+    if (this.allGenres.length > 0) { callback(); return; }
+    this.genreService.getAllGenres().subscribe({
+      next: (res) => { this.allGenres = res || []; this.genres = [...this.allGenres]; callback(); },
+      error: () => callback()
+    });
+  }
+
+  toggleMovieGenre(genreId: number) {
+    const idx = this.movieFormGenreIds.indexOf(genreId);
+    if (idx === -1) this.movieFormGenreIds.push(genreId);
+    else this.movieFormGenreIds.splice(idx, 1);
+  }
+
+  isMovieGenreSelected(genreId: number): boolean {
+    return this.movieFormGenreIds.includes(genreId);
   }
 
   saveMovie() {
+    const payload = { ...this.movieForm, genreIds: this.movieFormGenreIds };
     if (this.isMovieEdit && this.selectedMovieId !== null) {
-      this.movieService.update(this.selectedMovieId, this.movieForm).subscribe({
+      this.movieService.update(this.selectedMovieId, payload).subscribe({
         next: () => { this.toastr.success('Updated'); this.showMovieForm = false; this.loadMovies(); },
         error: () => this.toastr.error('Update failed')
       });
     } else {
-      this.movieService.add(this.movieForm).subscribe({
+      this.movieService.add(payload).subscribe({
         next: () => { this.toastr.success('Added'); this.showMovieForm = false; this.loadMovies(); },
         error: () => this.toastr.error('Add failed')
       });
     }
   }
 
-  cancelMovieForm() { this.showMovieForm = false; this.cdr.detectChanges(); }
+  cancelMovieForm() { this.showMovieForm = false; this.genreDropdownOpen = false; this.cdr.detectChanges(); }
 
   deleteMovie(id: number) {
     if (!confirm('Delete this movie?')) return;
@@ -509,7 +517,8 @@ export class Admin implements OnInit {
   loadRentals() {
     this.rentalService.getAll().subscribe({
       next: (res: any) => {
-        this.rentals = Array.isArray(res) ? res : (res?.data || res?.items || []);
+        this.allRentals = Array.isArray(res) ? res : (res?.data || res?.items || []);
+        this.rentals = [...this.allRentals];
         this.cdr.detectChanges();
       },
       error: () => this.toastr.error('Failed to load rentals')
@@ -519,64 +528,30 @@ export class Admin implements OnInit {
   refreshRentals() { this.loadRentals(); this.toastr.success('Refreshed'); }
 
   onRentalDateFromChange(val: string) {
-    // If From > To, clear To so user must re-pick
-    if (val && this.rentalDateTo && val > this.rentalDateTo) {
-      this.rentalDateTo = '';
-      this.toastr.info('"From" date cannot be after "To" date');
-    }
+    if (val && this.rentalDateTo && val > this.rentalDateTo) { this.rentalDateTo = ''; }
     this.rentalDateFrom = val;
   }
-
   onRentalDateToChange(val: string) {
-    // If To < From, clear From
-    if (val && this.rentalDateFrom && val < this.rentalDateFrom) {
-      this.rentalDateFrom = '';
-      this.toastr.info('"To" date cannot be before "From" date');
-    }
+    if (val && this.rentalDateFrom && val < this.rentalDateFrom) { this.rentalDateFrom = ''; }
     this.rentalDateTo = val;
   }
 
   searchRental() {
-    this.rentalService.getAll().subscribe({
-      next: (res: any) => {
-        let list: any[] = Array.isArray(res) ? res : (res?.data || res?.items || []);
-
-        if (this.rentalSearchUserId) {
-          list = list.filter((r: any) => r.userId === Number(this.rentalSearchUserId));
-        }
-        if (this.rentalStatusFilter !== '') {
-          list = list.filter((r: any) => r.status === Number(this.rentalStatusFilter));
-        }
-        if (this.rentalDateFrom) {
-          const from = new Date(this.rentalDateFrom);
-          list = list.filter((r: any) => new Date(r.rentalDate) >= from);
-        }
-        if (this.rentalDateTo) {
-          const to = new Date(this.rentalDateTo);
-          to.setHours(23, 59, 59);
-          list = list.filter((r: any) => new Date(r.rentalDate) <= to);
-        }
-        if (this.rentalSortDate === 'desc') {
-          list = list.sort((a, b) => new Date(b.rentalDate).getTime() - new Date(a.rentalDate).getTime());
-        } else if (this.rentalSortDate === 'asc') {
-          list = list.sort((a, b) => new Date(a.rentalDate).getTime() - new Date(b.rentalDate).getTime());
-        }
-
-        this.rentals = list;
-        if (!list.length) this.toastr.info('No rentals matched');
-        this.cdr.detectChanges();
-      },
-      error: () => this.toastr.error('Search failed')
-    });
+    let list = [...this.allRentals];
+    if (this.rentalSearchUserId) list = list.filter((r: any) => r.userId === Number(this.rentalSearchUserId));
+    if (this.rentalStatusFilter !== '') list = list.filter((r: any) => r.status === Number(this.rentalStatusFilter));
+    if (this.rentalDateFrom) { const from = new Date(this.rentalDateFrom); list = list.filter((r: any) => new Date(r.rentalDate) >= from); }
+    if (this.rentalDateTo) { const to = new Date(this.rentalDateTo); to.setHours(23,59,59); list = list.filter((r: any) => new Date(r.rentalDate) <= to); }
+    if (this.rentalSortDate === 'desc') list.sort((a, b) => new Date(b.rentalDate).getTime() - new Date(a.rentalDate).getTime());
+    else if (this.rentalSortDate === 'asc') list.sort((a, b) => new Date(a.rentalDate).getTime() - new Date(b.rentalDate).getTime());
+    this.rentals = list;
+    this.cdr.detectChanges();
   }
 
   resetRental() {
-    this.rentalSearchUserId = null;
-    this.rentalDateFrom = '';
-    this.rentalDateTo = '';
-    this.rentalStatusFilter = '';
-    this.rentalSortDate = '';
-    this.loadRentals();
+    this.rentalSearchUserId = null; this.rentalDateFrom = ''; this.rentalDateTo = '';
+    this.rentalStatusFilter = ''; this.rentalSortDate = '';
+    this.rentals = [...this.allRentals]; this.cdr.detectChanges();
   }
 
   getStatusText(status: number): string {
@@ -632,7 +607,8 @@ export class Admin implements OnInit {
   loadPayments() {
     this.paymentService.getAll().subscribe({
       next: (res: any) => {
-        this.payments = Array.isArray(res) ? res : (res?.data || []);
+        this.allPayments = Array.isArray(res) ? res : (res?.data || []);
+        this.payments = [...this.allPayments];
         this.cdr.detectChanges();
       },
       error: () => this.toastr.error('Failed to load payments')
@@ -642,54 +618,24 @@ export class Admin implements OnInit {
   refreshPayments() { this.loadPayments(); this.toastr.success('Refreshed'); }
 
   searchPayment() {
-    this.paymentService.getAll().subscribe({
-      next: (res: any) => {
-        let list: any[] = Array.isArray(res) ? res : (res?.data || []);
-
-        if (this.paymentSearchRentalId) {
-          list = list.filter((p: any) => p.rentalId === Number(this.paymentSearchRentalId));
-        }
-        if (this.paymentSearchUserId) {
-          list = list.filter((p: any) => p.userId === Number(this.paymentSearchUserId));
-        }
-        if (this.paymentMethodFilter !== '') {
-          list = list.filter((p: any) => (p.method ?? p.paymentMethod) === Number(this.paymentMethodFilter));
-        }
-        if (this.paymentStatusFilter !== '') {
-          list = list.filter((p: any) => (p.status ?? p.paymentStatus) === Number(this.paymentStatusFilter));
-        }
-        if (this.paymentDateFrom) {
-          const from = new Date(this.paymentDateFrom);
-          list = list.filter((p: any) => new Date(p.paymentDate) >= from);
-        }
-        if (this.paymentDateTo) {
-          const to = new Date(this.paymentDateTo);
-          to.setHours(23, 59, 59);
-          list = list.filter((p: any) => new Date(p.paymentDate) <= to);
-        }
-        if (this.paymentSortDate === 'desc') {
-          list = list.sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
-        } else if (this.paymentSortDate === 'asc') {
-          list = list.sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
-        }
-
-        this.payments = list;
-        if (!list.length) this.toastr.info('No payments matched');
-        this.cdr.detectChanges();
-      },
-      error: () => this.toastr.error('Search failed')
-    });
+    let list = [...this.allPayments];
+    if (this.paymentSearchRentalId) list = list.filter((p: any) => p.rentalId === Number(this.paymentSearchRentalId));
+    if (this.paymentSearchUserId) list = list.filter((p: any) => p.userId === Number(this.paymentSearchUserId));
+    if (this.paymentMethodFilter !== '') list = list.filter((p: any) => (p.method ?? p.paymentMethod) === Number(this.paymentMethodFilter));
+    if (this.paymentStatusFilter !== '') list = list.filter((p: any) => (p.status ?? p.paymentStatus) === Number(this.paymentStatusFilter));
+    if (this.paymentDateFrom) { const from = new Date(this.paymentDateFrom); list = list.filter((p: any) => new Date(p.paymentDate) >= from); }
+    if (this.paymentDateTo) { const to = new Date(this.paymentDateTo); to.setHours(23,59,59); list = list.filter((p: any) => new Date(p.paymentDate) <= to); }
+    if (this.paymentSortDate === 'desc') list.sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
+    else if (this.paymentSortDate === 'asc') list.sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
+    this.payments = list;
+    this.cdr.detectChanges();
   }
 
   resetPayment() {
-    this.paymentSearchRentalId = null;
-    this.paymentSearchUserId = null;
-    this.paymentMethodFilter = '';
-    this.paymentStatusFilter = '';
-    this.paymentDateFrom = '';
-    this.paymentDateTo = '';
-    this.paymentSortDate = '';
-    this.loadPayments();
+    this.paymentSearchRentalId = null; this.paymentSearchUserId = null;
+    this.paymentMethodFilter = ''; this.paymentStatusFilter = '';
+    this.paymentDateFrom = ''; this.paymentDateTo = ''; this.paymentSortDate = '';
+    this.payments = [...this.allPayments]; this.cdr.detectChanges();
   }
 
   getPaymentStatus(status: number): string {
@@ -801,6 +747,74 @@ export class Admin implements OnInit {
       },
       error: () => this.toastr.error('Delete failed')
     });
+  }
+
+  // ================= ACTIVITY LOGS =================
+  loadLogs() {
+    this.logsLoading = true;
+    this.activityLogService.getLogs({
+      userId: this.logFilterUserId || undefined,
+      role: this.logFilterRole || undefined,
+      entity: this.logFilterEntity || undefined,
+      action: this.logFilterAction || undefined,
+      status: this.logFilterStatus || undefined,
+      from: this.logFilterFrom || undefined,
+      to: this.logFilterTo || undefined,
+      sortOrder: this.logSortOrder,
+      page: this.logsPage,
+      pageSize: this.logsPageSize
+    }).pipe(catchError(() => of(null))).subscribe({
+      next: (res: any) => {
+        this.logs = res?.items || [];
+        this.logsTotalCount = res?.totalCount || 0;
+        this.logsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.logsLoading = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  searchLogs() { this.logsPage = 1; this.loadLogs(); }
+
+  resetLogs() {
+    this.logFilterUserId = null;
+    this.logFilterRole = '';
+    this.logFilterEntity = '';
+    this.logFilterAction = '';
+    this.logFilterStatus = '';
+    this.logFilterFrom = '';
+    this.logFilterTo = '';
+    this.logSortOrder = 'desc';
+    this.logsPage = 1;
+    this.loadLogs();
+  }
+
+  logsNextPage() {
+    if (this.logsPage * this.logsPageSize < this.logsTotalCount) {
+      this.logsPage++;
+      this.loadLogs();
+    }
+  }
+
+  logsPrevPage() {
+    if (this.logsPage > 1) {
+      this.logsPage--;
+      this.loadLogs();
+    }
+  }
+
+  onLogDateFromChange(val: string) {
+    if (val && this.logFilterTo && val > this.logFilterTo) { this.logFilterTo = ''; }
+    this.logFilterFrom = val;
+  }
+
+  onLogDateToChange(val: string) {
+    if (val && this.logFilterFrom && val < this.logFilterFrom) { this.logFilterFrom = ''; }
+    this.logFilterTo = val;
+  }
+
+  get logsTotalPages(): number {
+    return Math.ceil(this.logsTotalCount / this.logsPageSize) || 1;
   }
 
   // ================= AUTH =================

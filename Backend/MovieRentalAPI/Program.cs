@@ -91,7 +91,10 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IPromoService, PromoService>();
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddHostedService<RentalExpiryBackgroundService>();
 #endregion
 
 #region Authentication (JWT)
@@ -206,6 +209,21 @@ BEGIN
         Title NVARCHAR(200) NOT NULL DEFAULT '',
         Message NVARCHAR(MAX) NOT NULL DEFAULT '',
         SentAt datetime2 NOT NULL
+    );
+END
+
+IF OBJECT_ID('ActivityLogs', 'U') IS NULL
+BEGIN
+    CREATE TABLE ActivityLogs (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        UserId INT NOT NULL DEFAULT 0,
+        UserName NVARCHAR(150) NOT NULL DEFAULT '',
+        Role NVARCHAR(50) NOT NULL DEFAULT '',
+        Entity NVARCHAR(100) NOT NULL DEFAULT '',
+        Action NVARCHAR(100) NOT NULL DEFAULT '',
+        Details NVARCHAR(MAX) NOT NULL DEFAULT '',
+        Status NVARCHAR(20) NOT NULL DEFAULT 'Success',
+        PerformedAt datetime2 NOT NULL
     );
 END
 ");
