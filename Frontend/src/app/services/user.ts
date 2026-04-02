@@ -44,7 +44,7 @@ export class UserService {
   }
 
   savePreferences(userId: number, data: { preferredGenres: string[]; preferredLanguages: string[]; theme: string }) {
-    return this.http.post<any>(`${this.baseUrl}/${userId}/preferences`, data);
+    return this.http.put<any>(`${this.baseUrl}/${userId}/preferences`, data);
   }
 }
 

@@ -85,7 +85,7 @@ namespace MovieRentalAPI.Services
                 PaymentDate = IstDateTime.Now
             };
 
-            var added = await _paymentRepository.Add(payment);
+            var added = (await _paymentRepository.Add(payment))!;
 
             rental.Status = rentalStatus;
             rental.PaymentId = paymentId;
@@ -182,7 +182,7 @@ namespace MovieRentalAPI.Services
                     RefundAmount = refundAmount,
                     RefundedAt = now
                 };
-                addedRefund = await _paymentRepository.Add(refundPayment);
+                addedRefund = (await _paymentRepository.Add(refundPayment))!;
             }
             else
             {
@@ -268,6 +268,7 @@ namespace MovieRentalAPI.Services
 
             return payments
                 .OrderByDescending(p => p.PaymentDate)
+                .Where(p => p != null)
                 .Select(MapToResponse);
         }
 

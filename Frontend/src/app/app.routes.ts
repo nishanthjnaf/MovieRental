@@ -19,20 +19,16 @@ import { RazorpayMock } from './customer/razorpay-mock';
 import { PaymentResult } from './customer/payment-result';
 import { CustomerPreferencesPage } from './customer/customer-preferences-page';
 import { AdminProfile } from './admin/admin-profile';
-
-
-
-
+import { OAuthCallback } from './oauth-callback/oauth-callback';
 import { CustomerNotifications } from './customer/customer-notifications';
-
 import { NotFound } from './not-found';
 
 export const routes: Routes = [
 
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+  { path: 'oauth-callback', component: OAuthCallback },
   { path: 'preferences', component: CustomerPreferencesPage, canActivate: [authGuard] },
 
   {

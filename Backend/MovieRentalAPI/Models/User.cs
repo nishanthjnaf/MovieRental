@@ -16,7 +16,7 @@ namespace MovieRentalAPI.Models
 
         public ICollection<Rental>? Rentals { get; set; }
         public ICollection<Watchlist>? Watchlists { get; set; }
-        public List<Review?> Reviews { get; internal set; }
+        public List<Review> Reviews { get; internal set; } = new();
 
         public int CompareTo(User? other)
         {

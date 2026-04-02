@@ -1,4 +1,5 @@
 using AspNetCoreRateLimit;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -18,15 +19,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 #endregion
 
+#region API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+}).AddMvc();
+#endregion
+
 
 #region NSwag (OpenAPI)
-builder.Services.AddOpenApiDocument(settings =>
-{
-    settings.DocumentName = "v1";
-    settings.Title = "MovieRentalAPI";
-    settings.Version = "v1";
 
-    // JWT Bearer auth in the UI
+// Processor that replaces {version} in routes with the actual version string
+// so NSwag can generate valid paths like /api/v1/Movie instead of /api/{version}/Movie
+void ConfigureSwaggerDoc(NSwag.Generation.AspNetCore.AspNetCoreOpenApiDocumentGeneratorSettings settings, string version)
+{
+    settings.DocumentName = version;
+    settings.Title = "MovieRentalAPI";
+    settings.Version = version;
+
+    // v1 gets all unversioned controllers + v1 Movie controller
+    // v2 gets only the v2 Movie controller
+    if (version == "v1")
+        settings.ApiGroupNames = new[] { "v1", null! }; // null = no GroupName set (all other controllers)
+    else
+        settings.ApiGroupNames = new[] { version };
+
     settings.AddSecurity("JWT", new OpenApiSecurityScheme
     {
         Type = OpenApiSecuritySchemeType.Http,
@@ -37,7 +56,19 @@ builder.Services.AddOpenApiDocument(settings =>
         Description = "Enter token as: Bearer {your token}"
     });
     settings.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
-});
+
+    // Replace {version} placeholder in paths with the real version number
+    settings.OperationProcessors.Add(new NSwag.Generation.Processors.OperationProcessor(ctx =>
+    {
+        ctx.OperationDescription.Path = ctx.OperationDescription.Path
+            .Replace("{version}", version.TrimStart('v'));
+        return true;
+    }));
+}
+
+builder.Services.AddOpenApiDocument(s => ConfigureSwaggerDoc(s, "v1"));
+builder.Services.AddOpenApiDocument(s => ConfigureSwaggerDoc(s, "v2"));
+
 #endregion
 
 
@@ -101,8 +132,18 @@ builder.Services.AddHostedService<RentalExpiryBackgroundService>();
 var key = builder.Configuration["Jwt:Key"]
           ?? throw new InvalidOperationException("JWT key missing");
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
+builder.Services.AddAuthentication(options =>
+{
+    // Cookies handle the OAuth redirect/callback handshake
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "Cookies";
+})
+.AddCookie("Cookies", options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+})
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -112,6 +153,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
+})
+.AddGoogle(options =>
+{
+    options.SignInScheme = "Cookies";
+    options.ClientId = builder.Configuration["OAuth:Google:ClientId"]!;
+    options.ClientSecret = builder.Configuration["OAuth:Google:ClientSecret"]!;
+    options.CallbackPath = "/signin-google";
 });
 
 builder.Services.AddAuthorization();
@@ -234,20 +282,18 @@ END
 
 if (app.Environment.IsDevelopment())
 {
+    // Serve both versioned OpenAPI JSON docs
     app.UseOpenApi(cfg =>
     {
-        cfg.Path = "/swagger/v1/swagger.json";
-        cfg.DocumentName = "v1";
+        cfg.Path = "/swagger/{documentName}/swagger.json";
     });
 
     app.UseSwaggerUi(cfg =>
     {
-        cfg.Path = "/swagger"; 
+        cfg.Path = "/swagger";
         cfg.SwaggerRoutes.Clear();
-        cfg.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute(
-            name: "v1",
-            url: "/swagger/v1/swagger.json"
-        ));
+        cfg.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute("v1", "/swagger/v1/swagger.json"));
+        cfg.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute("v2", "/swagger/v2/swagger.json"));
         cfg.DocumentTitle = "MovieRentalAPI - Swagger UI";
     });
 }

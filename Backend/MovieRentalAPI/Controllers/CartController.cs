@@ -15,85 +15,96 @@ namespace MovieRentalAPI.Controllers
             _context = context;
         }
 
-        // GET api/Cart/{userId}
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetCart(int userId)
         {
-            var items = await _context.CartItems
-                .Where(c => c.UserId == userId)
-                .Include(c => c.Movie)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.MovieId,
-                    c.RentalDays,
-                    c.Movie!.Title,
-                    c.Movie.PosterPath,
-                    c.Movie.ReleaseYear,
-                    c.Movie.Language,
-                    c.Movie.Rating
-                })
-                .ToListAsync();
-
-            return Ok(items);
+            try
+            {
+                var items = await _context.CartItems
+                    .Where(c => c.UserId == userId)
+                    .Include(c => c.Movie)
+                    .Select(c => new
+                    {
+                        c.Id, c.MovieId, c.RentalDays,
+                        c.Movie!.Title, c.Movie.PosterPath,
+                        c.Movie.ReleaseYear, c.Movie.Language, c.Movie.Rating
+                    })
+                    .ToListAsync();
+                return Ok(items);
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // POST api/Cart/{userId}/add
         [HttpPost("{userId}/add")]
         public async Task<IActionResult> AddItem(int userId, [FromBody] CartAddRequest req)
         {
-            var exists = await _context.CartItems
-                .AnyAsync(c => c.UserId == userId && c.MovieId == req.MovieId);
-
-            if (exists) return Ok(); // already in cart, no-op
-
-            _context.CartItems.Add(new MovieRentalAPI.Models.CartItem
+            try
             {
-                UserId = userId,
-                MovieId = req.MovieId,
-                RentalDays = req.RentalDays > 0 ? req.RentalDays : 7
-            });
+                if (req == null || req.MovieId <= 0) return BadRequest("Valid MovieId is required");
+                if (userId <= 0) return BadRequest("Valid UserId is required");
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                var exists = await _context.CartItems
+                    .AnyAsync(c => c.UserId == userId && c.MovieId == req.MovieId);
+
+                if (exists) return Conflict("Movie already exists in cart");
+
+                _context.CartItems.Add(new MovieRentalAPI.Models.CartItem
+                {
+                    UserId = userId,
+                    MovieId = req.MovieId,
+                    RentalDays = req.RentalDays > 0 ? req.RentalDays : 7
+                });
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // PATCH api/Cart/{userId}/days
         [HttpPatch("{userId}/days")]
         public async Task<IActionResult> UpdateDays(int userId, [FromBody] CartUpdateDaysRequest req)
         {
-            var item = await _context.CartItems
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.MovieId == req.MovieId);
+            try
+            {
+                var item = await _context.CartItems
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.MovieId == req.MovieId);
 
-            if (item == null) return NotFound();
+                if (item == null) return NotFound("Cart item not found");
 
-            item.RentalDays = Math.Max(1, Math.Min(30, req.RentalDays));
-            await _context.SaveChangesAsync();
-            return Ok();
+                item.RentalDays = Math.Max(1, Math.Min(30, req.RentalDays));
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // DELETE api/Cart/{userId}/remove/{movieId}
         [HttpDelete("{userId}/remove/{movieId}")]
         public async Task<IActionResult> RemoveItem(int userId, int movieId)
         {
-            var item = await _context.CartItems
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.MovieId == movieId);
+            try
+            {
+                var item = await _context.CartItems
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.MovieId == movieId);
 
-            if (item == null) return NotFound();
+                if (item == null) return NotFound("Cart item not found");
 
-            _context.CartItems.Remove(item);
-            await _context.SaveChangesAsync();
-            return Ok();
+                _context.CartItems.Remove(item);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // DELETE api/Cart/{userId}/clear
         [HttpDelete("{userId}/clear")]
         public async Task<IActionResult> ClearCart(int userId)
         {
-            var items = _context.CartItems.Where(c => c.UserId == userId);
-            _context.CartItems.RemoveRange(items);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                var items = _context.CartItems.Where(c => c.UserId == userId);
+                _context.CartItems.RemoveRange(items);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
     }
 

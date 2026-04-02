@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({ providedIn: 'root' })
 export class MovieService {
 
-  baseUrl = 'http://localhost:5287/api/Movie';
+  baseUrl = 'http://localhost:5287/api/v1/Movie';
 
   constructor(private http: HttpClient) {}
 

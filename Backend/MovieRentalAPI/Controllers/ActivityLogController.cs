@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
 
@@ -15,15 +16,17 @@ namespace MovieRentalAPI.Controllers
             _logService = logService;
         }
 
-        /// <summary>
-        /// Returns paginated activity logs with optional filters and sort.
-        /// </summary>
-        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetLogs([FromQuery] ActivityLogQueryDto query)
         {
-            var result = await _logService.GetLogs(query);
-            return Ok(result);
+            try
+            {
+                var result = await _logService.GetLogs(query);
+                return Ok(result);
+            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
     }
 }

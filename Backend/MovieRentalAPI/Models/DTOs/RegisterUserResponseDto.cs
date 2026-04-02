@@ -2,7 +2,7 @@
 {
     public class RegisterUserResponseDto
     {
-        public string Username { get; set; }
-        public string Message { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
     }
 }

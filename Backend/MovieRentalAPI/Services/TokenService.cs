@@ -16,7 +16,7 @@ public class TokenService : ITokenService
     public string CreateToken(TokenPayloadDto payload)
     {
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+            Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
         );
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -32,7 +32,7 @@ public class TokenService : ITokenService
             audience: _config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.Now.AddMinutes(
-                Convert.ToDouble(_config["Jwt:ExpireMinutes"])
+                Convert.ToDouble(_config["Jwt:ExpireMinutes"] ?? "60")
             ),
             signingCredentials: creds
         );

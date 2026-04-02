@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MovieRentalAPI.Services
 {
-    public class UserServices : Repository<int, User>, IUserServices
+    public class UserService : Repository<int, User>, IUserServices
     {
         private readonly ITokenService _tokenService;
         private readonly IPasswordService _passwordService;
@@ -22,7 +22,7 @@ namespace MovieRentalAPI.Services
         private readonly NotificationService _notifications;
         private readonly IActivityLogService _activityLog;
 
-        public UserServices(
+        public UserService(
             MovieRentalContext context,
             IPasswordService passwordService,
             ITokenService tokenService,

@@ -1,17 +1,17 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
+import { AuthService } from '../services/auth';
 
 export const authGuard: CanActivateFn = () => {
-
   const router = inject(Router);
-  const token =
-  localStorage.getItem('token') ||
-  sessionStorage.getItem('token');
+  const auth = inject(AuthService);
 
-  if (token) {
-    return true; // ✅ allow access
-  } else {
-    router.navigate(['/login']); // ❌ redirect
-    return false;
+  if (auth.isTokenValid()) {
+    return true; // ✅ token exists and is not expired
   }
+
+  // token missing, expired, or tampered — clean up and redirect
+  auth.clearSession();
+  router.navigate(['/login']);
+  return false;
 };

@@ -2,7 +2,6 @@
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
-using Microsoft.AspNetCore.Authorization;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -17,31 +16,20 @@ namespace MovieRentalAPI.Controllers
             _service = service;
         }
 
-        //[Authorize(Roles = "Customer")]
         [HttpPost]
-        public async Task<IActionResult> AddToWatchlist(
-            [FromBody] WatchlistRequestDto request)
+        public async Task<IActionResult> AddToWatchlist([FromBody] WatchlistRequestDto request)
         {
             try
             {
                 var result = await _service.AddToWatchlist(request);
                 return Ok(result);
             }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ConflictException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (ConflictException ex) { return Conflict(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Customer")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserWatchlist(int userId)
         {
@@ -50,13 +38,10 @@ namespace MovieRentalAPI.Controllers
                 var result = await _service.GetUserWatchlist(userId);
                 return Ok(result);
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Customer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(int id)
         {
@@ -65,10 +50,8 @@ namespace MovieRentalAPI.Controllers
                 await _service.RemoveFromWatchlist(id);
                 return Ok("Removed from watchlist successfully");
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
     }
 }

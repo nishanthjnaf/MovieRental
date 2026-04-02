@@ -97,7 +97,7 @@ namespace MovieRentalAPI.Services
             if (movieReviews == null || !movieReviews.Any())
                 throw new NotFoundException("No reviews found for this movie");
 
-            return movieReviews.Select(MapToResponse);
+            return movieReviews!.Select(MapToResponse);
         }
 
         public async Task<IEnumerable<ReviewResponseDto>> GetReviewsByUser(int userId)
@@ -116,7 +116,7 @@ namespace MovieRentalAPI.Services
             if (userReviews == null || !userReviews.Any())
                 return Enumerable.Empty<ReviewResponseDto>();
 
-            return userReviews.Select(MapToResponse);
+            return userReviews!.Select(MapToResponse);
         }
 
         public async Task<ReviewResponseDto> UpdateReview(int id, ReviewRequestDto request)

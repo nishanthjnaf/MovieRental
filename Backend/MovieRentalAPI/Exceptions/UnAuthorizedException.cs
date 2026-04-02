@@ -1,6 +1,6 @@
 ﻿namespace MovieRentalAPI.Exceptions
 {
-    public class UnAuthorizedException : IOException
+    public class UnAuthorizedException : Exception
     {
         public UnAuthorizedException() : base("Unauthorized access.")
         {
@@ -8,7 +8,7 @@
         public UnAuthorizedException(string message) : base(message)
         {
         }
-        public UnAuthorizedException(string message, IOException innerException) : base(message, innerException)
+        public UnAuthorizedException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

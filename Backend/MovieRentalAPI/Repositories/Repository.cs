@@ -97,7 +97,7 @@ namespace MovieRentalAPI.Repositories
                     foreach (var include in includes)
                         query = query.Include(include);
 
-                    return await query.FirstOrDefaultAsync(e => EF.Property<K>(e, "Id").Equals(key));
+                    return await query.FirstOrDefaultAsync(e => EF.Property<K>(e, "Id")!.Equals(key));
                 }
     }
 }

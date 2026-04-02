@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Models.DTOs;
 using MovieRentalAPI.Services;
 
@@ -15,97 +16,138 @@ namespace MovieRentalAPI.Controllers
             _svc = svc;
         }
 
-        // GET api/Notification/user/{userId}
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetForUser(int userId)
         {
-            var result = await _svc.GetForUser(userId);
-            return Ok(result);
+            try
+            {
+                if (userId <= 0) return BadRequest("Valid UserId is required");
+                var result = await _svc.GetForUser(userId);
+                return Ok(result);
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // GET api/Notification/user/{userId}/unread-count
         [HttpGet("user/{userId}/unread-count")]
         public async Task<IActionResult> UnreadCount(int userId)
         {
-            var count = await _svc.GetUnreadCount(userId);
-            return Ok(count);
+            try
+            {
+                if (userId <= 0) return BadRequest("Valid UserId is required");
+                var count = await _svc.GetUnreadCount(userId);
+                return Ok(count);
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // PATCH api/Notification/{id}/read
         [HttpPatch("{id}/read")]
         public async Task<IActionResult> MarkRead(int id)
         {
-            await _svc.MarkRead(id);
-            return Ok();
+            try
+            {
+                if (id <= 0) return BadRequest("Valid notification Id is required");
+                await _svc.MarkRead(id);
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // PATCH api/Notification/user/{userId}/read-all
         [HttpPatch("user/{userId}/read-all")]
         public async Task<IActionResult> MarkAllRead(int userId)
         {
-            await _svc.MarkAllRead(userId);
-            return Ok();
+            try
+            {
+                if (userId <= 0) return BadRequest("Valid UserId is required");
+                await _svc.MarkAllRead(userId);
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // DELETE api/Notification/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _svc.Delete(id);
-            return Ok();
+            try
+            {
+                if (id <= 0) return BadRequest("Valid notification Id is required");
+                await _svc.Delete(id);
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // POST api/Notification/admin/broadcast
         [HttpPost("admin/broadcast")]
         public async Task<IActionResult> Broadcast([FromBody] SendBroadcastRequestDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Message))
-                return BadRequest("Message is required");
+            try
+            {
+                if (dto == null) return BadRequest("Request body is required");
+                if (string.IsNullOrWhiteSpace(dto.Message))
+                    return BadRequest("Message is required");
 
-            // Resolve sender username
-            var sender = await _svc.GetSenderUsername(dto.SentByUserId);
-            var result = await _svc.Broadcast("admin_message", dto.Title, dto.Message, dto.SentByUserId, sender);
-            return Ok(result);
+                var sender = await _svc.GetSenderUsername(dto.SentByUserId);
+                var result = await _svc.Broadcast("admin_message", dto.Title, dto.Message, dto.SentByUserId, sender);
+                return Ok(result);
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // GET api/Notification/admin/broadcasts
         [HttpGet("admin/broadcasts")]
         public async Task<IActionResult> GetBroadcasts()
         {
-            var result = await _svc.GetAllBroadcasts();
-            return Ok(result);
+            try
+            {
+                var result = await _svc.GetAllBroadcasts();
+                return Ok(result);
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // DELETE api/Notification/admin/broadcasts/{id}
         [HttpDelete("admin/broadcasts/{id}")]
         public async Task<IActionResult> DeleteBroadcast(int id)
         {
-            await _svc.DeleteBroadcast(id);
-            return Ok();
+            try
+            {
+                if (id <= 0) return BadRequest("Valid broadcast Id is required");
+                await _svc.DeleteBroadcast(id);
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // POST api/Notification/check-expiry
-        [HttpPost("check-expiry")]
+        [HttpGet("check-expiry")]
         public async Task<IActionResult> CheckExpiry()
         {
-            await _svc.CheckExpiringRentals();
-            return Ok();
+            try
+            {
+                await _svc.CheckExpiringRentals();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // POST api/Notification/check-expired
-        [HttpPost("check-expired")]
+        [HttpGet("check-expired")]
         public async Task<IActionResult> CheckExpired()
         {
-            await _svc.CheckExpiredRentals();
-            return Ok();
+            try
+            {
+                await _svc.CheckExpiredRentals();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // POST api/Notification/push  (generic single push)
         [HttpPost("push")]
         public async Task<IActionResult> Push([FromBody] PushNotificationDto dto)
         {
-            await _svc.Push(dto.UserId, dto.Type, dto.Title, dto.Message, dto.RelatedId);
-            return Ok();
+            try
+            {
+                if (dto.UserId <= 0)
+                    return BadRequest("Valid UserId is required");
+                await _svc.Push(dto.UserId, dto.Type, dto.Title, dto.Message, dto.RelatedId);
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
     }
 

@@ -10,14 +10,14 @@ namespace MovieRentalAPI.Models
         public int Id { get; set; }
         public int RentalId { get; set; }
         public int UserId { get; set; }
-        public Rental Rental { get; set; }
+        public Rental Rental { get; set; } = null!;
         public float Amount { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
         public DateTime PaymentDate { get; set; }
         public PaymentStatus Status { get; set; }
         public PaymentType PaymentType { get; set; }
-        public string PaymentId { get; set; }
-        public User User { get; set; }
+        public string PaymentId { get; set; } = string.Empty;
+        public User User { get; set; } = null!;
 
         // Kept for backward compat on refund records (populated only when PaymentType == Refund)
         public double? RefundAmount { get; set; }

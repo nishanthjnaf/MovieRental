@@ -1,13 +1,15 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
-using Microsoft.AspNetCore.Authorization;
 
 namespace MovieRentalAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/Movie")]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class MovieController : ControllerBase
     {
         private readonly IMovieServices _movieService;
@@ -17,7 +19,6 @@ namespace MovieRentalAPI.Controllers
             _movieService = movieService;
         }
 
-        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddMovie(CreateMovieRequestDto request)
         {
@@ -26,21 +27,12 @@ namespace MovieRentalAPI.Controllers
                 var result = await _movieService.AddMovie(request);
                 return Ok(result);
             }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ConflictException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (ConflictException ex) { return Conflict(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMovie(int id)
         {
@@ -49,13 +41,10 @@ namespace MovieRentalAPI.Controllers
                 var result = await _movieService.GetMovieById(id);
                 return Ok(result);
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin,Customer")]
         [HttpGet]
         public async Task<IActionResult> GetAllMovies()
         {
@@ -64,54 +53,36 @@ namespace MovieRentalAPI.Controllers
                 var result = await _movieService.GetAllMovies();
                 return Ok(result);
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin,Customer")]
         [HttpGet("search")]
-        public async Task<IActionResult> SearchMovies(
-            [FromQuery] MovieSearchRequestDto request)
+        public async Task<IActionResult> SearchMovies([FromQuery] MovieSearchRequestDto request)
         {
             try
             {
                 var result = await _movieService.SearchMovies(request);
                 return Ok(result);
             }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMovie(
-            int id,
-            CreateMovieRequestDto request)
+        public async Task<IActionResult> UpdateMovie(int id, CreateMovieRequestDto request)
         {
             try
             {
                 var result = await _movieService.UpdateMovie(id, request);
                 return Ok(result);
             }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
@@ -120,54 +91,34 @@ namespace MovieRentalAPI.Controllers
                 await _movieService.DeleteMovie(id);
                 return Ok("Movie deleted successfully");
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin,Customer")]
         [HttpGet("top-rented")]
-        public async Task<IActionResult> GetTopRentedMovies(
-            [FromQuery] int count = 5)
+        public async Task<IActionResult> GetTopRentedMovies([FromQuery] int count = 5)
         {
             try
             {
-                var result =
-                    await _movieService.GetTopRentedMovies(count);
-
+                var result = await _movieService.GetTopRentedMovies(count);
                 return Ok(result);
             }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        //[Authorize(Roles = "Admin,Customer")]
         [HttpGet("top-user-rated")]
-        public async Task<IActionResult> GetTopUserRatedMovies(
-            [FromQuery] int count = 10)
+        public async Task<IActionResult> GetTopUserRatedMovies([FromQuery] int count = 10)
         {
             try
             {
-                var result =
-                    await _movieService.GetTopUserRatedMovies(count);
-
+                var result = await _movieService.GetTopUserRatedMovies(count);
                 return Ok(result);
             }
-            catch (BadRequestException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
         [HttpGet("suggestions/{userId}")]
@@ -178,13 +129,10 @@ namespace MovieRentalAPI.Controllers
                 var result = await _movieService.GetSuggestedMovies(userId);
                 return Ok(result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
-        // GET api/Movie/filter?searchTerm=&languages=English&languages=Korean&minYear=2000&maxYear=2024&minPrice=50&maxPrice=300&genreIds=1&genreIds=2
         [HttpGet("filter")]
         public async Task<IActionResult> FilterMovies([FromQuery] MovieFilterRequestDto request)
         {
@@ -193,10 +141,8 @@ namespace MovieRentalAPI.Controllers
                 var result = await _movieService.FilterMovies(request);
                 return Ok(result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
     }
 }

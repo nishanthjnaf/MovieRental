@@ -26,14 +26,9 @@ namespace MovieRentalAPI.Controllers
                 var result = await _userService.CheckUser(userRequestDto);
                 return Ok(result);
             }
-            catch (UnAuthorizedException )
-            {
-                return Unauthorized("Invalid username or password");
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (UnAuthorizedException ex) { return Unauthorized(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
         [AllowAnonymous]
@@ -44,14 +39,10 @@ namespace MovieRentalAPI.Controllers
             {
                 var result = await _userService.RegisterUser(registerRequestDto);
                 return Ok(result);
-
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
+            catch (ConflictException ex) { return Conflict(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
-
     }
-
 }

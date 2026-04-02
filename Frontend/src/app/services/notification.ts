@@ -45,7 +45,7 @@ export class NotificationService {
   }
 
   checkExpiry() {
-    return this.http.post(`${this.baseUrl}/check-expiry`, {}, { responseType: 'text' });
+    return this.http.get(`${this.baseUrl}/check-expiry`, { responseType: 'text' });
   }
 
   // Push rate-movie notification (called from watch page)

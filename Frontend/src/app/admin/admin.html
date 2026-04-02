@@ -1,4 +1,4 @@
-﻿<div class="admin-shell">
+<div class="admin-shell">
   <aside class="admin-sidebar">
     <div class="admin-sidebar__logo"><span class="admin-sidebar__logo-icon">🎬</span><span class="admin-sidebar__logo-text">CineAdmin</span></div>
     <nav class="admin-sidebar__nav">
@@ -15,7 +15,6 @@
     <div class="admin-sidebar__divider"></div>
     <button class="admin-sidebar__logout" (click)="logout()"><span>🚪</span> Logout</button>
   </aside>
-
   <div class="admin-main">
     <header class="admin-topbar">
       <span class="admin-topbar__title">{{ getPageTitle() }}</span>
@@ -32,10 +31,8 @@
         </div>
       </div>
     </header>
-
     <div class="admin-content">
-
-      <!-- ═══════════════ DASHBOARD ═══════════════ -->
+      <!-- DASHBOARD -->
       <ng-container *ngIf="viewMode === 'services'">
         <p class="admin-dash__greeting">Welcome back, {{ currentAdminName }} 👋</p>
         <p class="admin-dash__sub">Here's what's happening with your platform today.</p>
@@ -56,37 +53,29 @@
         </div>
       </ng-container>
 
-      <!-- ═══════════════ GENRE ═══════════════ -->
+
+      <!-- GENRE -->
       <ng-container *ngIf="viewMode === 'genre'">
-        <div class="admin-page-header">
-          <h2 class="admin-page-title">Genre Management</h2>
-          <button class="admin-add-btn" (click)="openAddForm()">+ Add Genre</button>
-        </div>
+        <div class="admin-page-header"><h2 class="admin-page-title">Genre Management</h2><button class="admin-add-btn" (click)="openAddForm()">+ Add Genre</button></div>
         <div class="admin-filter-bar">
           <div class="admin-filter-group"><span class="admin-filter-label">Search by ID</span><input type="number" [(ngModel)]="searchId" (ngModelChange)="searchGenre()" placeholder="ID" class="admin-filter-input" style="width:80px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Search by Name</span><input [(ngModel)]="genreSearchName" (ngModelChange)="searchGenre()" placeholder="Genre name..." class="admin-filter-input" style="width:200px" /></div>
           <button class="admin-filter-reset" (click)="resetSearch()">Reset</button>
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let g of genres">
-                <td>{{ g.id }}</td><td>{{ g.name }}</td><td style="color:#94a3b8">{{ g.description }}</td>
-                <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editGenre(g)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteGenre(g.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Assign Movie" (click)="openAssign(g)">🎬</button></div></td>
-              </tr>
-              <tr *ngIf="genres.length === 0"><td colspan="4" class="admin-empty">No genres found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="admin-table-wrap"><table class="admin-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let g of genres"><td>{{ g.id }}</td><td>{{ g.name }}</td><td style="color:#94a3b8">{{ g.description }}</td>
+              <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editGenre(g)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteGenre(g.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Assign Movie" (click)="openAssign(g)">🎬</button></div></td>
+            </tr>
+            <tr *ngIf="genres.length === 0"><td colspan="4" class="admin-empty">No genres found.</td></tr>
+          </tbody>
+        </table></div>
       </ng-container>
 
-      <!-- ═══════════════ INVENTORY ═══════════════ -->
+      <!-- INVENTORY -->
       <ng-container *ngIf="viewMode === 'inventory'">
-        <div class="admin-page-header">
-          <h2 class="admin-page-title">Inventory Management</h2>
-          <button class="admin-add-btn" (click)="openInventoryForm()">+ Add Inventory</button>
-        </div>
+        <div class="admin-page-header"><h2 class="admin-page-title">Inventory Management</h2><button class="admin-add-btn" (click)="openInventoryForm()">+ Add Inventory</button></div>
         <div class="admin-filter-bar">
           <div class="admin-filter-group"><span class="admin-filter-label">Inventory ID</span><input type="number" [(ngModel)]="inventorySearchId" (ngModelChange)="searchInventory()" placeholder="ID" class="admin-filter-input" style="width:80px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Movie ID</span><input type="number" [(ngModel)]="inventorySearchMovieId" (ngModelChange)="searchInventory()" placeholder="Movie ID" class="admin-filter-input" style="width:90px" /></div>
@@ -94,27 +83,21 @@
           <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="inventoryStatusFilter" (ngModelChange)="searchInventory()" class="admin-filter-select" style="width:140px"><option value="">All Status</option><option value="available">Available</option><option value="unavailable">Not Available</option></select></div>
           <button class="admin-filter-reset" (click)="resetInventory()">Reset</button>
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>ID</th><th>Movie ID</th><th>Movie Name</th><th>Price/day</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let i of inventories">
-                <td>{{ i.id }}</td><td>{{ i.movieId }}</td><td>{{ i.movieName }}</td><td>₹{{ i.rentalPrice }}</td>
-                <td><span class="admin-badge" [class.admin-badge--green]="i.isAvailable" [class.admin-badge--red]="!i.isAvailable">{{ i.isAvailable ? 'Available' : 'Unavailable' }}</span></td>
-                <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editInventory(i)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteInventory(i.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Toggle" (click)="toggleAvailability(i.id)">🔄</button></div></td>
-              </tr>
-              <tr *ngIf="inventories.length === 0"><td colspan="6" class="admin-empty">No inventory items found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="admin-table-wrap"><table class="admin-table">
+          <thead><tr><th>ID</th><th>Movie ID</th><th>Movie Name</th><th>Price/day</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let i of inventories"><td>{{ i.id }}</td><td>{{ i.movieId }}</td><td>{{ i.movieName }}</td><td>₹{{ i.rentalPrice }}</td>
+              <td><span class="admin-badge" [class.admin-badge--green]="i.isAvailable" [class.admin-badge--red]="!i.isAvailable">{{ i.isAvailable ? 'Available' : 'Unavailable' }}</span></td>
+              <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editInventory(i)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteInventory(i.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Toggle" (click)="toggleAvailability(i.id)">🔄</button></div></td>
+            </tr>
+            <tr *ngIf="inventories.length === 0"><td colspan="6" class="admin-empty">No inventory items found.</td></tr>
+          </tbody>
+        </table></div>
       </ng-container>
 
-      <!-- ═══════════════ MOVIES ═══════════════ -->
+      <!-- MOVIES -->
       <ng-container *ngIf="viewMode === 'movie'">
-        <div class="admin-page-header">
-          <h2 class="admin-page-title">Movie Management</h2>
-          <button class="admin-add-btn" (click)="openMovieForm()">+ Add Movie</button>
-        </div>
+        <div class="admin-page-header"><h2 class="admin-page-title">Movie Management</h2><button class="admin-add-btn" (click)="openMovieForm()">+ Add Movie</button></div>
         <div class="admin-filter-bar">
           <div class="admin-filter-group"><span class="admin-filter-label">Movie ID</span><input type="number" [(ngModel)]="movieSearchId" (ngModelChange)="searchMovie()" placeholder="ID" class="admin-filter-input" style="width:80px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Title</span><input [(ngModel)]="movieSearchName" (ngModelChange)="searchMovie()" placeholder="Movie title..." class="admin-filter-input" style="width:180px" /></div>
@@ -124,27 +107,23 @@
           <div class="admin-filter-group"><span class="admin-filter-label">Sort By</span><select [(ngModel)]="movieSort" (ngModelChange)="searchMovie()" class="admin-filter-select" style="width:190px"><option value="">Default</option><option value="rentalCount_desc">Rental Count ↓</option><option value="rentalCount_asc">Rental Count ↑</option><option value="rating_desc">Rating ↓</option><option value="rating_asc">Rating ↑</option></select></div>
           <button class="admin-filter-reset" (click)="resetMovie()">Reset</button>
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>ID</th><th>Title</th><th>Year</th><th>Duration</th><th>Language</th><th>Genres</th><th>Rating</th><th>Rentals</th><th>Poster</th><th>Trailer</th><th>Actions</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let m of movies">
-                <td>{{ m.id }}</td>
-                <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.title }}</td>
-                <td>{{ m.releaseYear }}</td><td>{{ m.durationMinutes }}m</td><td>{{ m.language }}</td>
-                <td><div class="admin-genre-tags"><span *ngFor="let g of (m.genres || [])" class="admin-genre-tag">{{ g }}</span><span *ngIf="!m.genres?.length" style="color:#475569">—</span></div></td>
-                <td>{{ m.rating || '—' }}</td><td>{{ m.rentalCount ?? '—' }}</td>
-                <td><button class="admin-tbl-btn" title="View poster" (click)="showPosterPopup(m.posterPath)">🖼️</button></td>
-                <td><button class="admin-tbl-btn" title="View trailer" (click)="showTrailerPopup(m.trailerUrl)">▶️</button></td>
-                <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editMovie(m)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteMovie(m.id)">🗑️</button></div></td>
-              </tr>
-              <tr *ngIf="movies.length === 0"><td colspan="11" class="admin-empty">No movies found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="admin-table-wrap"><table class="admin-table">
+          <thead><tr><th>ID</th><th>Title</th><th>Year</th><th>Duration</th><th>Language</th><th>Genres</th><th>Rating</th><th>Rentals</th><th>Poster</th><th>Trailer</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of movies"><td>{{ m.id }}</td><td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.title }}</td><td>{{ m.releaseYear }}</td><td>{{ m.durationMinutes }}m</td><td>{{ m.language }}</td>
+              <td><div class="admin-genre-tags"><span *ngFor="let g of (m.genres || [])" class="admin-genre-tag">{{ g }}</span><span *ngIf="!m.genres?.length" style="color:#475569">—</span></div></td>
+              <td>{{ m.rating || '—' }}</td><td>{{ m.rentalCount ?? '—' }}</td>
+              <td><button class="admin-tbl-btn" title="View poster" (click)="showPosterPopup(m.posterPath)">🖼️</button></td>
+              <td><button class="admin-tbl-btn" title="View trailer" (click)="showTrailerPopup(m.trailerUrl)">▶️</button></td>
+              <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editMovie(m)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteMovie(m.id)">🗑️</button></div></td>
+            </tr>
+            <tr *ngIf="movies.length === 0"><td colspan="11" class="admin-empty">No movies found.</td></tr>
+          </tbody>
+        </table></div>
       </ng-container>
 
-      <!-- ═══════════════ RENTALS ═══════════════ -->
+
+      <!-- RENTALS -->
       <ng-container *ngIf="viewMode === 'rental'">
         <div class="admin-page-header"><h2 class="admin-page-title">Rental Management</h2></div>
         <div class="admin-filter-bar">
@@ -155,23 +134,19 @@
           <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="rentalSortDate" (ngModelChange)="searchRental()" class="admin-filter-select" style="width:140px"><option value="">Default</option><option value="desc">Newest First</option><option value="asc">Oldest First</option></select></div>
           <button class="admin-filter-reset" (click)="resetRental()">Reset</button>
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>ID</th><th>User ID</th><th>Date</th><th>Status</th><th>Total</th><th>Items</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let r of rentals">
-                <td>{{ r.id }}</td><td>{{ r.userId }}</td><td>{{ r.rentalDate | date:'MMM d, y' }}</td>
-                <td><span class="admin-badge" [class.admin-badge--yellow]="r.status===0" [class.admin-badge--green]="r.status===1" [class.admin-badge--red]="r.status===2||r.status===3">{{ getStatusText(r.status) }}</span></td>
-                <td>₹{{ r.totalAmount }}</td>
-                <td><button class="admin-tbl-btn admin-tbl-btn--info" title="View items" (click)="openRentalItems(r.id)">📂</button></td>
-              </tr>
-              <tr *ngIf="rentals.length === 0"><td colspan="6" class="admin-empty">No rentals found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="admin-table-wrap"><table class="admin-table">
+          <thead><tr><th>ID</th><th>User ID</th><th>Date</th><th>Status</th><th>Total</th><th>Items</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of rentals"><td>{{ r.id }}</td><td>{{ r.userId }}</td><td>{{ r.rentalDate | date:'MMM d, y' }}</td>
+              <td><span class="admin-badge" [class.admin-badge--yellow]="r.status===0" [class.admin-badge--green]="r.status===1" [class.admin-badge--red]="r.status===2||r.status===3">{{ getStatusText(r.status) }}</span></td>
+              <td>₹{{ r.totalAmount }}</td><td><button class="admin-tbl-btn admin-tbl-btn--info" title="View items" (click)="openRentalItems(r.id)">📂</button></td>
+            </tr>
+            <tr *ngIf="rentals.length === 0"><td colspan="6" class="admin-empty">No rentals found.</td></tr>
+          </tbody>
+        </table></div>
       </ng-container>
 
-      <!-- ═══════════════ PAYMENTS ═══════════════ -->
+      <!-- PAYMENTS -->
       <ng-container *ngIf="viewMode === 'payment'">
         <div class="admin-page-header"><h2 class="admin-page-title">Payment Management</h2></div>
         <div class="admin-filter-bar">
@@ -184,25 +159,22 @@
           <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="paymentSortDate" (ngModelChange)="searchPayment()" class="admin-filter-select" style="width:140px"><option value="">Default</option><option value="desc">Newest First</option><option value="asc">Oldest First</option></select></div>
           <button class="admin-filter-reset" (click)="resetPayment()">Reset</button>
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Rental ID</th><th>User</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th><th>Status</th><th>Payment ID</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let p of payments">
-                <td>{{ p.rentalId }}</td><td>{{ p.userName || p.userId }}</td><td>₹{{ p.amount }}</td>
-                <td><span class="admin-badge" [class.admin-badge--fuchsia]="p.paymentType===1" [class.admin-badge--slate]="p.paymentType===0">{{ p.paymentType === 1 ? 'Refund' : 'Purchase' }}</span></td>
-                <td>{{ getPaymentMethod(p.method) }}</td>
-                <td>{{ p.paymentDate | date:'MMM d, y' }}</td>
-                <td><span class="admin-badge" [class.admin-badge--green]="p.status===0" [class.admin-badge--red]="p.status===1" [class.admin-badge--fuchsia]="p.status===2">{{ getPaymentStatus(p.status) }}</span></td>
-                <td style="font-size:0.7rem;color:#64748b">{{ p.paymentId }}</td>
-              </tr>
-              <tr *ngIf="payments.length === 0"><td colspan="8" class="admin-empty">No payments found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="admin-table-wrap"><table class="admin-table">
+          <thead><tr><th>Rental ID</th><th>User</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th><th>Status</th><th>Payment ID</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of payments"><td>{{ p.rentalId }}</td><td>{{ p.userName || p.userId }}</td><td>₹{{ p.amount }}</td>
+              <td><span class="admin-badge" [class.admin-badge--fuchsia]="p.paymentType===1" [class.admin-badge--slate]="p.paymentType===0">{{ p.paymentType === 1 ? 'Refund' : 'Purchase' }}</span></td>
+              <td>{{ getPaymentMethod(p.method) }}</td><td>{{ p.paymentDate | date:'MMM d, y' }}</td>
+              <td><span class="admin-badge" [class.admin-badge--green]="p.status===0" [class.admin-badge--red]="p.status===1" [class.admin-badge--fuchsia]="p.status===2">{{ getPaymentStatus(p.status) }}</span></td>
+              <td style="font-size:0.7rem;color:#64748b">{{ p.paymentId }}</td>
+            </tr>
+            <tr *ngIf="payments.length === 0"><td colspan="8" class="admin-empty">No payments found.</td></tr>
+          </tbody>
+        </table></div>
       </ng-container>
 
-      <!-- ═══════════════ BROADCAST ═══════════════ -->
+
+      <!-- BROADCAST -->
       <ng-container *ngIf="viewMode === 'broadcast'">
         <div class="admin-page-header"><h2 class="admin-page-title">Broadcast Notifications</h2></div>
         <div class="admin-broadcast-form">
@@ -220,110 +192,54 @@
           <button class="admin-filter-reset" (click)="resetBroadcastFilters()">Reset</button>
         </div>
         <div *ngIf="broadcastsLoading" class="admin-empty">Loading...</div>
-        <div *ngIf="!broadcastsLoading" class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>ID</th><th>Title</th><th>Message</th><th>Sent By</th><th>Sent At</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let b of filteredBroadcasts">
-                <td>{{ b.id }}</td><td style="font-weight:600">{{ b.title }}</td><td style="max-width:240px;color:#94a3b8">{{ b.message }}</td>
-                <td><span class="admin-badge admin-badge--fuchsia">{{ b.sentByUsername }}</span></td>
-                <td style="white-space:nowrap">{{ b.sentAt | date:'MMM d, y, h:mm a' }}</td>
-                <td><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteBroadcast(b.id)">🗑️</button></td>
-              </tr>
-              <tr *ngIf="filteredBroadcasts.length === 0"><td colspan="6" class="admin-empty">No broadcasts found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div *ngIf="!broadcastsLoading" class="admin-table-wrap"><table class="admin-table">
+          <thead><tr><th>ID</th><th>Title</th><th>Message</th><th>Sent By</th><th>Sent At</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let b of filteredBroadcasts"><td>{{ b.id }}</td><td style="font-weight:600">{{ b.title }}</td><td style="max-width:240px;color:#94a3b8">{{ b.message }}</td>
+              <td><span class="admin-badge admin-badge--fuchsia">{{ b.sentByUsername }}</span></td>
+              <td style="white-space:nowrap">{{ b.sentAt | date:'MMM d, y, h:mm a' }}</td>
+              <td><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteBroadcast(b.id)">🗑️</button></td>
+            </tr>
+            <tr *ngIf="filteredBroadcasts.length === 0"><td colspan="6" class="admin-empty">No broadcasts found.</td></tr>
+          </tbody>
+        </table></div>
       </ng-container>
 
-      <!-- ═══════════════ ACTIVITY LOGS ═══════════════ -->
+      <!-- ACTIVITY LOGS -->
       <ng-container *ngIf="viewMode === 'logs'">
         <div class="admin-page-header"><h2 class="admin-page-title">Activity Logs</h2></div>
         <div class="admin-filter-bar">
           <div class="admin-filter-group"><span class="admin-filter-label">User ID</span><input type="number" [(ngModel)]="logFilterUserId" (ngModelChange)="searchLogs()" placeholder="User ID" class="admin-filter-input" style="width:90px" /></div>
-          <div class="admin-filter-group"><span class="admin-filter-label">Role</span><select [(ngModel)]="logFilterRole" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:130px">
-            <option value="">All Roles</option>
-            <option value="Customer">Customer</option>
-            <option value="Admin">Admin</option>
-            <option value="System">System</option>
-          </select></div>
-          <div class="admin-filter-group"><span class="admin-filter-label">Entity</span><select [(ngModel)]="logFilterEntity" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:130px">
-            <option value="">All Entities</option>
-            <option value="User">User</option>
-            <option value="Rental">Rental</option>
-            <option value="Payment">Payment</option>
-            <option value="Movie">Movie</option>
-          </select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Role</span><select [(ngModel)]="logFilterRole" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:130px"><option value="">All Roles</option><option value="Customer">Customer</option><option value="Admin">Admin</option><option value="System">System</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Entity</span><select [(ngModel)]="logFilterEntity" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:130px"><option value="">All Entities</option><option value="User">User</option><option value="Rental">Rental</option><option value="Payment">Payment</option><option value="Movie">Movie</option></select></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Action</span><input [(ngModel)]="logFilterAction" (ngModelChange)="searchLogs()" placeholder="e.g. Login" class="admin-filter-input" style="width:130px" /></div>
-          <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="logFilterStatus" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:120px">
-            <option value="">All</option>
-            <option value="Success">Success</option>
-            <option value="Failure">Failure</option>
-          </select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="logFilterStatus" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:120px"><option value="">All</option><option value="Success">Success</option><option value="Failure">Failure</option></select></div>
           <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="logFilterFrom" [max]="logFilterTo || todayStr" (ngModelChange)="onLogDateFromChange($any($event)); searchLogs()" class="admin-filter-input" style="width:140px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">To</span><input type="date" [(ngModel)]="logFilterTo" [min]="logFilterFrom" [max]="todayStr" (ngModelChange)="onLogDateToChange($any($event)); searchLogs()" class="admin-filter-input" style="width:140px" /></div>
-          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="logSortOrder" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:140px">
-            <option value="desc">Newest First</option>
-            <option value="asc">Oldest First</option>
-          </select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="logSortOrder" (ngModelChange)="searchLogs()" class="admin-filter-select" style="width:140px"><option value="desc">Newest First</option><option value="asc">Oldest First</option></select></div>
           <button class="admin-filter-reset" (click)="resetLogs()">Reset</button>
         </div>
-
         <div *ngIf="logsLoading" class="admin-empty">Loading...</div>
-
         <div *ngIf="!logsLoading" class="admin-table-wrap">
           <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>User</th>
-                <th>Role</th>
-                <th>Entity</th>
-                <th>Action</th>
-                <th>Details</th>
-                <th>Status</th>
-                <th>Performed At</th>
-              </tr>
-            </thead>
+            <thead><tr><th>ID</th><th>User</th><th>Role</th><th>Entity</th><th>Action</th><th>Details</th><th>Status</th><th>Performed At</th></tr></thead>
             <tbody>
               <tr *ngFor="let l of logs">
                 <td style="color:#64748b">{{ l.id }}</td>
-                <td>
-                  <span style="font-weight:600">{{ l.userName }}</span><br/>
-                  <span style="font-size:0.7rem;color:#64748b">#{{ l.userId }}</span>
-                </td>
-                <td>
-                  <span class="admin-badge"
-                    [class.admin-badge--fuchsia]="l.role==='Admin'"
-                    [class.admin-badge--slate]="l.role==='Customer'"
-                    [class.admin-badge--yellow]="l.role==='System'">
-                    {{ l.role }}
-                  </span>
-                </td>
+                <td><span style="font-weight:600">{{ l.userName }}</span><br/><span style="font-size:0.7rem;color:#64748b">#{{ l.userId }}</span></td>
+                <td><span class="admin-badge" [class.admin-badge--fuchsia]="l.role==='Admin'" [class.admin-badge--slate]="l.role==='Customer'" [class.admin-badge--yellow]="l.role==='System'">{{ l.role }}</span></td>
                 <td><span class="admin-badge admin-badge--slate">{{ l.entity }}</span></td>
                 <td style="font-weight:600;color:#e2e8f0">{{ l.action }}</td>
                 <td style="max-width:260px;color:#94a3b8;font-size:0.75rem">{{ l.details }}</td>
-                <td>
-                  <span class="admin-badge"
-                    [class.admin-badge--green]="l.status==='Success'"
-                    [class.admin-badge--red]="l.status==='Failure'">
-                    {{ l.status }}
-                  </span>
-                </td>
+                <td><span class="admin-badge" [class.admin-badge--green]="l.status==='Success'" [class.admin-badge--red]="l.status==='Failure'">{{ l.status }}</span></td>
                 <td style="white-space:nowrap;font-size:0.75rem">{{ l.performedAt | date:'MMM d, y, h:mm a' }}</td>
               </tr>
-              <tr *ngIf="logs.length === 0">
-                <td colspan="8" class="admin-empty">No activity logs found.</td>
-              </tr>
+              <tr *ngIf="logs.length === 0"><td colspan="8" class="admin-empty">No activity logs found.</td></tr>
             </tbody>
           </table>
         </div>
-
-        <div *ngIf="!logsLoading && logsTotalCount > 0"
-          style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;font-size:0.8rem;color:#64748b">
-          <span>
-            Showing {{ (logsPage - 1) * logsPageSize + 1 }}–{{ logsPage * logsPageSize > logsTotalCount ? logsTotalCount : logsPage * logsPageSize }} of {{ logsTotalCount }} entries
-          </span>
+        <div *ngIf="!logsLoading && logsTotalCount > 0" style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;font-size:0.8rem;color:#64748b">
+          <span>Showing {{ (logsPage - 1) * logsPageSize + 1 }}–{{ logsPage * logsPageSize > logsTotalCount ? logsTotalCount : logsPage * logsPageSize }} of {{ logsTotalCount }} entries</span>
           <div style="display:flex;gap:0.5rem">
             <button class="admin-filter-reset" [disabled]="logsPage === 1" (click)="logsPrevPage()">← Prev</button>
             <span style="padding:0.45rem 0.75rem;color:#e2e8f0">{{ logsPage }} / {{ logsTotalPages }}</span>
@@ -333,5 +249,108 @@
       </ng-container>
 
     </div>
+  </div>
+</div>
+
+
+<!-- MODALS -->
+<div *ngIf="showForm" class="admin-modal-backdrop">
+  <div class="admin-modal">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">{{ isEdit ? 'Edit Genre' : 'Add Genre' }}</h3><button class="admin-modal__close" (click)="cancelForm()">✕</button></div>
+    <div class="admin-modal__body">
+      <div class="admin-field"><label class="admin-field__label">Name</label><input [(ngModel)]="formData.name" class="admin-field__input" placeholder="Genre name" /></div>
+      <div class="admin-field"><label class="admin-field__label">Description</label><textarea [(ngModel)]="formData.description" class="admin-field__textarea" placeholder="Description"></textarea></div>
+    </div>
+    <div class="admin-modal__footer"><button class="admin-btn admin-btn--cancel" (click)="cancelForm()">Cancel</button><button class="admin-btn admin-btn--primary" (click)="saveGenre()">Save</button></div>
+  </div>
+</div>
+
+<div *ngIf="showAssign" class="admin-modal-backdrop">
+  <div class="admin-modal">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">Assign Movie to Genre</h3><button class="admin-modal__close" (click)="cancelAssign()">✕</button></div>
+    <div class="admin-modal__body"><div class="admin-field"><label class="admin-field__label">Movie ID</label><input type="number" [(ngModel)]="assignMovieId" class="admin-field__input" placeholder="Enter Movie ID" /></div></div>
+    <div class="admin-modal__footer"><button class="admin-btn admin-btn--cancel" (click)="cancelAssign()">Cancel</button><button class="admin-btn admin-btn--primary" (click)="assignMovie()">Assign</button></div>
+  </div>
+</div>
+
+<div *ngIf="showInventoryForm" class="admin-modal-backdrop">
+  <div class="admin-modal">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">{{ isInventoryEdit ? 'Edit Inventory' : 'Add Inventory' }}</h3><button class="admin-modal__close" (click)="cancelInventoryForm()">✕</button></div>
+    <div class="admin-modal__body">
+      <div class="admin-field"><label class="admin-field__label">Movie ID</label><input type="number" [(ngModel)]="inventoryForm.movieId" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Rental Price (₹/day)</label><input type="number" [(ngModel)]="inventoryForm.rentalPrice" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Available</label><select [(ngModel)]="inventoryForm.isAvailable" class="admin-field__select"><option [ngValue]="true">Yes</option><option [ngValue]="false">No</option></select></div>
+    </div>
+    <div class="admin-modal__footer"><button class="admin-btn admin-btn--cancel" (click)="cancelInventoryForm()">Cancel</button><button class="admin-btn admin-btn--primary" (click)="saveInventory()">Save</button></div>
+  </div>
+</div>
+
+<div *ngIf="showMovieForm" class="admin-modal-backdrop">
+  <div class="admin-modal admin-modal--wide">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">{{ isMovieEdit ? 'Edit Movie' : 'Add Movie' }}</h3><button class="admin-modal__close" (click)="cancelMovieForm()">✕</button></div>
+    <div class="admin-modal__body" style="display:grid;grid-template-columns:1fr 1fr;gap:0.9rem">
+      <div class="admin-field"><label class="admin-field__label">Title</label><input [(ngModel)]="movieForm.title" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Language</label><input [(ngModel)]="movieForm.language" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Release Year</label><input type="number" [(ngModel)]="movieForm.releaseYear" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Duration (min)</label><input type="number" [(ngModel)]="movieForm.durationMinutes" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Director</label><input [(ngModel)]="movieForm.director" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Cast</label><input [(ngModel)]="movieForm.cast" class="admin-field__input" placeholder="Comma separated" /></div>
+      <div class="admin-field"><label class="admin-field__label">Content Rating</label><input [(ngModel)]="movieForm.contentRating" class="admin-field__input" placeholder="U, UA, A..." /></div>
+      <div class="admin-field"><label class="admin-field__label">Content Advisory</label><input [(ngModel)]="movieForm.contentAdvisory" class="admin-field__input" /></div>
+      <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Description</label><textarea [(ngModel)]="movieForm.description" class="admin-field__textarea"></textarea></div>
+      <div class="admin-field" style="grid-column:1/-1">
+        <label class="admin-field__label">Genres</label>
+        <div class="admin-genre-dropdown">
+          <button type="button" class="admin-genre-dropdown__trigger" (click)="genreDropdownOpen=!genreDropdownOpen">
+            <span class="admin-genre-dropdown__value" [class.admin-genre-dropdown__value--placeholder]="!movieFormGenreIds.length">{{ selectedGenreNames }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" [class.admin-genre-dropdown__arrow--open]="genreDropdownOpen"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="admin-genre-dropdown__menu" *ngIf="genreDropdownOpen">
+            <label *ngFor="let g of allGenres" class="admin-genre-dropdown__item" (click)="toggleMovieGenre(g.id)">
+              <span class="admin-genre-dropdown__checkbox" [class.admin-genre-dropdown__checkbox--checked]="isMovieGenreSelected(g.id)">
+                <svg *ngIf="isMovieGenreSelected(g.id)" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              </span>
+              {{ g.name }}
+            </label>
+            <p *ngIf="allGenres.length === 0" style="padding:0.5rem;color:#64748b;font-size:0.8rem">No genres available</p>
+          </div>
+        </div>
+        <p *ngIf="movieFormGenreIds.length" class="admin-genre-selected-hint">{{ movieFormGenreIds.length }} genre(s) selected</p>
+      </div>
+      <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Poster URL</label><input [(ngModel)]="movieForm.posterPath" class="admin-field__input" /></div>
+      <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Trailer URL</label><input [(ngModel)]="movieForm.trailerUrl" class="admin-field__input" /></div>
+    </div>
+    <div class="admin-modal__footer"><button class="admin-btn admin-btn--cancel" (click)="cancelMovieForm()">Cancel</button><button class="admin-btn admin-btn--primary" (click)="saveMovie()">Save</button></div>
+  </div>
+</div>
+
+<div *ngIf="showRentalItems" class="admin-modal-backdrop">
+  <div class="admin-modal admin-modal--wide">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">Rental #{{ selectedRentalId }} — Items</h3><button class="admin-modal__close" (click)="closeRentalItems()">✕</button></div>
+    <div class="admin-modal__body" style="padding:0">
+      <table class="admin-table">
+        <thead><tr><th>Item ID</th><th>Movie ID</th><th>Price/day</th><th>Start</th><th>End</th><th>Active</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let item of rentalItems">
+            <td>{{ item.id }}</td><td>{{ item.movieId }}</td><td>₹{{ item.pricePerDay }}</td>
+            <td>{{ item.startDate | date:'MMM d, y' }}</td><td>{{ item.endDate | date:'MMM d, y' }}</td>
+            <td><span class="admin-badge" [class.admin-badge--green]="item.isActive" [class.admin-badge--red]="!item.isActive">{{ item.isActive ? 'Active' : 'Ended' }}</span></td>
+            <td><button *ngIf="item.isActive" class="admin-tbl-btn admin-tbl-btn--danger" title="End rental" (click)="endRentalItem(item)">⏹</button></td>
+          </tr>
+          <tr *ngIf="rentalItems.length === 0"><td colspan="7" class="admin-empty">No items found.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="admin-modal__footer"><button class="admin-btn admin-btn--cancel" (click)="closeRentalItems()">Close</button></div>
+  </div>
+</div>
+
+<div *ngIf="showPoster" class="admin-modal-backdrop" (click)="showPoster=''">
+  <div style="max-width:480px;width:100%"><img [src]="showPoster" style="width:100%;border-radius:12px" alt="Poster" /></div>
+</div>
+
+<div *ngIf="showTrailer" class="admin-modal-backdrop" (click)="showTrailer=''">
+  <div style="max-width:720px;width:100%;aspect-ratio:16/9">
+    <iframe [src]="showTrailer | safeUrl" style="width:100%;height:100%;border-radius:12px;border:none" allowfullscreen></iframe>
   </div>
 </div>
