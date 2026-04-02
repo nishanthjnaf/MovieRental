@@ -9,11 +9,27 @@ using MovieRentalAPI.Models;
 using MovieRentalAPI.Repositories;
 using MovieRentalAPI.Services;
 using MovieRentalModels;
-using NSwag;                                
-using NSwag.Generation.Processors.Security; 
+using NSwag;
+using NSwag.Generation.Processors.Security;
+using Serilog;
 using System.Text;
 
+// ── Configure Serilog before the host builds ────────────────────────────────
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: "Logs/app-.log",          // creates Logs/app-20260402.log etc.
+        rollingInterval: RollingInterval.Day,   // new file every day
+        retainedFileCountLimit: 30,             // keep last 30 days
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Replace default .NET logger with Serilog
+builder.Host.UseSerilog();
 
 #region Controllers
 builder.Services.AddControllers();
