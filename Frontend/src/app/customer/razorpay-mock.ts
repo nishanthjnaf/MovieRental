@@ -90,16 +90,21 @@ export class RazorpayMock implements OnInit {
       return;
     }
 
-    this.rentalService.renewItem(this.rentalItemId, this.days)
+    // First create the renewal payment record, then renew the item
+    this.paymentService.makeRenewalPayment(this.rentalItemId, this.days, this.method)
       .pipe(catchError(() => of(null)))
-      .subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/dashboard/payment-result'], {
-            queryParams: { success: true, amount: this.amount, source: 'renew' }
+      .subscribe(() => {
+        this.rentalService.renewItem(this.rentalItemId, this.days)
+          .pipe(catchError(() => of(null)))
+          .subscribe({
+            next: () => {
+              this.loading = false;
+              this.router.navigate(['/dashboard/payment-result'], {
+                queryParams: { success: true, amount: this.amount, source: 'renew' }
+              });
+            },
+            error: () => { this.loading = false; this.cdr.detectChanges(); }
           });
-        },
-        error: () => { this.loading = false; this.cdr.detectChanges(); }
       });
   }
 

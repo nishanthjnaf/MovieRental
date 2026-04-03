@@ -2,6 +2,7 @@
 using MovieRentalAPI.Exceptions;
 using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models.DTOs;
+using MovieRentalAPI.Models.Enums;
 
 namespace MovieRentalAPI.Controllers
 {
@@ -40,6 +41,19 @@ namespace MovieRentalAPI.Controllers
             }
             catch (BadRequestException ex) { return BadRequest(ex.Message); }
             catch (ConflictException ex) { return Conflict(ex.Message); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
+
+        [HttpPost("renewal/{rentalItemId}")]
+        public async Task<IActionResult> MakeRenewalPayment(int rentalItemId, [FromQuery] int daysToAdd, [FromQuery] int method)
+        {
+            try
+            {
+                var result = await _paymentService.MakeRenewalPayment(rentalItemId, daysToAdd, (PaymentMethod)method);
+                return Ok(result);
+            }
+            catch (BadRequestException ex) { return BadRequest(ex.Message); }
             catch (NotFoundException ex) { return NotFound(ex.Message); }
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }

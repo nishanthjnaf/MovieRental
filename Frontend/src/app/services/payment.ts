@@ -28,6 +28,13 @@ export class PaymentService {
     return this.http.post<any>(`${this.baseUrl}/refund/${rentalItemId}`, {});
   }
 
+  makeRenewalPayment(rentalItemId: number, daysToAdd: number, method: number) {
+    return this.http.post<any>(
+      `${this.baseUrl}/renewal/${rentalItemId}?daysToAdd=${daysToAdd}&method=${method}`,
+      {}
+    );
+  }
+
   getItemRefund(rentalItemId: number) {
     return this.http.get<any>(`${this.baseUrl}/item-refund/${rentalItemId}`);
   }

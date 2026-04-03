@@ -246,7 +246,6 @@
       <div class="rental-popup__row"><span class="rental-popup__label">Amount Paid</span><span class="rental-popup__value">₹ {{ selectedRentalDetails?.amountPaid | number:'1.2-2' }}</span></div>
       <div class="rental-popup__row"><span class="rental-popup__label">Purchase Date</span><span class="rental-popup__value">{{ selectedRentalDetails?.purchaseDate | date:'medium' }}</span></div>
       <div class="rental-popup__row"><span class="rental-popup__label">Expiry Date</span><span class="rental-popup__value">{{ selectedRentalDetails?.expiryDate | date:'medium' }}</span></div>
-      <div class="rental-popup__row"><span class="rental-popup__label">Payment Method</span><span class="rental-popup__value">{{ selectedRentalDetails?.paymentMethod }}</span></div>
       <ng-container *ngIf="selectedRentalDetails?.refundedAt">
         <div class="rental-popup__row"><span class="rental-popup__label">Returned At</span><span class="rental-popup__value">{{ selectedRentalDetails.refundedAt | date:'medium' }}</span></div>
       </ng-container>

@@ -109,6 +109,47 @@ namespace MovieRentalAPI.Services
             return MapToResponse(added);
         }
 
+        // ── RENEWAL PAYMENT ─────────────────────────────────────────────────────
+        public async Task<PaymentResponseDto> MakeRenewalPayment(int rentalItemId, int daysToAdd, PaymentMethod method)
+        {
+            var item = await _rentalItemRepository.Get(rentalItemId);
+            if (item == null)
+                throw new NotFoundException("Rental item not found");
+
+            var rental = await _rentalRepository.Get(item.RentalId);
+            if (rental == null)
+                throw new NotFoundException("Rental not found");
+
+            var renewalAmount = (float)(item.PricePerDay * daysToAdd);
+            var paymentId = GeneratePaymentId();
+
+            var payment = new Payment
+            {
+                RentalId = rental.Id,
+                PaymentId = paymentId,
+                UserId = rental.UserId,
+                Amount = renewalAmount,
+                PaymentMethod = method,
+                PaymentType = PaymentType.Renewal,
+                Status = PaymentStatus.Success,
+                PaymentDate = IstDateTime.Now
+            };
+
+            var added = (await _paymentRepository.Add(payment))!;
+
+            var movie = await _context.Set<Movie>().FindAsync(item.MovieId);
+            await _notifications.Push(rental.UserId, "payment",
+                "Renewal Payment Successful",
+                $"Your renewal of \"{movie?.Title ?? "your movie"}\" for {daysToAdd} day(s) — ₹{renewalAmount:F2} was successful.",
+                item.MovieId);
+
+            await _activityLog.Log(rental.UserId, "Customer", "Customer",
+                "Payment", "MakeRenewalPayment",
+                $"Renewal payment {paymentId} for RentalItem #{rentalItemId}. Days: {daysToAdd}. Amount: ₹{renewalAmount:F2}.");
+
+            return MapToResponse(added);
+        }
+
         // ── REFUND ──────────────────────────────────────────────────────────────
         public async Task<PaymentResponseDto> ProcessRefund(int rentalItemId)
         {
