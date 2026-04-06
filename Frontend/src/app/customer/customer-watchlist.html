@@ -1,7 +1,23 @@
 <!-- Header -->
 <div class="wl-header">
   <h1 class="wl-header__title">Watchlist</h1>
-  <p class="wl-header__count" *ngIf="!loading && items.length > 0">{{ items.length }} movie{{ items.length === 1 ? '' : 's' }}</p>
+  <p class="wl-header__count" *ngIf="!loading && items.length > 0">{{ filteredItems.length }} item{{ filteredItems.length === 1 ? '' : 's' }}</p>
+</div>
+
+<!-- Filter tabs -->
+<div class="flex gap-2 mb-4">
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="watchlistFilter==='all'" [class.text-white]="watchlistFilter==='all'"
+    [class.bg-slate-800]="watchlistFilter!=='all'" [class.text-slate-400]="watchlistFilter!=='all'"
+    (click)="watchlistFilter='all'">All</button>
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="watchlistFilter==='movies'" [class.text-white]="watchlistFilter==='movies'"
+    [class.bg-slate-800]="watchlistFilter!=='movies'" [class.text-slate-400]="watchlistFilter!=='movies'"
+    (click)="watchlistFilter='movies'">Movies</button>
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="watchlistFilter==='series'" [class.text-white]="watchlistFilter==='series'"
+    [class.bg-slate-800]="watchlistFilter!=='series'" [class.text-slate-400]="watchlistFilter!=='series'"
+    (click)="watchlistFilter='series'">Series</button>
 </div>
 
 <!-- Skeleton -->
@@ -16,39 +32,47 @@
 </div>
 
 <!-- Grid -->
-<div *ngIf="!loading && items.length > 0" class="wl-grid">
-  <article *ngFor="let i of items" class="wl-card">
+<div *ngIf="!loading && filteredItems.length > 0" class="wl-grid">
+  <article *ngFor="let i of filteredItems" class="wl-card">
 
     <!-- Poster -->
-    <div class="wl-card__poster" (click)="open(i.movieId)">
+    <div class="wl-card__poster" (click)="open(i)">
       <img [src]="i.movie?.posterPath || 'https://placehold.co/640x360'" [alt]="i.movie?.title" />
       <div class="wl-card__poster-overlay">
         <div class="mcard__genres">
           <span *ngFor="let g of (i.movie?.genres || []).slice(0,3)" class="mcard__genre">{{ g }}</span>
         </div>
-        <span class="mcard__rating">★ {{ (i.movie?.rating || 0) | number:'1.1-1' }}</span>
+        <div class="flex items-center gap-2">
+          <span *ngIf="!i._isSeries" class="mcard__rating">★ {{ (i.movie?.rating || 0) | number:'1.1-1' }}</span>
+          <span class="text-xs px-1.5 py-0.5 rounded" [class.bg-fuchsia-900]="i._isSeries" [class.text-fuchsia-300]="i._isSeries" [class.bg-blue-900]="!i._isSeries" [class.text-blue-300]="!i._isSeries">{{ i._isSeries ? 'Series' : 'Movie' }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Info -->
     <div class="wl-card__body">
-      <h3 class="wl-card__title" (click)="open(i.movieId)">{{ i.movie?.title || i.movieTitle }}</h3>
+      <h3 class="wl-card__title" (click)="open(i)">{{ i.movie?.title || i.movieTitle || i.seriesTitle }}</h3>
       <p class="wl-card__meta" *ngIf="i.movie">
-        {{ i.movie.releaseYear }}
+        {{ i.movie.releaseYear || '' }}
         <span class="wl-card__dot"></span>
         {{ i.movie.language }}
-        <span *ngIf="i.movie.rating" class="wl-card__rating">★ {{ (i.movie.rating || 0) | number:'1.1-1' }}</span>
+        <span *ngIf="!i._isSeries && i.movie.rating" class="wl-card__rating">★ {{ (i.movie.rating || 0) | number:'1.1-1' }}</span>
+        <span *ngIf="i._isSeries" class="wl-card__rating">{{ i.movie.seasons?.length }} Seasons</span>
       </p>
       <div class="wl-card__actions">
-        <button *ngIf="!isRented(i.movieId)" class="wl-action-btn wl-action-btn--cart" (click)="addToCart(i)">
+        <button *ngIf="!isRented(i)" class="wl-action-btn wl-action-btn--cart" (click)="addToCart(i)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM7.2 14.8l.1.2H19c.6 0 1-.4 1-1s-.4-1-1-1H7.4L5.5 5H3c-.6 0-1 .4-1 1s.4 1 1 1h1l2.2 7.8z"/></svg>
-          Add to Cart
+          {{ i._isSeries ? 'View Series' : 'Add to Cart' }}
         </button>
-        <button *ngIf="isRented(i.movieId)" class="wl-action-btn wl-action-btn--watch" (click)="watchMovie(i.movieId)">
+        <button *ngIf="isRented(i) && !i._isSeries" class="wl-action-btn wl-action-btn--watch" (click)="watchMovie(i)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           Watch
         </button>
-        <button class="wl-action-btn wl-action-btn--remove" (click)="remove(i.id)">
+        <button *ngIf="isRented(i) && i._isSeries" class="wl-action-btn wl-action-btn--watch" (click)="watchMovie(i)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Watch
+        </button>
+        <button class="wl-action-btn wl-action-btn--remove" (click)="remove(i.id, i._isSeries)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
           Remove
         </button>
@@ -58,8 +82,8 @@
   </article>
 </div>
 
-<p *ngIf="!loading && items.length === 0" class="wl-empty">
-  Your watchlist is empty. Browse movies and save ones you want to watch.
+<p *ngIf="!loading && filteredItems.length === 0" class="wl-empty">
+  Your watchlist is empty. Browse movies and series to save ones you want to watch.
 </p>
 
 <!-- Confirm remove popup -->

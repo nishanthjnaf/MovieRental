@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MovieRentalModels;
 
@@ -11,9 +12,11 @@ using MovieRentalModels;
 namespace MovieRentalAPI.Migrations
 {
     [DbContext(typeof(MovieRentalContext))]
-    partial class MovieRentalContextModelSnapshot : ModelSnapshot
+    [Migration("20260406060219_AddSeriesFeature")]
+    partial class AddSeriesFeature
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -625,32 +628,6 @@ namespace MovieRentalAPI.Migrations
                     b.ToTable("Series");
                 });
 
-            modelBuilder.Entity("MovieRentalAPI.Models.SeriesCartItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RentalDays")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeriesId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SeriesCartItems");
-                });
-
             modelBuilder.Entity("MovieRentalAPI.Models.SeriesRentalItem", b =>
                 {
                     b.Property<int>("Id")
@@ -974,25 +951,6 @@ namespace MovieRentalAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Season");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MovieRentalAPI.Models.SeriesCartItem", b =>
-                {
-                    b.HasOne("MovieRentalAPI.Models.Series", "Series")
-                        .WithMany()
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MovieRentalAPI.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Series");
 
                     b.Navigation("User");
                 });
