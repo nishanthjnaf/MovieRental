@@ -54,7 +54,7 @@ namespace MovieRentalAPI.Services
                 paymentStatus = PaymentStatus.Success;
                 rentalStatus = RentalStatus.Available;
 
-                // Activate all rental items
+                // Activate all movie rental items
                 var allItems = await _rentalItemRepository.GetAll();
                 var rentalItems = allItems?.Where(i => i.RentalId == rental.Id).ToList();
                 if (rentalItems != null)
@@ -64,6 +64,25 @@ namespace MovieRentalAPI.Services
                         item.IsActive = true;
                         await _rentalItemRepository.Update(item.Id, item);
                     }
+                }
+
+                // Activate all series rental items
+                var seriesItems = await _context.SeriesRentalItems
+                    .Where(i => i.RentalId == rental.Id)
+                    .ToListAsync();
+                foreach (var si in seriesItems)
+                {
+                    si.IsActive = true;
+                }
+                if (seriesItems.Any())
+                {
+                    // Update series rental count
+                    foreach (var si in seriesItems)
+                    {
+                        var series = await _context.Series.FindAsync(si.SeriesId);
+                        if (series != null) series.RentalCount++;
+                    }
+                    await _context.SaveChangesAsync();
                 }
             }
             else

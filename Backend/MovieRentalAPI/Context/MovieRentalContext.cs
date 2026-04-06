@@ -24,6 +24,15 @@ namespace MovieRentalModels
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<BroadcastMessage> BroadcastMessages => Set<BroadcastMessage>();
         public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+
+        // Series
+        public DbSet<Series> Series => Set<Series>();
+        public DbSet<Season> Seasons => Set<Season>();
+        public DbSet<Episode> Episodes => Set<Episode>();
+        public DbSet<SeasonReview> SeasonReviews => Set<SeasonReview>();
+        public DbSet<SeriesWatchlist> SeriesWatchlists => Set<SeriesWatchlist>();
+        public DbSet<SeriesRentalItem> SeriesRentalItems => Set<SeriesRentalItem>();
+        public DbSet<SeriesCartItem> SeriesCartItems => Set<SeriesCartItem>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -133,6 +142,82 @@ namespace MovieRentalModels
 
             modelBuilder.Entity<ActivityLog>()
                 .HasKey(a => a.Id);
+
+            // Series
+            modelBuilder.Entity<Series>()
+                .HasKey(s => s.Id);
+            modelBuilder.Entity<Series>()
+                .HasMany(s => s.Genres)
+                .WithMany()
+                .UsingEntity(j => j.ToTable("SeriesGenres"));
+
+            modelBuilder.Entity<Season>()
+                .HasKey(s => s.Id);
+            modelBuilder.Entity<Season>()
+                .HasOne(s => s.Series)
+                .WithMany(sr => sr.Seasons)
+                .HasForeignKey(s => s.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Episode>()
+                .HasKey(e => e.Id);
+            modelBuilder.Entity<Episode>()
+                .HasOne(e => e.Season)
+                .WithMany(s => s.Episodes)
+                .HasForeignKey(e => e.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeasonReview>()
+                .HasKey(r => r.Id);
+            modelBuilder.Entity<SeasonReview>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<SeasonReview>()
+                .HasOne(r => r.Season)
+                .WithMany(s => s.Reviews)
+                .HasForeignKey(r => r.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeriesWatchlist>()
+                .HasKey(w => w.Id);
+            modelBuilder.Entity<SeriesWatchlist>()
+                .HasOne(w => w.User)
+                .WithMany()
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<SeriesWatchlist>()
+                .HasOne(w => w.Series)
+                .WithMany(s => s.Watchlists)
+                .HasForeignKey(w => w.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeriesRentalItem>()
+                .HasKey(r => r.Id);
+            modelBuilder.Entity<SeriesRentalItem>()
+                .HasOne(r => r.Rental)
+                .WithMany()
+                .HasForeignKey(r => r.RentalId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<SeriesRentalItem>()
+                .HasOne(r => r.Series)
+                .WithMany()
+                .HasForeignKey(r => r.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeriesCartItem>()
+                .HasKey(c => c.Id);
+            modelBuilder.Entity<SeriesCartItem>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<SeriesCartItem>()
+                .HasOne(c => c.Series)
+                .WithMany()
+                .HasForeignKey(c => c.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

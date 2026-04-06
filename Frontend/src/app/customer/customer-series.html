@@ -1,0 +1,95 @@
+<!-- Header -->
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-white">Series</h1>
+  <span class="text-slate-400 text-sm">{{ visibleSeries.length }} series</span>
+</div>
+
+<!-- Search + Filters -->
+<div class="flex flex-wrap gap-3 mb-6">
+  <div class="relative flex-1 min-w-48">
+    <input [(ngModel)]="q" (ngModelChange)="applyFilters()" placeholder="Search series..."
+      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 outline-none focus:border-fuchsia-500" />
+  </div>
+</div>
+
+<!-- Genre chips -->
+<div class="flex flex-wrap gap-2 mb-4">
+  <button *ngFor="let g of genres"
+    class="px-3 py-1 rounded-full text-xs border transition-colors"
+    [class.bg-fuchsia-600]="selectedGenreIds.has(g.id)"
+    [class.border-fuchsia-600]="selectedGenreIds.has(g.id)"
+    [class.text-white]="selectedGenreIds.has(g.id)"
+    [class.border-slate-600]="!selectedGenreIds.has(g.id)"
+    [class.text-slate-400]="!selectedGenreIds.has(g.id)"
+    (click)="toggleGenre(g.id)">
+    {{ g.name }}
+  </button>
+</div>
+
+<!-- Language chips -->
+<div class="flex flex-wrap gap-2 mb-6">
+  <button *ngFor="let lang of availableLanguages"
+    class="px-3 py-1 rounded-full text-xs border transition-colors"
+    [class.bg-amber-600]="selectedLanguages.has(lang)"
+    [class.border-amber-600]="selectedLanguages.has(lang)"
+    [class.text-white]="selectedLanguages.has(lang)"
+    [class.border-slate-600]="!selectedLanguages.has(lang)"
+    [class.text-slate-400]="!selectedLanguages.has(lang)"
+    (click)="toggleLanguage(lang)">
+    {{ lang }}
+  </button>
+</div>
+
+<!-- Skeleton -->
+<div *ngIf="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="rounded-xl overflow-hidden">
+    <div class="aspect-[2/3] skeleton"></div>
+    <div class="p-2"><div class="h-3 rounded skeleton w-3/4 mb-1"></div><div class="h-3 rounded skeleton w-1/2"></div></div>
+  </div>
+</div>
+
+<!-- Grid -->
+<div *ngIf="!loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  <article *ngFor="let s of visibleSeries"
+    class="group relative rounded-xl overflow-hidden cursor-pointer bg-slate-900 border border-slate-800 hover:border-fuchsia-600 transition-all"
+    (click)="open(s.id)"
+    (mouseenter)="setHoveredSeries(s.id)"
+    (mouseleave)="setHoveredSeries(null)">
+
+    <!-- Poster -->
+    <div class="aspect-[2/3] relative overflow-hidden">
+      <img [src]="s.posterPath || 'https://placehold.co/400x600'" [alt]="s.title"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+
+      <!-- Hover overlay with season ratings -->
+      <div class="absolute inset-0 bg-slate-950/85 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
+        <p class="text-white text-sm font-semibold mb-2">{{ s.title }}</p>
+        <div class="space-y-1 max-h-40 overflow-y-auto">
+          <div *ngFor="let season of s.seasons"
+            class="flex items-center justify-between text-xs px-2 py-1 rounded bg-slate-800/80">
+            <span class="text-slate-300">S{{ season.seasonNumber }}: {{ season.title }}</span>
+            <span *ngIf="season.averageRating > 0" class="text-amber-400">★ {{ season.averageRating | number:'1.1-1' }}</span>
+            <span *ngIf="season.averageRating === 0" class="text-slate-600">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Availability badge -->
+      <div class="absolute top-2 right-2">
+        <span *ngIf="!s.isAvailable" class="px-1.5 py-0.5 rounded text-xs bg-slate-800/80 text-slate-500">Unavailable</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="p-3">
+      <h3 class="text-slate-200 text-sm font-medium truncate">{{ s.title }}</h3>
+      <div class="flex items-center justify-between mt-1">
+        <span class="text-slate-500 text-xs">{{ s.seasons?.length }} Season{{ s.seasons?.length !== 1 ? 's' : '' }}</span>
+        <span *ngIf="getAverageRating(s) > 0" class="text-amber-400 text-xs">★ {{ getAverageRating(s) | number:'1.1-1' }}</span>
+      </div>
+      <p class="text-fuchsia-400 text-xs mt-1">₹{{ s.rentalPrice }}/day</p>
+    </div>
+  </article>
+</div>
+
+<p *ngIf="!loading && visibleSeries.length === 0" class="text-slate-500 text-center py-16">No series found.</p>

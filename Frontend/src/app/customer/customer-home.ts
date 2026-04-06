@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRe
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MovieService } from '../services/movie';
+import { SeriesService } from '../services/series';
 import { CurrentUserService } from '../services/current-user';
 import { UserService } from '../services/user';
 import { InventoryService } from '../services/inventory';
@@ -24,6 +25,12 @@ export class CustomerHome implements OnInit, OnDestroy {
   hasSuggestions = false;
   loading = true;
 
+  // Series sections
+  newSeries: any[] = [];
+  topRatedMixed: any[] = [];
+  topRentedMixed: any[] = [];
+  suggestedMixed: any[] = [];
+
   showPreferencesPopup = false;
   userId = 0;
 
@@ -37,6 +44,7 @@ export class CustomerHome implements OnInit, OnDestroy {
   offsets: Record<string, number> = {
     suggested: 0,
     newMovies: 0,
+    newSeries: 0,
     topRated: 0,
     topRented: 0
   };
@@ -45,6 +53,7 @@ export class CustomerHome implements OnInit, OnDestroy {
 
   constructor(
     private movieService: MovieService,
+    private seriesService: SeriesService,
     private currentUser: CurrentUserService,
     private userService: UserService,
     private inventoryService: InventoryService,
@@ -98,7 +107,7 @@ export class CustomerHome implements OnInit, OnDestroy {
   }
 
   private loadMovieSections() {
-    let pending = 3;
+    let pending = 5;
     const done = () => {
       pending--;
       if (pending <= 0) {
@@ -110,7 +119,6 @@ export class CustomerHome implements OnInit, OnDestroy {
       timeout(10000), catchError(() => of([])), finalize(done)
     ).subscribe({
       next: (movies) => {
-        // Filter to only available movies for home page carousels
         const available = (movies || []).filter(m => this.availableMovieIds.has(m.id));
         const sortedByAdded = [...available].sort((a, b) => (b.id || 0) - (a.id || 0));
         this.newMovies = sortedByAdded.slice(0, 10);
@@ -122,14 +130,37 @@ export class CustomerHome implements OnInit, OnDestroy {
     this.movieService.getTopUserRated(10).pipe(
       timeout(10000), catchError(() => of([])), finalize(done)
     ).subscribe({
-      next: (res) => (this.topRatedMovies = (res || []).filter((m: any) => this.availableMovieIds.has(m.id)))
+      next: (res) => {
+        const movies = (res || []).filter((m: any) => this.availableMovieIds.has(m.id)).map((m: any) => ({ ...m, _type: 'movie' }));
+        this.seriesService.getTopRated(10).pipe(catchError(() => of([]))).subscribe(series => {
+          const s = (series || []).map((s: any) => ({ ...s, _type: 'series' }));
+          this.topRatedMixed = [...movies, ...s].sort((a, b) => (b.rating || this.seriesAvgRating(b)) - (a.rating || this.seriesAvgRating(a))).slice(0, 10);
+          this.cdr.detectChanges();
+        });
+      }
     });
 
     this.movieService.getTopRented(10).pipe(
       timeout(10000), catchError(() => of([])), finalize(done)
     ).subscribe({
-      next: (res) => (this.topRentedMovies = (res || []).filter((m: any) => this.availableMovieIds.has(m.movieId ?? m.id)))
+      next: (res) => {
+        const movies = (res || []).filter((m: any) => this.availableMovieIds.has(m.movieId ?? m.id)).map((m: any) => ({ ...m, _type: 'movie' }));
+        this.seriesService.getTopRented(10).pipe(catchError(() => of([]))).subscribe(series => {
+          const s = (series || []).map((s: any) => ({ ...s, _type: 'series' }));
+          this.topRentedMixed = [...movies, ...s].sort((a, b) => (b.rentalCount || 0) - (a.rentalCount || 0)).slice(0, 10);
+          this.cdr.detectChanges();
+        });
+      }
     });
+
+    this.seriesService.getNew(10).pipe(
+      timeout(10000), catchError(() => of([])), finalize(done)
+    ).subscribe({
+      next: (res) => { this.newSeries = res || []; }
+    });
+
+    // dummy 5th pending resolver
+    Promise.resolve().then(done);
   }
 
   ngOnDestroy() {
@@ -169,11 +200,21 @@ export class CustomerHome implements OnInit, OnDestroy {
   loadSuggestions() {
     if (this.userId > 0) {
       this.movieService.getSuggestions(this.userId).pipe(catchError(() => of([]))).subscribe(res => {
-        this.suggestedMovies = res || [];
-        this.hasSuggestions = this.suggestedMovies.length > 0;
-        this.cdr.detectChanges();
+        const movies = (res || []).map((m: any) => ({ ...m, _type: 'movie' }));
+        this.seriesService.getSuggestions(this.userId).pipe(catchError(() => of([]))).subscribe(series => {
+          const s = (series || []).map((s: any) => ({ ...s, _type: 'series' }));
+          this.suggestedMixed = [...movies, ...s];
+          this.hasSuggestions = this.suggestedMixed.length > 0;
+          this.cdr.detectChanges();
+        });
       });
     }
+  }
+
+  private seriesAvgRating(s: any): number {
+    if (!s.seasons?.length) return 0;
+    const ratings = s.seasons.filter((sn: any) => sn.averageRating > 0).map((sn: any) => sn.averageRating);
+    return ratings.length ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : 0;
   }
 
   onPreferencesDone() {
@@ -213,6 +254,19 @@ export class CustomerHome implements OnInit, OnDestroy {
 
   openMovie(movieId: number) {
     this.router.navigate(['/dashboard/movie', movieId]);
+  }
+
+  openItem(item: any) {
+    if (item._type === 'series') {
+      this.router.navigate(['/dashboard/series', item.id]);
+    } else {
+      this.router.navigate(['/dashboard/movie', item.movieId || item.id]);
+    }
+  }
+
+  getItemRating(item: any): number {
+    if (item._type === 'series') return this.seriesAvgRating(item);
+    return item.rating || 0;
   }
 }
 

@@ -1,7 +1,7 @@
 <!-- Header -->
 <div class="cart-header">
   <h1 class="cart-header__title">Rental Cart</h1>
-  <p class="cart-header__count" *ngIf="items.length > 0">{{ items.length }} movie{{ items.length === 1 ? '' : 's' }}</p>
+  <p class="cart-header__count" *ngIf="items.length > 0">{{ items.length }} item{{ items.length === 1 ? '' : 's' }}</p>
 </div>
 
 <!-- Empty state -->
@@ -18,19 +18,26 @@
   <!-- Items list -->
   <div class="cart-items">
     <div *ngFor="let m of items" class="cart-item">
-      <div class="cart-item__poster" (click)="openMovie(m.movieId)">
+      <div class="cart-item__poster" (click)="m.isSeries ? router.navigate(['/dashboard/series', m.seriesId]) : openMovie(m.movieId)">
         <img [src]="m.posterPath || 'https://placehold.co/640x360'" [alt]="m.title" />
       </div>
       <div class="cart-item__body">
-        <h3 class="cart-item__title" (click)="openMovie(m.movieId)">{{ m.title }}</h3>
-        <p class="cart-item__meta">{{ m.releaseYear }} · {{ m.language }}</p>
-        <p class="cart-item__price">₹{{ priceByMovieId[m.movieId] ?? '—' }} / day</p>
+        <div class="flex items-center gap-2 mb-1">
+          <h3 class="cart-item__title" (click)="m.isSeries ? router.navigate(['/dashboard/series', m.seriesId]) : openMovie(m.movieId)">{{ m.title }}</h3>
+          <span class="text-xs px-1.5 py-0.5 rounded shrink-0"
+            [class.bg-fuchsia-900]="m.isSeries" [class.text-fuchsia-300]="m.isSeries"
+            [class.bg-blue-900]="!m.isSeries" [class.text-blue-300]="!m.isSeries">
+            {{ m.isSeries ? 'Series' : 'Movie' }}
+          </span>
+        </div>
+        <p class="cart-item__meta">{{ m.releaseYear || '' }} {{ m.language ? '· ' + m.language : '' }}</p>
+        <p class="cart-item__price">₹{{ m.isSeries ? m.rentalPrice : (priceByMovieId[m.movieId] ?? '—') }} / day</p>
       </div>
       <div class="cart-item__days">
         <label class="cart-item__days-label">Rental Days</label>
-        <input type="number" min="1" max="30"
+        <input type="number" min="3" max="30"
           [ngModel]="m.rentalDays || 7"
-          (ngModelChange)="setDays(m.movieId, $event)"
+          (ngModelChange)="setDays(m, $event)"
           class="cart-item__days-input"
           [class.cart-item__days-input--error]="(m.rentalDays || 7) < 3" />
         <p class="cart-item__days-hint" [class.cart-item__days-hint--error]="(m.rentalDays || 7) < 3">
@@ -39,9 +46,11 @@
       </div>
       <div class="cart-item__subtotal">
         <span class="cart-item__subtotal-label">Subtotal</span>
-        <span class="cart-item__subtotal-value">₹{{ ((priceByMovieId[m.movieId] || 0) * (m.rentalDays || 7)) | number:'1.2-2' }}</span>
+        <span class="cart-item__subtotal-value">
+          ₹{{ ((m.isSeries ? (m.rentalPrice || 0) : (priceByMovieId[m.movieId] || 0)) * (m.rentalDays || 7)) | number:'1.2-2' }}
+        </span>
       </div>
-      <button class="cart-item__remove" (click)="remove(m.movieId)" title="Remove">
+      <button class="cart-item__remove" (click)="remove(m)" title="Remove">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
       </button>
     </div>
@@ -106,7 +115,7 @@
     <div class="cart-summary__lines">
       <div *ngFor="let m of items" class="cart-summary__line">
         <span class="cart-summary__line-name">{{ m.title }}</span>
-        <span class="cart-summary__line-val">₹{{ ((priceByMovieId[m.movieId] || 0) * (m.rentalDays || 7)) | number:'1.2-2' }}</span>
+        <span class="cart-summary__line-val">₹{{ ((m.isSeries ? (m.rentalPrice || 0) : (priceByMovieId[m.movieId] || 0)) * (m.rentalDays || 7)) | number:'1.2-2' }}</span>
       </div>
     </div>
 
@@ -153,7 +162,7 @@
     <div class="rental-popup__body">
       <div *ngFor="let m of items" class="rental-popup__row">
         <span class="rental-popup__label">{{ m.title }} × {{ m.rentalDays || 7 }} day(s)</span>
-        <span class="rental-popup__value">₹{{ ((priceByMovieId[m.movieId] || 0) * (m.rentalDays || 7)) | number:'1.2-2' }}</span>
+        <span class="rental-popup__value">₹{{ ((m.isSeries ? (m.rentalPrice || 0) : (priceByMovieId[m.movieId] || 0)) * (m.rentalDays || 7)) | number:'1.2-2' }}</span>
       </div>
       <div class="rental-popup__divider"></div>
       <div *ngIf="appliedPromo" class="rental-popup__row">

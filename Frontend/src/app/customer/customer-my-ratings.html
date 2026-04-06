@@ -1,7 +1,23 @@
 <!-- Header -->
 <div class="wl-header">
   <h1 class="wl-header__title">My Ratings</h1>
-  <p class="wl-header__count" *ngIf="!loading && ratings.length > 0">{{ ratings.length }} review{{ ratings.length === 1 ? '' : 's' }}</p>
+  <p class="wl-header__count" *ngIf="!loading && ratings.length > 0">{{ filteredRatings.length }} review{{ filteredRatings.length === 1 ? '' : 's' }}</p>
+</div>
+
+<!-- Filter tabs -->
+<div class="flex gap-2 mb-4">
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="ratingsFilter==='all'" [class.text-white]="ratingsFilter==='all'"
+    [class.bg-slate-800]="ratingsFilter!=='all'" [class.text-slate-400]="ratingsFilter!=='all'"
+    (click)="ratingsFilter='all'">All</button>
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="ratingsFilter==='movies'" [class.text-white]="ratingsFilter==='movies'"
+    [class.bg-slate-800]="ratingsFilter!=='movies'" [class.text-slate-400]="ratingsFilter!=='movies'"
+    (click)="ratingsFilter='movies'">Movies</button>
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="ratingsFilter==='series'" [class.text-white]="ratingsFilter==='series'"
+    [class.bg-slate-800]="ratingsFilter!=='series'" [class.text-slate-400]="ratingsFilter!=='series'"
+    (click)="ratingsFilter='series'">Series</button>
 </div>
 
 <!-- Skeleton -->
@@ -17,23 +33,28 @@
 </div>
 
 <!-- List -->
-<div *ngIf="!loading && ratings.length > 0" class="mr-list">
-  <div *ngFor="let r of ratings" class="mr-card">
+<div *ngIf="!loading && filteredRatings.length > 0" class="mr-list">
+  <div *ngFor="let r of filteredRatings" class="mr-card">
 
     <!-- Poster thumbnail -->
-    <div class="mr-card__poster" (click)="openMovie(r.movieId)">
-      <img [src]="r.movie?.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieName" />
+    <div class="mr-card__poster" (click)="openItem(r)">
+      <img [src]="r.movie?.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieName || r._seasonTitle" />
       <div class="mr-card__poster-overlay">
         <div class="mcard__genres">
           <span *ngFor="let g of (r.movie?.genres || []).slice(0,2)" class="mcard__genre">{{ g }}</span>
         </div>
+        <span class="text-xs px-1.5 py-0.5 rounded mt-1"
+          [class.bg-fuchsia-900]="r._isSeries" [class.text-fuchsia-300]="r._isSeries"
+          [class.bg-blue-900]="!r._isSeries" [class.text-blue-300]="!r._isSeries">
+          {{ r._isSeries ? 'Season' : 'Movie' }}
+        </span>
       </div>
     </div>
 
-    <!-- Movie info -->
+    <!-- Info -->
     <div class="mr-card__body">
-      <h3 class="mr-card__title" (click)="openMovie(r.movieId)">{{ r.movieName }}</h3>
-      <div class="mr-card__meta" *ngIf="r.movie">
+      <h3 class="mr-card__title" (click)="openItem(r)">{{ r._isSeries ? r._displayTitle : r.movieName }}</h3>
+      <div class="mr-card__meta" *ngIf="r.movie && !r._isSeries">
         <span>{{ r.movie.releaseYear }}</span>
         <span class="wl-card__dot"></span>
         <span>{{ r.movie.language }}</span>
@@ -41,13 +62,13 @@
       <p class="mr-card__date">Reviewed {{ r.reviewDate | date:'MMM d, y' }}</p>
     </div>
 
-    <!-- Comment — centred column -->
+    <!-- Comment -->
     <div class="mr-card__comment-col">
       <p class="mr-card__comment" *ngIf="r.comment">"{{ r.comment }}"</p>
       <p class="mr-card__comment mr-card__comment--empty" *ngIf="!r.comment">No comment</p>
     </div>
 
-    <!-- User score left, remove right -->
+    <!-- Score -->
     <div class="mr-card__score">
       <div class="mr-score">
         <span class="mr-score__number">{{ r.rating | number:'1.1-1' }}</span>
@@ -62,8 +83,8 @@
       </div>
     </div>
 
-    <!-- Remove button far right -->
-    <button class="mr-remove-btn" (click)="removeRating(r.id)" title="Remove rating">
+    <!-- Remove -->
+    <button class="mr-remove-btn" (click)="removeRating(r.id, r._isSeries)" title="Remove rating">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
       Remove
     </button>
@@ -71,7 +92,7 @@
   </div>
 </div>
 
-<p *ngIf="!loading && ratings.length === 0" class="wl-empty">You haven't rated any movies yet.</p>
+<p *ngIf="!loading && filteredRatings.length === 0" class="wl-empty">No ratings yet.</p>
 
 <!-- Confirm popup -->
 <div *ngIf="showConfirmPopup" class="rental-popup-backdrop">

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CartStateService } from '../services/cart-state';
 import { CurrentUserService } from '../services/current-user';
 import { RentalService } from '../services/rental';
+import { SeriesService } from '../services/series';
 import { PaymentService } from '../services/payment';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
@@ -37,9 +38,10 @@ export class CustomerCart implements OnInit {
     private cart: CartStateService,
     private currentUser: CurrentUserService,
     private rentalService: RentalService,
+    private seriesService: SeriesService,
     private paymentService: PaymentService,
     private toastr: ToastrService,
-    private router: Router,
+    public router: Router,
     private inventoryService: InventoryService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -122,6 +124,9 @@ export class CustomerCart implements OnInit {
   get subtotal(): number {
     return this.items.reduce((sum, m) => {
       const days = Math.max(3, Number(m?.rentalDays || 3));
+      if (m.isSeries) {
+        return sum + Number(m.rentalPrice || 0) * days;
+      }
       const price = Number(this.priceByMovieId[m.movieId] || 0);
       return sum + price * days;
     }, 0);
@@ -169,10 +174,14 @@ export class CustomerCart implements OnInit {
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
-  remove(movieId: number) { this.cart.remove(movieId); }
+  remove(item: any) {
+    if (item.isSeries) this.cart.removeSeries(item.seriesId);
+    else this.cart.remove(item.movieId);
+  }
 
-  setDays(movieId: number, days: number) {
-    this.cart.updateRentalDays(movieId, Number(days) || 1);
+  setDays(item: any, days: number) {
+    if (item.isSeries) this.cart.updateSeriesRentalDays(item.seriesId, Number(days) || 3);
+    else this.cart.updateRentalDays(item.movieId, Number(days) || 3);
   }
 
   openCheckout() {
@@ -185,25 +194,58 @@ export class CustomerCart implements OnInit {
     if (!userId || this.items.length === 0) return;
     this.loading = true;
 
-    const movieIds = this.items.map(m => m.movieId);
-    const rentalDaysPerMovie = this.items.map(m => Math.max(3, Number(m?.rentalDays || 3)));
+    const movieItems = this.items.filter(m => !m.isSeries);
+    const seriesItems = this.items.filter(m => m.isSeries);
 
-    this.rentalService.createRental({ userId, movieIds, rentalDays: rentalDaysPerMovie[0], rentalDaysPerMovie })
-      .pipe(catchError(() => of(null)), finalize(() => { this.loading = false; this.cdr.detectChanges(); }))
-      .subscribe({
-        next: (rental: any) => {
-          if (!rental?.id) { this.toastr.error('Could not create rental. Please try again.'); return; }
-          this.showPaymentPopup = false;
-          this.router.navigate(['/dashboard/pay'], {
-            queryParams: {
-              rentalId: rental.id,
-              amount: this.total.toFixed(2),
-              method: this.selectedPaymentMethod
-            }
-          });
-        },
-        error: () => this.toastr.error('Unable to create rental')
+    // We create one rental per item type group, then navigate to pay for the first one
+    // For simplicity: create movie rental first (if any), then series rentals
+    const allRentalIds: number[] = [];
+    let totalAmount = this.total;
+
+    const proceed = () => {
+      this.loading = false;
+      this.showPaymentPopup = false;
+      if (allRentalIds.length === 0) { this.toastr.error('Could not create rental'); this.cdr.detectChanges(); return; }
+      // Navigate to pay with the first rental id; payment activates all
+      this.router.navigate(['/dashboard/pay'], {
+        queryParams: { rentalId: allRentalIds[0], amount: totalAmount.toFixed(2), method: this.selectedPaymentMethod }
       });
+    };
+
+    if (movieItems.length > 0) {
+      const movieIds = movieItems.map(m => m.movieId);
+      const rentalDaysPerMovie = movieItems.map(m => Math.max(3, Number(m?.rentalDays || 3)));
+      this.rentalService.createRental({ userId, movieIds, rentalDays: rentalDaysPerMovie[0], rentalDaysPerMovie })
+        .pipe(catchError(() => of(null)))
+        .subscribe({
+          next: (rental: any) => {
+            if (rental?.id) allRentalIds.push(rental.id);
+            if (seriesItems.length === 0) { proceed(); return; }
+            // Create series rentals sequentially
+            let idx = 0;
+            const nextSeries = () => {
+              if (idx >= seriesItems.length) { proceed(); return; }
+              const s = seriesItems[idx++];
+              this.seriesService.createRental({ userId, seriesId: s.seriesId, rentalDays: Math.max(3, Number(s.rentalDays || 3)) })
+                .pipe(catchError(() => of(null)))
+                .subscribe(r => { if (r?.id) allRentalIds.push(r.id); nextSeries(); });
+            };
+            nextSeries();
+          },
+          error: () => { this.loading = false; this.toastr.error('Could not create rental'); this.cdr.detectChanges(); }
+        });
+    } else {
+      // Only series items
+      let idx = 0;
+      const nextSeries = () => {
+        if (idx >= seriesItems.length) { proceed(); return; }
+        const s = seriesItems[idx++];
+        this.seriesService.createRental({ userId, seriesId: s.seriesId, rentalDays: Math.max(3, Number(s.rentalDays || 3)) })
+          .pipe(catchError(() => of(null)))
+          .subscribe(r => { if (r?.id) allRentalIds.push(r.id); nextSeries(); });
+      };
+      nextSeries();
+    }
   }
 
   goToMovies() { this.router.navigate(['/dashboard/movies']); }

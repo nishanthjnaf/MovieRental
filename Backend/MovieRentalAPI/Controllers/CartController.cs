@@ -20,17 +20,40 @@ namespace MovieRentalAPI.Controllers
         {
             try
             {
-                var items = await _context.CartItems
+                var movieItems = await _context.CartItems
                     .Where(c => c.UserId == userId)
                     .Include(c => c.Movie)
                     .Select(c => new
                     {
                         c.Id, c.MovieId, c.RentalDays,
                         c.Movie!.Title, c.Movie.PosterPath,
-                        c.Movie.ReleaseYear, c.Movie.Language, c.Movie.Rating
+                        c.Movie.ReleaseYear, c.Movie.Language, c.Movie.Rating,
+                        IsSeries = false,
+                        SeriesId = (int?)null
                     })
                     .ToListAsync();
-                return Ok(items);
+
+                var seriesItems = await _context.SeriesCartItems
+                    .Where(c => c.UserId == userId)
+                    .Include(c => c.Series)
+                    .Select(c => new
+                    {
+                        c.Id,
+                        MovieId = (int?)null,
+                        c.RentalDays,
+                        c.Series!.Title,
+                        c.Series.PosterPath,
+                        ReleaseYear = (int?)null,
+                        c.Series.Language,
+                        Rating = (double?)null,
+                        IsSeries = true,
+                        SeriesId = (int?)c.SeriesId,
+                        RentalPrice = c.Series.RentalPrice
+                    })
+                    .ToListAsync();
+
+                var combined = movieItems.Cast<object>().Concat(seriesItems.Cast<object>());
+                return Ok(combined);
             }
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
@@ -60,6 +83,30 @@ namespace MovieRentalAPI.Controllers
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
+        [HttpPost("{userId}/add-series")]
+        public async Task<IActionResult> AddSeriesItem(int userId, [FromBody] SeriesCartAddRequest req)
+        {
+            try
+            {
+                if (req == null || req.SeriesId <= 0) return BadRequest("Valid SeriesId is required");
+                if (userId <= 0) return BadRequest("Valid UserId is required");
+
+                var exists = await _context.SeriesCartItems
+                    .AnyAsync(c => c.UserId == userId && c.SeriesId == req.SeriesId);
+                if (exists) return Conflict("Series already exists in cart");
+
+                _context.SeriesCartItems.Add(new MovieRentalAPI.Models.SeriesCartItem
+                {
+                    UserId = userId,
+                    SeriesId = req.SeriesId,
+                    RentalDays = req.RentalDays > 0 ? req.RentalDays : 7
+                });
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
+
         [HttpPatch("{userId}/days")]
         public async Task<IActionResult> UpdateDays(int userId, [FromBody] CartUpdateDaysRequest req)
         {
@@ -70,6 +117,21 @@ namespace MovieRentalAPI.Controllers
 
                 if (item == null) return NotFound("Cart item not found");
 
+                item.RentalDays = Math.Max(1, Math.Min(30, req.RentalDays));
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
+
+        [HttpPatch("{userId}/series-days")]
+        public async Task<IActionResult> UpdateSeriesDays(int userId, [FromBody] SeriesCartUpdateDaysRequest req)
+        {
+            try
+            {
+                var item = await _context.SeriesCartItems
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.SeriesId == req.SeriesId);
+                if (item == null) return NotFound("Series cart item not found");
                 item.RentalDays = Math.Max(1, Math.Min(30, req.RentalDays));
                 await _context.SaveChangesAsync();
                 return Ok();
@@ -94,6 +156,21 @@ namespace MovieRentalAPI.Controllers
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
+        [HttpDelete("{userId}/remove-series/{seriesId}")]
+        public async Task<IActionResult> RemoveSeriesItem(int userId, int seriesId)
+        {
+            try
+            {
+                var item = await _context.SeriesCartItems
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.SeriesId == seriesId);
+                if (item == null) return NotFound("Series cart item not found");
+                _context.SeriesCartItems.Remove(item);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
+
         [HttpDelete("{userId}/clear")]
         public async Task<IActionResult> ClearCart(int userId)
         {
@@ -101,6 +178,8 @@ namespace MovieRentalAPI.Controllers
             {
                 var items = _context.CartItems.Where(c => c.UserId == userId);
                 _context.CartItems.RemoveRange(items);
+                var seriesItems = _context.SeriesCartItems.Where(c => c.UserId == userId);
+                _context.SeriesCartItems.RemoveRange(seriesItems);
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -108,15 +187,8 @@ namespace MovieRentalAPI.Controllers
         }
     }
 
-    public class CartAddRequest
-    {
-        public int MovieId { get; set; }
-        public int RentalDays { get; set; } = 7;
-    }
-
-    public class CartUpdateDaysRequest
-    {
-        public int MovieId { get; set; }
-        public int RentalDays { get; set; }
-    }
+    public class CartAddRequest { public int MovieId { get; set; } public int RentalDays { get; set; } = 7; }
+    public class CartUpdateDaysRequest { public int MovieId { get; set; } public int RentalDays { get; set; } }
+    public class SeriesCartAddRequest { public int SeriesId { get; set; } public int RentalDays { get; set; } = 7; }
+    public class SeriesCartUpdateDaysRequest { public int SeriesId { get; set; } public int RentalDays { get; set; } }
 }

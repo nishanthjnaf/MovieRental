@@ -21,6 +21,10 @@ import { CustomerPreferencesPage } from './customer/customer-preferences-page';
 import { AdminProfile } from './admin/admin-profile';
 import { OAuthCallback } from './oauth-callback/oauth-callback';
 import { CustomerNotifications } from './customer/customer-notifications';
+import { CustomerSeries } from './customer/customer-series';
+import { CustomerSeriesDetail } from './customer/customer-series-detail';
+import { CustomerWatchSeries } from './customer/customer-watch-series';
+import { CustomerSearch } from './customer/customer-search';
 import { NotFound } from './not-found';
 
 export const routes: Routes = [
@@ -39,8 +43,11 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: CustomerHome },
       { path: 'movies', component: CustomerMovies },
-      { path: 'search', redirectTo: 'movies', pathMatch: 'full' },
+      { path: 'search', component: CustomerSearch },
       { path: 'movie/:id', component: CustomerMovieDetail },
+      { path: 'series', component: CustomerSeries },
+      { path: 'series/:id', component: CustomerSeriesDetail },
+      { path: 'watch-series/:id', component: CustomerWatchSeries },
       { path: 'rentals', component: CustomerRentals },
       { path: 'watchlist', component: CustomerWatchlist },
       { path: 'my-ratings', component: CustomerMyRatings },

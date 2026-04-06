@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { UserService } from '../services/user';
 import { CurrentUserService } from '../services/current-user';
 import { RentalService } from '../services/rental';
+import { SeriesService } from '../services/series';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PaymentService } from '../services/payment';
@@ -40,10 +41,25 @@ export class CustomerRentals implements OnInit, AfterViewInit {
   // Search
   searchQuery = '';
 
+  // Filter: 'all' | 'movies' | 'series'
+  rentalFilter: 'all' | 'movies' | 'series' = 'all';
+
+  get filteredActive(): any[] { return this.applyTypeFilter(this.activeRentals); }
+  get filteredReturned(): any[] { return this.applyTypeFilter(this.returnedRentals); }
+  get filteredExpired(): any[] { return this.applyTypeFilter(this.expiredRentals); }
+
+  private applyTypeFilter(list: any[]): any[] {
+    if (this.rentalFilter === 'movies') return list.filter(r => !r._isSeries);
+    if (this.rentalFilter === 'series') return list.filter(r => r._isSeries);
+    return list;
+  }
+
   get searchResults(): any[] {
     const q = this.searchQuery.trim().toLowerCase();
     if (!q) return [];
-    return this.rentals.filter(r => r.movieTitle?.toLowerCase().includes(q));
+    return this.applyTypeFilter(this.rentals).filter(r =>
+      (r.movieTitle || r.seriesTitle || '').toLowerCase().includes(q)
+    );
   }
 
   get isSearching(): boolean {
@@ -54,6 +70,7 @@ export class CustomerRentals implements OnInit, AfterViewInit {
     private userService: UserService,
     private currentUser: CurrentUserService,
     private rentalService: RentalService,
+    private seriesService: SeriesService,
     private paymentService: PaymentService,
     private notifService: NotificationService,
     private toastr: ToastrService,
@@ -91,13 +108,35 @@ export class CustomerRentals implements OnInit, AfterViewInit {
     }
     this.userService.getRentedMovies(userId).subscribe({
       next: (items) => {
-        this.rentals = (items || []).map((r: any) => ({
+        const movieRentals = (items || []).map((r: any) => ({
           ...r,
-          rentalItemId: r.rentalItemId ?? r.id
+          rentalItemId: r.rentalItemId ?? r.id,
+          _isSeries: false,
+          displayTitle: r.movieTitle
         }));
-        this.splitRentals();
-        this.loading = false;
-        this.cdr.detectChanges();
+
+        this.seriesService.getRentalsByUser(userId).subscribe({
+          next: (seriesItems) => {
+            const seriesRentals = (seriesItems || []).map((r: any) => ({
+              ...r,
+              rentalItemId: r.id,
+              movieTitle: r.seriesTitle,
+              movieId: r.seriesId,
+              _isSeries: true,
+              displayTitle: r.seriesTitle
+            }));
+            this.rentals = [...movieRentals, ...seriesRentals];
+            this.splitRentals();
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.rentals = movieRentals;
+            this.splitRentals();
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: () => {
         this.rentals = [];
@@ -311,6 +350,14 @@ export class CustomerRentals implements OnInit, AfterViewInit {
     this.router.navigate(['/dashboard/movie', movieId]);
   }
 
+  openItem(item: any) {
+    if (item._isSeries) {
+      this.router.navigate(['/dashboard/series', item.movieId || item.seriesId]);
+    } else {
+      this.router.navigate(['/dashboard/movie', item.movieId]);
+    }
+  }
+
   getStatusLabel(r: any): string {
     const now = new Date();
     if (new Date(r.endDate) <= now) return 'expired';
@@ -334,6 +381,11 @@ export class CustomerRentals implements OnInit, AfterViewInit {
 
   watchMovie(movieId: number) {
     this.router.navigate(['/dashboard/watch', movieId]);
+  }
+
+  watchItem(r: any) {
+    if (r._isSeries) this.router.navigate(['/dashboard/watch-series', r.movieId || r.seriesId]);
+    else this.router.navigate(['/dashboard/watch', r.movieId]);
   }
 }
 

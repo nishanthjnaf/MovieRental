@@ -1,6 +1,21 @@
 <!-- Page header -->
 <div class="rentals-header">
   <h1 class="rentals-header__title">My Rentals</h1>
+  <!-- Filter tabs -->
+  <div class="flex gap-2 mb-2">
+    <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+      [class.bg-fuchsia-600]="rentalFilter==='all'" [class.text-white]="rentalFilter==='all'"
+      [class.bg-slate-800]="rentalFilter!=='all'" [class.text-slate-400]="rentalFilter!=='all'"
+      (click)="rentalFilter='all'">All</button>
+    <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+      [class.bg-fuchsia-600]="rentalFilter==='movies'" [class.text-white]="rentalFilter==='movies'"
+      [class.bg-slate-800]="rentalFilter!=='movies'" [class.text-slate-400]="rentalFilter!=='movies'"
+      (click)="rentalFilter='movies'">Movies</button>
+    <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+      [class.bg-fuchsia-600]="rentalFilter==='series'" [class.text-white]="rentalFilter==='series'"
+      [class.bg-slate-800]="rentalFilter!=='series'" [class.text-slate-400]="rentalFilter!=='series'"
+      (click)="rentalFilter='series'">Series</button>
+  </div>
   <!-- Search bar -->
   <div class="rentals-search">
     <svg xmlns="http://www.w3.org/2000/svg" class="rentals-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -20,7 +35,7 @@
     <div *ngFor="let r of searchResults"
       class="rental-card"
       [class.rental-card--dim]="getStatusLabel(r) !== 'active'">
-      <div class="rental-card__poster" (click)="openMovie(r.movieId)">
+      <div class="rental-card__poster" (click)="openItem(r)">
         <img [src]="r.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieTitle" />
         <div class="rental-card__poster-overlay">
           <span class="rental-card__status"
@@ -32,7 +47,7 @@
         </div>
       </div>
       <div class="rental-card__body">
-        <h3 class="rental-card__title" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</h3>
+        <h3 class="rental-card__title" (click)="openItem(r)">{{ r.movieTitle }}</h3>
         <div class="rental-card__meta">
           <span>{{ r.rentalDays }} days</span>
           <span class="rental-card__dot"></span>
@@ -53,7 +68,7 @@
           </div>
         </div>
         <div class="rental-card__actions">
-          <button *ngIf="getStatusLabel(r) === 'active'" class="rental-btn rental-btn--watch" (click)="watchMovie(r.movieId)">
+          <button *ngIf="getStatusLabel(r) === 'active'" class="rental-btn rental-btn--watch" (click)="watchItem(r)">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             Watch
           </button>
@@ -88,20 +103,20 @@
 
 <!-- ── ACTIVE ── -->
 <ng-container *ngIf="!loading && !isSearching">
-  <div class="rentals-section" *ngIf="activeRentals.length > 0">
+  <div class="rentals-section" *ngIf="filteredActive.length > 0">
     <div class="rentals-section__header">
       <span class="rentals-section__tag rentals-section__tag--active">Active</span>
       <h2 class="rentals-section__title">Currently Renting</h2>
     </div>
     <div class="rentals-grid">
-      <div *ngFor="let r of activeRentals" class="rental-card">
+      <div *ngFor="let r of filteredActive" class="rental-card">
         <!-- Expiry countdown above poster -->
         <div class="rental-card__countdown-bar" [class.rental-card__countdown-bar--urgent]="isExpiringSoon(r.endDate)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
           {{ getExpiryCountdown(r.endDate) }}
         </div>
         <!-- Poster -->
-        <div class="rental-card__poster" (click)="openMovie(r.movieId)">
+        <div class="rental-card__poster" (click)="openItem(r)">
           <img [src]="r.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieTitle" />
           <div class="rental-card__poster-overlay">
             <span class="rental-card__status rental-card__status--active">Active</span>
@@ -109,7 +124,7 @@
         </div>
         <!-- Info -->
         <div class="rental-card__body">
-          <h3 class="rental-card__title" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</h3>
+          <h3 class="rental-card__title" (click)="openItem(r)">{{ r.movieTitle }}</h3>
           <div class="rental-card__meta">
             <span>{{ r.rentalDays }} days</span>
             <span class="rental-card__dot"></span>
@@ -126,7 +141,7 @@
             </div>
           </div>
           <div class="rental-card__actions">
-            <button class="rental-btn rental-btn--watch" (click)="watchMovie(r.movieId)">
+            <button class="rental-btn rental-btn--watch" (click)="watchItem(r)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               Watch
             </button>
@@ -145,21 +160,21 @@
 
 <!-- ── RETURNED ── -->
 <ng-container *ngIf="!loading && !isSearching">
-  <div class="rentals-section" *ngIf="returnedRentals.length > 0">
+  <div class="rentals-section" *ngIf="filteredReturned.length > 0">
     <div class="rentals-section__header">
       <span class="rentals-section__tag rentals-section__tag--returned">Returned</span>
       <h2 class="rentals-section__title">Returned</h2>
     </div>
     <div class="rentals-grid">
-      <div *ngFor="let r of returnedRentals" class="rental-card rental-card--dim">
-        <div class="rental-card__poster" (click)="openMovie(r.movieId)">
+      <div *ngFor="let r of filteredReturned" class="rental-card rental-card--dim">
+        <div class="rental-card__poster" (click)="openItem(r)">
           <img [src]="r.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieTitle" />
           <div class="rental-card__poster-overlay">
             <span class="rental-card__status rental-card__status--returned">Returned</span>
           </div>
         </div>
         <div class="rental-card__body">
-          <h3 class="rental-card__title" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</h3>
+          <h3 class="rental-card__title" (click)="openItem(r)">{{ r.movieTitle }}</h3>
           <div class="rental-card__meta">
             <span>{{ r.rentalDays }} days</span>
             <span class="rental-card__dot"></span>
@@ -189,21 +204,21 @@
 
 <!-- ── EXPIRED ── -->
 <ng-container *ngIf="!loading && !isSearching">
-  <div class="rentals-section" *ngIf="expiredRentals.length > 0" #expiredSection>
+  <div class="rentals-section" *ngIf="filteredExpired.length > 0" #expiredSection>
     <div class="rentals-section__header">
       <span class="rentals-section__tag rentals-section__tag--expired">Expired</span>
       <h2 class="rentals-section__title">Expired</h2>
     </div>
     <div class="rentals-grid">
-      <div *ngFor="let r of expiredRentals" class="rental-card rental-card--dim">
-        <div class="rental-card__poster" (click)="openMovie(r.movieId)">
+      <div *ngFor="let r of filteredExpired" class="rental-card rental-card--dim">
+        <div class="rental-card__poster" (click)="openItem(r)">
           <img [src]="r.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieTitle" />
           <div class="rental-card__poster-overlay">
             <span class="rental-card__status rental-card__status--expired">Expired</span>
           </div>
         </div>
         <div class="rental-card__body">
-          <h3 class="rental-card__title" (click)="openMovie(r.movieId)">{{ r.movieTitle }}</h3>
+          <h3 class="rental-card__title" (click)="openItem(r)">{{ r.movieTitle }}</h3>
           <div class="rental-card__meta">
             <span>{{ r.rentalDays }} days</span>
             <span class="rental-card__dot"></span>

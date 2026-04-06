@@ -1,39 +1,64 @@
-<div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Search Results</h2>
-  <p class="text-sm text-slate-400" *ngIf="q">for "{{ q }}"</p>
+<!-- Header -->
+<div class="flex items-center justify-between mb-5">
+  <div>
+    <h2 class="text-2xl font-semibold text-white">Search Results</h2>
+    <p class="text-sm text-slate-400 mt-0.5" *ngIf="q">for "{{ q }}" — {{ visibleResults.length }} result{{ visibleResults.length !== 1 ? 's' : '' }}</p>
+    <p class="text-sm text-slate-400 mt-0.5" *ngIf="!q">All titles</p>
+  </div>
 </div>
 
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" *ngIf="loading">
+<!-- Tabs -->
+<div class="flex gap-2 mb-6">
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="activeTab==='all'" [class.text-white]="activeTab==='all'"
+    [class.bg-slate-800]="activeTab!=='all'" [class.text-slate-400]="activeTab!=='all'"
+    (click)="activeTab='all'">All ({{ allResults.length }})</button>
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="activeTab==='movies'" [class.text-white]="activeTab==='movies'"
+    [class.bg-slate-800]="activeTab!=='movies'" [class.text-slate-400]="activeTab!=='movies'"
+    (click)="activeTab='movies'">Movies ({{ movies.length }})</button>
+  <button class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+    [class.bg-fuchsia-600]="activeTab==='series'" [class.text-white]="activeTab==='series'"
+    [class.bg-slate-800]="activeTab!=='series'" [class.text-slate-400]="activeTab!=='series'"
+    (click)="activeTab='series'">Series ({{ series.length }})</button>
+</div>
+
+<!-- Skeleton -->
+<div *ngIf="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
   <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="rounded-xl border border-slate-800 overflow-hidden">
-    <div class="h-32 skeleton"></div>
+    <div class="aspect-[2/3] skeleton"></div>
     <div class="p-3 space-y-2">
-      <div class="h-4 rounded skeleton"></div>
+      <div class="h-3 rounded skeleton w-3/4"></div>
       <div class="h-3 rounded skeleton w-1/2"></div>
     </div>
   </div>
 </div>
 
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" *ngIf="!loading">
-  <article *ngFor="let m of movies" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:scale-[1.02] transition" (click)="openMovie(m.id)">
-    <img [src]="m.posterPath || 'https://placehold.co/300x220'" class="h-32 w-full object-cover">
+<!-- Results grid -->
+<div *ngIf="!loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+  <article *ngFor="let item of visibleResults"
+    class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden cursor-pointer hover:border-fuchsia-600 hover:scale-[1.02] transition-all"
+    (click)="open(item)">
+    <div class="relative aspect-[2/3] overflow-hidden">
+      <img [src]="item.posterPath || 'https://placehold.co/300x450'" [alt]="item.title" class="w-full h-full object-cover" />
+      <span class="absolute top-2 left-2 text-xs px-1.5 py-0.5 rounded font-medium"
+        [class.bg-fuchsia-800]="item._type==='series'" [class.text-fuchsia-200]="item._type==='series'"
+        [class.bg-blue-800]="item._type==='movie'" [class.text-blue-200]="item._type==='movie'">
+        {{ item._type === 'series' ? 'Series' : 'Movie' }}
+      </span>
+    </div>
     <div class="p-3">
-      <h3 class="text-sm font-semibold truncate">{{ m.title }}</h3>
-      <p class="text-xs text-slate-400">{{ m.releaseYear }}</p>
-      <p class="text-xs text-amber-300">★ {{ (m.rating || 0) | number:'1.1-1' }}</p>
+      <h3 class="text-sm font-semibold truncate text-slate-100">{{ item.title }}</h3>
+      <p class="text-xs text-slate-400 mt-0.5">
+        <span *ngIf="item._type==='movie'">{{ item.releaseYear }} · {{ item.language }}</span>
+        <span *ngIf="item._type==='series'">{{ item.seasons?.length }} Season{{ item.seasons?.length !== 1 ? 's' : '' }} · {{ item.language }}</span>
+      </p>
+      <p class="text-xs text-amber-300 mt-0.5" *ngIf="getAvgRating(item) > 0">★ {{ getAvgRating(item) | number:'1.1-1' }}</p>
+      <p class="text-xs text-fuchsia-400 mt-0.5" *ngIf="item._type==='series'">₹{{ item.rentalPrice }}/day</p>
     </div>
   </article>
 </div>
 
-<div class="flex items-center justify-center gap-2 mt-8" *ngIf="!loading && q && totalPages > 1">
-  <button
-    *ngFor="let p of pages"
-    (click)="goToPage(p)"
-    class="px-3 py-1 rounded border border-slate-700 hover:border-fuchsia-500"
-    [class.bg-fuchsia-700]="p === pageNumber"
-  >
-    {{ p }}
-  </button>
-</div>
-
-<p *ngIf="!loading && movies.length === 0" class="text-slate-400 mt-8">No movies found.</p>
-
+<p *ngIf="!loading && visibleResults.length === 0" class="text-slate-400 mt-8 text-center">
+  No results found{{ q ? ' for "' + q + '"' : '' }}.
+</p>

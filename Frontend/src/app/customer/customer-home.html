@@ -94,24 +94,27 @@
         <button class="home-arrow" (click)="prev('suggested')" [disabled]="!canPrev('suggested')">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button class="home-arrow" (click)="next('suggested', suggestedMovies)" [disabled]="!canNext('suggested', suggestedMovies)">
+        <button class="home-arrow" (click)="next('suggested', suggestedMixed)" [disabled]="!canNext('suggested', suggestedMixed)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>
     <div class="carousel-viewport">
       <div class="carousel-track" [style.transform]="trackTranslate('suggested')" [style.--count]="visibleCount">
-        <article *ngFor="let m of suggestedMovies" class="movie-card" (click)="openMovie(m.id)">
+        <article *ngFor="let m of suggestedMixed" class="movie-card" (click)="openItem(m)">
           <div class="movie-card__poster">
             <img [src]="m.posterPath || 'https://placehold.co/640x360'" [alt]="m.title" />
             <div class="movie-card__overlay">
               <div class="movie-card__genres"><span *ngFor="let g of (m.genres || []).slice(0,3)" class="movie-card__genre-tag">{{ g }}</span></div>
-              <span class="movie-card__rating">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
+              <div class="flex items-center gap-2">
+                <span class="movie-card__rating">★ {{ getItemRating(m) | number:'1.1-1' }}</span>
+                <span class="text-xs px-1.5 py-0.5 rounded" [class.bg-fuchsia-900]="m._type==='series'" [class.text-fuchsia-300]="m._type==='series'" [class.bg-blue-900]="m._type==='movie'" [class.text-blue-300]="m._type==='movie'">{{ m._type === 'series' ? 'Series' : 'Movie' }}</span>
+              </div>
             </div>
           </div>
           <div class="movie-card__info">
             <h3 class="movie-card__name">{{ m.title }}</h3>
-            <p class="movie-card__meta">{{ m.releaseYear }} · {{ m.language }}</p>
+            <p class="movie-card__meta">{{ m.language }}</p>
           </div>
         </article>
       </div>
@@ -153,6 +156,41 @@
     </div>
   </section>
 
+  <!-- New Series -->
+  <section class="home-section mb-12" *ngIf="!loading && newSeries.length > 0">
+    <div class="home-section__header">
+      <div class="home-section__title-group">
+        <h2 class="home-section__title">New Series</h2>
+        <span class="home-section__tag home-section__tag--fuchsia">Series</span>
+      </div>
+      <div class="home-section__arrows">
+        <button class="home-arrow" (click)="prev('newSeries')" [disabled]="!canPrev('newSeries')">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button class="home-arrow" (click)="next('newSeries', newSeries)" [disabled]="!canNext('newSeries', newSeries)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="carousel-viewport">
+      <div class="carousel-track" [style.transform]="trackTranslate('newSeries')" [style.--count]="visibleCount">
+        <article *ngFor="let s of newSeries" class="movie-card" (click)="openItem({_type:'series', id: s.id})">
+          <div class="movie-card__poster">
+            <img [src]="s.posterPath || 'https://placehold.co/640x360'" [alt]="s.title" />
+            <div class="movie-card__overlay">
+              <div class="movie-card__genres"><span *ngFor="let g of (s.genres || []).slice(0,3)" class="movie-card__genre-tag">{{ g }}</span></div>
+              <span class="movie-card__rating movie-card__rating--fuchsia">{{ s.seasons?.length }} Seasons</span>
+            </div>
+          </div>
+          <div class="movie-card__info">
+            <h3 class="movie-card__name">{{ s.title }}</h3>
+            <p class="movie-card__meta">{{ s.language }} · ₹{{ s.rentalPrice }}/day</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- Top Rated -->
   <section class="home-section mb-12" *ngIf="!loading">
     <div class="home-section__header">
@@ -164,24 +202,27 @@
         <button class="home-arrow" (click)="prev('topRated')" [disabled]="!canPrev('topRated')">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button class="home-arrow" (click)="next('topRated', topRatedMovies)" [disabled]="!canNext('topRated', topRatedMovies)">
+        <button class="home-arrow" (click)="next('topRated', topRatedMixed)" [disabled]="!canNext('topRated', topRatedMixed)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>
     <div class="carousel-viewport">
       <div class="carousel-track" [style.transform]="trackTranslate('topRated')" [style.--count]="visibleCount">
-        <article *ngFor="let m of topRatedMovies" class="movie-card" (click)="openMovie(m.id)">
+        <article *ngFor="let m of topRatedMixed" class="movie-card" (click)="openItem(m)">
           <div class="movie-card__poster">
             <img [src]="m.posterPath || 'https://placehold.co/640x360'" [alt]="m.title" />
             <div class="movie-card__overlay">
               <div class="movie-card__genres"><span *ngFor="let g of (m.genres || []).slice(0,3)" class="movie-card__genre-tag">{{ g }}</span></div>
-              <span class="movie-card__rating">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
+              <div class="flex items-center gap-2">
+                <span class="movie-card__rating">★ {{ getItemRating(m) | number:'1.1-1' }}</span>
+                <span class="text-xs px-1.5 py-0.5 rounded" [class.bg-fuchsia-900]="m._type==='series'" [class.text-fuchsia-300]="m._type==='series'" [class.bg-blue-900]="m._type==='movie'" [class.text-blue-300]="m._type==='movie'">{{ m._type === 'series' ? 'Series' : 'Movie' }}</span>
+              </div>
             </div>
           </div>
           <div class="movie-card__info">
             <h3 class="movie-card__name">{{ m.title }}</h3>
-            <p class="movie-card__meta">{{ m.releaseYear }} · {{ m.language }}</p>
+            <p class="movie-card__meta">{{ m.releaseYear || m.language }} · {{ m.language }}</p>
           </div>
         </article>
       </div>
@@ -199,27 +240,27 @@
         <button class="home-arrow" (click)="prev('topRented')" [disabled]="!canPrev('topRented')">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button class="home-arrow" (click)="next('topRented', topRentedMovies)" [disabled]="!canNext('topRented', topRentedMovies)">
+        <button class="home-arrow" (click)="next('topRented', topRentedMixed)" [disabled]="!canNext('topRented', topRentedMixed)">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>
     <div class="carousel-viewport">
       <div class="carousel-track" [style.transform]="trackTranslate('topRented')" [style.--count]="visibleCount">
-        <article *ngFor="let m of topRentedMovies" class="movie-card" (click)="openMovie(m.movieId || m.id)">
+        <article *ngFor="let m of topRentedMixed" class="movie-card" (click)="openItem(m)">
           <div class="movie-card__poster">
             <img [src]="m.posterPath || 'https://placehold.co/640x360'" [alt]="m.title" />
             <div class="movie-card__overlay">
               <div class="movie-card__genres"><span *ngFor="let g of (m.genres || []).slice(0,3)" class="movie-card__genre-tag">{{ g }}</span></div>
               <div class="flex items-center justify-between">
-                <span class="movie-card__rating movie-card__rating--amber">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
+                <span class="movie-card__rating movie-card__rating--amber">★ {{ getItemRating(m) | number:'1.1-1' }}</span>
                 <span class="movie-card__rating movie-card__rating--emerald">{{ m.rentalCount }} rentals</span>
               </div>
             </div>
           </div>
           <div class="movie-card__info">
             <h3 class="movie-card__name">{{ m.title }}</h3>
-            <p class="movie-card__meta">{{ m.releaseYear }} · {{ m.language }}</p>
+            <p class="movie-card__meta">{{ m.language }}</p>
           </div>
         </article>
       </div>

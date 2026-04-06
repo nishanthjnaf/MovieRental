@@ -717,6 +717,7 @@ html.light-theme .home-cinehero__sub { color: #64748b; }
 }
 .movie-card__rating--amber { color: #fbbf24; background: rgba(245,158,11,0.2); border-color: rgba(245,158,11,0.3); }
 .movie-card__rating--emerald { color: #34d399; background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.3); }
+.movie-card__rating--fuchsia { color: #e879f9; background: rgba(217,70,239,0.2); border-color: rgba(217,70,239,0.3); }
 
 .movie-card__genres {
   display: flex;

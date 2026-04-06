@@ -63,10 +63,9 @@ export class CustomerShell implements OnInit {
     this.searchControl.valueChanges
       .pipe(debounceTime(200), distinctUntilChanged())
       .subscribe((term) => {
-        this.searchOrigin = this.currentPath.includes('/dashboard/home') ? 'home' : 'movies';
-        this.router.navigate(['/dashboard/movies'], {
-          queryParams: { q: term || null, page: 1 },
-          queryParamsHandling: 'merge'
+        if (!term?.trim()) return;
+        this.router.navigate(['/dashboard/search'], {
+          queryParams: { q: term.trim() },
         });
       });
 
@@ -168,14 +167,7 @@ export class CustomerShell implements OnInit {
 
   clearSearch() {
     this.searchControl.setValue('', { emitEvent: false });
-    if (this.searchOrigin === 'home') {
-      this.router.navigate(['/dashboard/home']);
-      return;
-    }
-    this.router.navigate(['/dashboard/movies'], {
-      queryParams: { q: null, page: 1 },
-      queryParamsHandling: 'merge'
-    });
+    this.router.navigate(['/dashboard/home']);
   }
 
   logout() {

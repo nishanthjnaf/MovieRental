@@ -8,8 +8,7 @@ using MovieRentalAPI.Interfaces;
 using MovieRentalAPI.Models;
 using MovieRentalAPI.Repositories;
 using MovieRentalAPI.Services;
-using MovieRentalModels;
-using NSwag;
+using MovieRentalModels;using NSwag;
 using NSwag.Generation.Processors.Security;
 using Serilog;
 using System.Text;
@@ -142,6 +141,10 @@ builder.Services.AddScoped<IPromoService, PromoService>();
 builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHostedService<RentalExpiryBackgroundService>();
+builder.Services.AddScoped<ISeriesService, SeriesService>();
+builder.Services.AddScoped<ISeasonReviewService, SeasonReviewService>();
+builder.Services.AddScoped<ISeriesWatchlistService, SeriesWatchlistService>();
+builder.Services.AddScoped<ISeriesRentalService, SeriesRentalService>();
 #endregion
 
 #region Authentication (JWT)
