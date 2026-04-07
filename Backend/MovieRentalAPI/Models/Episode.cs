@@ -8,6 +8,7 @@ namespace MovieRentalAPI.Models
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int DurationMinutes { get; set; }
+        public DateTime AirDate { get; set; }
 
         public Season? Season { get; set; }
 

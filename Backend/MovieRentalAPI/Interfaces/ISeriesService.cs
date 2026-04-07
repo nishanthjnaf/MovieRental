@@ -13,5 +13,7 @@ namespace MovieRentalAPI.Interfaces
         Task<IEnumerable<SeriesResponseDto>> GetTopRatedSeries(int count);
         Task<IEnumerable<SeriesResponseDto>> GetTopRentedSeries(int count);
         Task<IEnumerable<SeriesResponseDto>> GetSuggestedSeries(int userId);
+        Task<SeasonResponseDto> AddSeason(AddSeasonRequestDto request);
+        Task<EpisodeResponseDto> AddEpisode(AddEpisodeRequestDto request);
     }
 }

@@ -67,7 +67,8 @@ namespace MovieRentalAPI.Services
                         EpisodeNumber = e.EpisodeNumber,
                         Title = e.Title,
                         Description = e.Description,
-                        DurationMinutes = e.DurationMinutes
+                        DurationMinutes = e.DurationMinutes,
+                        AirDate = e.AirDate ?? DateTime.UtcNow
                     }).ToList()
                 };
                 _context.Seasons.Add(season);
@@ -221,6 +222,75 @@ namespace MovieRentalAPI.Services
                 .Select(MapToDto);
         }
 
+        public async Task<SeasonResponseDto> AddSeason(AddSeasonRequestDto request)
+        {
+            var series = await _context.Series.FindAsync(request.SeriesId);
+            if (series == null) throw new NotFoundException("Series not found");
+
+            var season = new Season
+            {
+                SeriesId = request.SeriesId,
+                SeasonNumber = request.SeasonNumber,
+                Title = request.Title,
+                ReleaseYear = request.ReleaseYear,
+                Episodes = request.Episodes.Select(e => new Episode
+                {
+                    EpisodeNumber = e.EpisodeNumber,
+                    Title = e.Title,
+                    Description = e.Description,
+                    DurationMinutes = e.DurationMinutes,
+                    AirDate = e.AirDate ?? DateTime.UtcNow
+                }).ToList()
+            };
+
+            _context.Seasons.Add(season);
+            await _context.SaveChangesAsync();
+
+            return new SeasonResponseDto
+            {
+                Id = season.Id,
+                SeriesId = season.SeriesId,
+                SeasonNumber = season.SeasonNumber,
+                Title = season.Title,
+                ReleaseYear = season.ReleaseYear,
+                AverageRating = 0,
+                IsNewSeason = true,
+                Episodes = season.Episodes.Select(e => new EpisodeResponseDto
+                {
+                    Id = e.Id, SeasonId = e.SeasonId, EpisodeNumber = e.EpisodeNumber,
+                    Title = e.Title, Description = e.Description,
+                    DurationMinutes = e.DurationMinutes, AirDate = e.AirDate
+                }).ToList()
+            };
+        }
+
+        public async Task<EpisodeResponseDto> AddEpisode(AddEpisodeRequestDto request)
+        {
+            var season = await _context.Seasons.FindAsync(request.SeasonId);
+            if (season == null) throw new NotFoundException("Season not found");
+
+            var episode = new Episode
+            {
+                SeasonId = request.SeasonId,
+                EpisodeNumber = request.EpisodeNumber,
+                Title = request.Title,
+                Description = request.Description,
+                DurationMinutes = request.DurationMinutes,
+                AirDate = request.AirDate ?? DateTime.UtcNow
+            };
+
+            _context.Episodes.Add(episode);
+            await _context.SaveChangesAsync();
+
+            return new EpisodeResponseDto
+            {
+                Id = episode.Id, SeasonId = episode.SeasonId,
+                EpisodeNumber = episode.EpisodeNumber, Title = episode.Title,
+                Description = episode.Description, DurationMinutes = episode.DurationMinutes,
+                AirDate = episode.AirDate
+            };
+        }
+
         private static double AverageSeriesRating(Series s)
         {
             if (s.Seasons == null || !s.Seasons.Any()) return 0;
@@ -264,6 +334,8 @@ namespace MovieRentalAPI.Services
                     AverageRating = sn.Reviews != null && sn.Reviews.Any()
                         ? sn.Reviews.Average(r => r.Rating)
                         : 0,
+                    IsNewSeason = sn.Episodes != null && sn.Episodes.Any()
+                        && sn.Episodes.Max(e => e.AirDate) >= DateTime.UtcNow.AddDays(-30),
                     Episodes = sn.Episodes?.OrderBy(e => e.EpisodeNumber).Select(e => new EpisodeResponseDto
                     {
                         Id = e.Id,
@@ -271,7 +343,8 @@ namespace MovieRentalAPI.Services
                         EpisodeNumber = e.EpisodeNumber,
                         Title = e.Title,
                         Description = e.Description,
-                        DurationMinutes = e.DurationMinutes
+                        DurationMinutes = e.DurationMinutes,
+                        AirDate = e.AirDate
                     }).ToList() ?? new List<EpisodeResponseDto>()
                 }).ToList() ?? new List<SeasonResponseDto>()
             };

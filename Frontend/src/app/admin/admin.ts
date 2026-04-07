@@ -5,6 +5,7 @@ import { GenreService } from '../services/genre';
 import { ToastrService } from 'ngx-toastr';
 import { InventoryService } from '../services/inventory';
 import { MovieService } from '../services/movie';
+import { SeriesService } from '../services/series';
 import { RentalService } from '../services/rental';
 import { PaymentService } from '../services/payment';
 import { Router } from '@angular/router';
@@ -29,6 +30,7 @@ export class Admin implements OnInit {
     private genreService: GenreService,
     private inventoryService: InventoryService,
     private movieService: MovieService,
+    private seriesService: SeriesService,
     private rentalService: RentalService,
     private paymentService: PaymentService,
     private userService: UserService,
@@ -40,7 +42,7 @@ export class Admin implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  viewMode: 'services' | 'genre' | 'inventory' | 'movie' | 'rental' | 'payment' | 'broadcast' | 'logs' = 'services';
+  viewMode: 'services' | 'genre' | 'inventory' | 'movie' | 'series' | 'rental' | 'payment' | 'broadcast' | 'logs' = 'services';
 
   // ---- BROADCAST ----
   broadcastTitle = '';
@@ -170,6 +172,7 @@ export class Admin implements OnInit {
     if (service === 'genre') this.loadGenres();
     if (service === 'inventory') this.loadInventory();
     if (service === 'movie') this.loadMovies();
+    if (service === 'series') this.loadSeries();
     if (service === 'rental') this.loadRentals();
     if (service === 'payment') this.loadPayments();
     if (service === 'broadcast') this.loadBroadcasts();
@@ -231,7 +234,7 @@ export class Admin implements OnInit {
   getPageTitle(): string {
     if (this.viewMode === 'services') return 'Dashboard';
     const map: Record<string, string> = {
-      genre: 'Genre', inventory: 'Inventory', movie: 'Movie',
+      genre: 'Genre', inventory: 'Inventory', movie: 'Movie', series: 'Series',
       rental: 'Rental', payment: 'Payment', broadcast: 'Broadcast', logs: 'Activity Logs'
     };
     return (map[this.viewMode] ?? this.viewMode) + ' Management';
@@ -817,9 +820,237 @@ export class Admin implements OnInit {
     return Math.ceil(this.logsTotalCount / this.logsPageSize) || 1;
   }
 
+  // ================= SERIES =================
+  seriesList: any[] = [];
+  private allSeriesList: any[] = [];
+  seriesSearchName = '';
+  seriesFilterLanguage = '';
+  seriesFilterAvailable = '';
+  seriesMinPrice: any;
+  seriesMaxPrice: any;
+  seriesSortOption = '';
+  seriesLanguages: string[] = [];
+  seriesExpandedId: number | null = null;
+  seriesExpandedSeasonId: number | null = null;
+  showSeriesForm = false;
+  isSeriesEdit = false;
+  selectedSeriesId: number | null = null;
+  seriesFormStep: 'details' | 'seasons' = 'details';
+  seriesForm = { title: '', description: '', language: '', director: '', cast: '', contentRating: '', contentAdvisory: '', posterPath: '', trailerUrl: '', rentalPrice: 0, isAvailable: true };
+  seriesFormGenreIds: number[] = [];
+  seriesGenreDropdownOpen = false;
+  seriesSeasonCount = 1;
+  seriesSeasons: Array<{ seasonNumber: number; title: string; releaseYear: number; episodeCount: number; episodes: Array<{ episodeNumber: number; title: string; description: string; durationMinutes: number }>; }> = [];
+  showEditSeasonModal = false;
+  editingSeasonData: any = null;
+  showEditEpisodeModal = false;
+  editingEpisodeData: any = null;
+  editingEpisodeSeasonId: number | null = null;
+
+  get seriesSelectedGenreNames(): string {
+    if (!this.seriesFormGenreIds.length) return 'Select genres...';
+    return this.allGenres.filter(g => this.seriesFormGenreIds.includes(g.id)).map(g => g.name).join(', ');
+  }
+
+  loadSeries() {
+    this.seriesService.getAll().subscribe({
+      next: (res) => {
+        this.allSeriesList = res || [];
+        this.seriesLanguages = [...new Set(this.allSeriesList.map(s => s.language).filter(Boolean))].sort() as string[];
+        this.seriesList = [...this.allSeriesList];
+        this.cdr.detectChanges();
+      },
+      error: () => this.toastr.error('Failed to load series')
+    });
+  }
+
+  searchSeries() {
+    let list = [...this.allSeriesList];
+    if (this.seriesSearchName.trim()) {
+      const q = this.seriesSearchName.trim().toLowerCase();
+      list = list.filter(s => s.title?.toLowerCase().includes(q) || s.director?.toLowerCase().includes(q));
+    }
+    if (this.seriesFilterLanguage) list = list.filter(s => s.language === this.seriesFilterLanguage);
+    if (this.seriesFilterAvailable === 'true') list = list.filter(s => s.isAvailable === true);
+    else if (this.seriesFilterAvailable === 'false') list = list.filter(s => s.isAvailable === false);
+    if (this.seriesMinPrice != null && this.seriesMinPrice !== '') list = list.filter(s => s.rentalPrice >= Number(this.seriesMinPrice));
+    if (this.seriesMaxPrice != null && this.seriesMaxPrice !== '') list = list.filter(s => s.rentalPrice <= Number(this.seriesMaxPrice));
+    if (this.seriesSortOption === 'price-asc') list.sort((a, b) => a.rentalPrice - b.rentalPrice);
+    else if (this.seriesSortOption === 'price-desc') list.sort((a, b) => b.rentalPrice - a.rentalPrice);
+    else if (this.seriesSortOption === 'rentals-desc') list.sort((a, b) => (b.rentalCount ?? 0) - (a.rentalCount ?? 0));
+    else if (this.seriesSortOption === 'rentals-asc') list.sort((a, b) => (a.rentalCount ?? 0) - (b.rentalCount ?? 0));
+    else if (this.seriesSortOption === 'seasons-desc') list.sort((a, b) => (b.seasons?.length ?? 0) - (a.seasons?.length ?? 0));
+    else if (this.seriesSortOption === 'seasons-asc') list.sort((a, b) => (a.seasons?.length ?? 0) - (b.seasons?.length ?? 0));
+    this.seriesList = list;
+    this.cdr.detectChanges();
+  }
+
+  resetSeries() {
+    this.seriesSearchName = ''; this.seriesFilterLanguage = ''; this.seriesFilterAvailable = '';
+    this.seriesMinPrice = null; this.seriesMaxPrice = null; this.seriesSortOption = '';
+    this.seriesList = [...this.allSeriesList]; this.cdr.detectChanges();
+  }
+  toggleSeriesRow(id: number) { this.seriesExpandedId = this.seriesExpandedId === id ? null : id; this.seriesExpandedSeasonId = null; this.cdr.detectChanges(); }
+  toggleSeasonRow(id: number) { this.seriesExpandedSeasonId = this.seriesExpandedSeasonId === id ? null : id; this.cdr.detectChanges(); }
+
+  openSeriesForm() {
+    this.isSeriesEdit = false; this.selectedSeriesId = null; this.seriesFormStep = 'details';
+    this.seriesForm = { title: '', description: '', language: '', director: '', cast: '', contentRating: '', contentAdvisory: '', posterPath: '', trailerUrl: '', rentalPrice: 0, isAvailable: true };
+    this.seriesFormGenreIds = []; this.seriesSeasonCount = 1; this.seriesSeasons = [];
+    this.ensureGenresLoaded(() => { this.showSeriesForm = true; this.cdr.detectChanges(); });
+  }
+
+  editSeries(s: any) {
+    this.isSeriesEdit = true; this.selectedSeriesId = s.id; this.seriesFormStep = 'details';
+    this.seriesForm = { title: s.title ?? '', description: s.description ?? '', language: s.language ?? '', director: s.director ?? '', cast: Array.isArray(s.cast) ? s.cast.join(', ') : (s.cast ?? ''), contentRating: s.contentRating ?? '', contentAdvisory: Array.isArray(s.contentAdvisory) ? s.contentAdvisory.join(', ') : (s.contentAdvisory ?? ''), posterPath: s.posterPath ?? '', trailerUrl: s.trailerUrl ?? '', rentalPrice: s.rentalPrice ?? 0, isAvailable: s.isAvailable ?? true };
+    this.ensureGenresLoaded(() => {
+      const names: string[] = Array.isArray(s.genres) ? s.genres : [];
+      this.seriesFormGenreIds = this.allGenres.filter(g => names.includes(g.name)).map(g => g.id);
+      this.showSeriesForm = true; this.cdr.detectChanges();
+    });
+  }
+
+  seriesDetailsNext() {
+    if (!this.seriesForm.title.trim()) { this.toastr.error('Title is required'); return; }
+    if (this.isSeriesEdit) { this.saveSeriesDetails(); return; }
+    this.seriesFormStep = 'seasons'; this.buildSeasonForms(); this.cdr.detectChanges();
+  }
+
+  buildSeasonForms() {
+    const count = Math.max(1, Math.min(20, Number(this.seriesSeasonCount) || 1));
+    this.seriesSeasons = Array.from({ length: count }, (_, i) => this.seriesSeasons[i] ?? { seasonNumber: i + 1, title: `Season ${i + 1}`, releaseYear: new Date().getFullYear(), episodeCount: 1, episodes: [{ episodeNumber: 1, title: 'Episode 1', description: '', durationMinutes: 45 }] });
+  }
+
+  buildEpisodeForms(idx: number) {
+    const s = this.seriesSeasons[idx];
+    const count = Math.max(1, Math.min(50, Number(s.episodeCount) || 1));
+    s.episodes = Array.from({ length: count }, (_, i) => s.episodes[i] ?? { episodeNumber: i + 1, title: `Episode ${i + 1}`, description: '', durationMinutes: 45 });
+    this.cdr.detectChanges();
+  }
+
+  saveSeriesDetails() {
+    const existing = this.allSeriesList.find(x => x.id === this.selectedSeriesId);
+    const payload = { ...this.seriesForm, genreIds: this.seriesFormGenreIds, seasons: existing?.seasons?.map((sn: any) => ({ ...sn, episodes: sn.episodes })) ?? [] };
+    this.seriesService.update(this.selectedSeriesId!, payload).subscribe({
+      next: () => { this.toastr.success('Series updated'); this.showSeriesForm = false; this.loadSeries(); },
+      error: () => this.toastr.error('Update failed')
+    });
+  }
+
+  saveSeries() {
+    const payload = { ...this.seriesForm, genreIds: this.seriesFormGenreIds, seasons: this.seriesSeasons.map(s => ({ seasonNumber: s.seasonNumber, title: s.title, releaseYear: s.releaseYear, episodes: s.episodes })) };
+    this.seriesService.add(payload).subscribe({
+      next: () => { this.toastr.success('Series added'); this.showSeriesForm = false; this.loadSeries(); },
+      error: (err) => this.toastr.error(err?.error || 'Add failed')
+    });
+  }
+
+  cancelSeriesForm() { this.showSeriesForm = false; this.seriesGenreDropdownOpen = false; this.cdr.detectChanges(); }
+
+  deleteSeries(id: number) {
+    if (!confirm('Delete this series and all its seasons/episodes?')) return;
+    this.seriesService.delete(id).subscribe({
+      next: () => { this.toastr.success('Deleted'); this.loadSeries(); },
+      error: () => { this.toastr.success('Deleted'); this.loadSeries(); }
+    });
+  }
+
+  toggleSeriesGenre(id: number) { const idx = this.seriesFormGenreIds.indexOf(id); if (idx === -1) this.seriesFormGenreIds.push(id); else this.seriesFormGenreIds.splice(idx, 1); }
+  isSeriesGenreSelected(id: number): boolean { return this.seriesFormGenreIds.includes(id); }
+
+  openEditSeason(season: any) { this.editingSeasonData = { ...season }; this.showEditSeasonModal = true; this.cdr.detectChanges(); }
+
+  saveEditSeason() {
+    if (!this.editingSeasonData) return;
+    const series = this.allSeriesList.find(s => s.seasons?.some((sn: any) => sn.id === this.editingSeasonData.id));
+    if (!series) { this.toastr.error('Series not found'); return; }
+    const genreIds = this.allGenres.filter(g => (series.genres || []).includes(g.name)).map((g: any) => g.id);
+    const payload = { ...series, genreIds, seasons: series.seasons.map((sn: any) => sn.id === this.editingSeasonData.id ? { ...sn, title: this.editingSeasonData.title, releaseYear: this.editingSeasonData.releaseYear, episodes: sn.episodes } : { ...sn, episodes: sn.episodes }) };
+    this.seriesService.update(series.id, payload).subscribe({
+      next: () => { this.toastr.success('Season updated'); this.showEditSeasonModal = false; this.loadSeries(); },
+      error: () => this.toastr.error('Update failed')
+    });
+  }
+
+  openEditEpisode(episode: any, seasonId: number) { this.editingEpisodeData = { ...episode }; this.editingEpisodeSeasonId = seasonId; this.showEditEpisodeModal = true; this.cdr.detectChanges(); }
+
+  saveEditEpisode() {
+    if (!this.editingEpisodeData || !this.editingEpisodeSeasonId) return;
+    const series = this.allSeriesList.find(s => s.seasons?.some((sn: any) => sn.id === this.editingEpisodeSeasonId));
+    if (!series) { this.toastr.error('Series not found'); return; }
+    const genreIds = this.allGenres.filter(g => (series.genres || []).includes(g.name)).map((g: any) => g.id);
+    const payload = { ...series, genreIds, seasons: series.seasons.map((sn: any) => sn.id === this.editingEpisodeSeasonId ? { ...sn, episodes: sn.episodes.map((ep: any) => ep.id === this.editingEpisodeData.id ? { ...this.editingEpisodeData } : ep) } : { ...sn, episodes: sn.episodes }) };
+    this.seriesService.update(series.id, payload).subscribe({
+      next: () => { this.toastr.success('Episode updated'); this.showEditEpisodeModal = false; this.loadSeries(); },
+      error: () => this.toastr.error('Update failed')
+    });
+  }
+
+  // Add Season to existing series
+  showAddSeasonModal = false;
+  addSeasonSeriesId: number | null = null;
+  addSeasonForm = { seasonNumber: 1, title: '', releaseYear: new Date().getFullYear(), episodeCount: 1, episodes: [] as Array<{ episodeNumber: number; title: string; description: string; durationMinutes: number }> };
+
+  openAddSeasonModal(seriesId: number) {
+    this.addSeasonSeriesId = seriesId;
+    const series = this.allSeriesList.find(s => s.id === seriesId);
+    const nextNum = (series?.seasons?.length ?? 0) + 1;
+    this.addSeasonForm = { seasonNumber: nextNum, title: `Season ${nextNum}`, releaseYear: new Date().getFullYear(), episodeCount: 1, episodes: [{ episodeNumber: 1, title: 'Episode 1', description: '', durationMinutes: 45 }] };
+    this.showAddSeasonModal = true;
+    this.cdr.detectChanges();
+  }
+
+  buildAddSeasonEpisodes() {
+    const count = Math.max(1, Math.min(50, Number(this.addSeasonForm.episodeCount) || 1));
+    this.addSeasonForm.episodes = Array.from({ length: count }, (_, i) =>
+      this.addSeasonForm.episodes[i] ?? { episodeNumber: i + 1, title: `Episode ${i + 1}`, description: '', durationMinutes: 45 }
+    );
+    this.cdr.detectChanges();
+  }
+
+  saveAddSeason() {
+    if (!this.addSeasonSeriesId) return;
+    const payload = {
+      seriesId: this.addSeasonSeriesId,
+      seasonNumber: this.addSeasonForm.seasonNumber,
+      title: this.addSeasonForm.title,
+      releaseYear: this.addSeasonForm.releaseYear,
+      episodes: this.addSeasonForm.episodes
+    };
+    this.seriesService.addSeason(payload).subscribe({
+      next: () => { this.toastr.success('Season added'); this.showAddSeasonModal = false; this.loadSeries(); },
+      error: (err) => this.toastr.error(err?.error || 'Failed to add season')
+    });
+  }
+
+  // Add Episode to existing season
+  showAddEpisodeModal = false;
+  addEpisodeSeasonId: number | null = null;
+  addEpisodeSeriesTitle = '';
+  addEpisodeSeasonTitle = '';
+  addEpisodeForm = { episodeNumber: 1, title: '', description: '', durationMinutes: 45 };
+
+  openAddEpisodeModal(season: any, seriesTitle: string) {
+    this.addEpisodeSeasonId = season.id;
+    this.addEpisodeSeriesTitle = seriesTitle;
+    this.addEpisodeSeasonTitle = `Season ${season.seasonNumber}`;
+    const nextNum = (season.episodes?.length ?? 0) + 1;
+    this.addEpisodeForm = { episodeNumber: nextNum, title: `Episode ${nextNum}`, description: '', durationMinutes: 45 };
+    this.showAddEpisodeModal = true;
+    this.cdr.detectChanges();
+  }
+
+  saveAddEpisode() {
+    if (!this.addEpisodeSeasonId) return;
+    const payload = { seasonId: this.addEpisodeSeasonId, ...this.addEpisodeForm };
+    this.seriesService.addEpisode(payload).subscribe({
+      next: () => { this.toastr.success('Episode added'); this.showAddEpisodeModal = false; this.loadSeries(); },
+      error: (err) => this.toastr.error(err?.error || 'Failed to add episode')
+    });
+  }
+
   // ================= AUTH =================
-  logout() {
-    this.showProfileMenu = false;
+  logout() {    this.showProfileMenu = false;
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('role');

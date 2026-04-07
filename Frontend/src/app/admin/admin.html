@@ -7,6 +7,7 @@
       <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='genre'" (click)="openService('genre')"><span class="admin-nav-item__icon">🏷️</span> Genres</button>
       <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='inventory'" (click)="openService('inventory')"><span class="admin-nav-item__icon">📦</span> Inventory</button>
       <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='movie'" (click)="openService('movie')"><span class="admin-nav-item__icon">🎥</span> Movies</button>
+      <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='series'" (click)="openService('series')"><span class="admin-nav-item__icon">📺</span> Series</button>
       <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='rental'" (click)="openService('rental')"><span class="admin-nav-item__icon">📋</span> Rentals</button>
       <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='payment'" (click)="openService('payment')"><span class="admin-nav-item__icon">💳</span> Payments</button>
       <button class="admin-nav-item" [class.admin-nav-item--active]="viewMode==='broadcast'" (click)="openService('broadcast')"><span class="admin-nav-item__icon">📢</span> Broadcast</button>
@@ -46,6 +47,7 @@
           <div class="admin-service-card" (click)="openService('genre')"><div class="admin-service-card__icon admin-service-card__icon--fuchsia">🏷️</div><div class="admin-service-card__body"><p class="admin-service-card__title">Genres</p><p class="admin-service-card__desc">Add, edit and assign genres to movies</p></div></div>
           <div class="admin-service-card" (click)="openService('inventory')"><div class="admin-service-card__icon admin-service-card__icon--amber">📦</div><div class="admin-service-card__body"><p class="admin-service-card__title">Inventory</p><p class="admin-service-card__desc">Manage stock and rental pricing</p></div></div>
           <div class="admin-service-card" (click)="openService('movie')"><div class="admin-service-card__icon admin-service-card__icon--emerald">🎥</div><div class="admin-service-card__body"><p class="admin-service-card__title">Movies</p><p class="admin-service-card__desc">Add, update and remove movies</p></div></div>
+          <div class="admin-service-card" (click)="openService('series')"><div class="admin-service-card__icon admin-service-card__icon--violet">📺</div><div class="admin-service-card__body"><p class="admin-service-card__title">Series</p><p class="admin-service-card__desc">Manage series, seasons and episodes</p></div></div>
           <div class="admin-service-card" (click)="openService('rental')"><div class="admin-service-card__icon admin-service-card__icon--sky">📋</div><div class="admin-service-card__body"><p class="admin-service-card__title">Rentals</p><p class="admin-service-card__desc">View and manage all rental records</p></div></div>
           <div class="admin-service-card" (click)="openService('payment')"><div class="admin-service-card__icon admin-service-card__icon--rose">💳</div><div class="admin-service-card__body"><p class="admin-service-card__title">Payments</p><p class="admin-service-card__desc">Track transactions and refunds</p></div></div>
           <div class="admin-service-card" (click)="openService('broadcast')"><div class="admin-service-card__icon admin-service-card__icon--violet">📢</div><div class="admin-service-card__body"><p class="admin-service-card__title">Broadcast</p><p class="admin-service-card__desc">Send notifications to all customers</p></div></div>
@@ -122,6 +124,92 @@
         </table></div>
       </ng-container>
 
+
+      <!-- SERIES -->
+      <ng-container *ngIf="viewMode === 'series'">
+        <div class="admin-page-header">
+          <h2 class="admin-page-title">Series Management</h2>
+          <button class="admin-add-btn" (click)="openSeriesForm()">+ Add Series</button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="admin-filter-group"><span class="admin-filter-label">Title</span><input [(ngModel)]="seriesSearchName" (ngModelChange)="searchSeries()" placeholder="Search title..." class="admin-filter-input" style="width:180px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Language</span><select [(ngModel)]="seriesFilterLanguage" (ngModelChange)="searchSeries()" class="admin-filter-select" style="width:130px"><option value="">All Languages</option><option *ngFor="let l of seriesLanguages" [value]="l">{{ l }}</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Available</span><select [(ngModel)]="seriesFilterAvailable" (ngModelChange)="searchSeries()" class="admin-filter-select" style="width:130px"><option value="">All</option><option value="true">Available</option><option value="false">Unavailable</option></select></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Min Price</span><input type="number" [(ngModel)]="seriesMinPrice" (ngModelChange)="searchSeries()" placeholder="₹ Min" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Max Price</span><input type="number" [(ngModel)]="seriesMaxPrice" (ngModelChange)="searchSeries()" placeholder="₹ Max" class="admin-filter-input" style="width:80px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Sort</span><select [(ngModel)]="seriesSortOption" (ngModelChange)="searchSeries()" class="admin-filter-select" style="width:180px"><option value="">Default</option><option value="price-asc">Price ↑</option><option value="price-desc">Price ↓</option><option value="rentals-desc">Most Rented</option><option value="rentals-asc">Least Rented</option><option value="seasons-desc">Most Seasons</option><option value="seasons-asc">Fewest Seasons</option></select></div>
+          <button class="admin-filter-reset" (click)="resetSeries()">Reset</button>
+        </div>
+
+        <!-- Series table -->
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th></th><th>ID</th><th>Title</th><th>Language</th><th>Genres</th><th>Seasons</th><th>Price/day</th><th>Rentals</th><th>Available</th><th>Actions</th></tr></thead>
+            <tbody>
+              <ng-container *ngFor="let s of seriesList">
+                <!-- Series row -->
+                <tr class="cursor-pointer hover:bg-slate-800/50" (click)="toggleSeriesRow(s.id)">
+                  <td style="width:32px;text-align:center">
+                    <svg class="w-4 h-4 inline transition-transform" [class.rotate-90]="seriesExpandedId===s.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6l6 6-6 6V6z"/></svg>
+                  </td>
+                  <td>{{ s.id }}</td>
+                  <td style="font-weight:600;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.title }}</td>
+                  <td>{{ s.language }}</td>
+                  <td><div class="admin-genre-tags"><span *ngFor="let g of (s.genres||[]).slice(0,3)" class="admin-genre-tag">{{ g }}</span></div></td>
+                  <td>{{ s.seasons?.length ?? 0 }}</td>
+                  <td>₹{{ s.rentalPrice }}</td>
+                  <td>{{ s.rentalCount }}</td>
+                  <td><span class="admin-badge" [class.admin-badge--green]="s.isAvailable" [class.admin-badge--red]="!s.isAvailable">{{ s.isAvailable ? 'Yes' : 'No' }}</span></td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="admin-tbl-actions">
+                      <button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editSeries(s)">✏️</button>
+                      <button class="admin-tbl-btn admin-tbl-btn--info" title="Add Season" (click)="openAddSeasonModal(s.id)">+ Season</button>
+                      <button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteSeries(s.id)">🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Seasons dropdown -->
+                <ng-container *ngIf="seriesExpandedId === s.id">
+                  <tr *ngFor="let season of s.seasons" style="background:#0f172a">
+                    <td colspan="10" style="padding:0">
+                      <div style="padding:0 0 0 2.5rem">
+                        <!-- Season header row -->
+                        <div class="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-slate-800/40 border-b border-slate-800"
+                          (click)="toggleSeasonRow(season.id)">
+                          <svg class="w-3.5 h-3.5 shrink-0 transition-transform" [class.rotate-90]="seriesExpandedSeasonId===season.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6l6 6-6 6V6z"/></svg>
+                          <span class="text-fuchsia-400 font-semibold text-sm">Season {{ season.seasonNumber }}</span>
+                          <span *ngIf="season.title && season.title.toLowerCase() !== 'season ' + season.seasonNumber" class="text-slate-300 text-sm">{{ season.title }}</span>
+                          <span class="text-slate-500 text-xs">{{ season.releaseYear }}</span>
+                          <span class="text-slate-400 text-xs">{{ season.episodes?.length }} ep{{ season.episodes?.length !== 1 ? 's' : '' }}</span>
+                          <span *ngIf="season.averageRating > 0" class="text-amber-400 text-xs ml-1">★ {{ season.averageRating | number:'1.1-1' }}</span>
+                          <button class="admin-tbl-btn admin-tbl-btn--primary ml-auto" style="font-size:0.7rem;padding:0.2rem 0.5rem" title="Edit Season" (click)="$event.stopPropagation(); openEditSeason(season)">✏️ Edit</button>
+                          <button class="admin-tbl-btn admin-tbl-btn--info" style="font-size:0.7rem;padding:0.2rem 0.5rem" title="Add Episode" (click)="$event.stopPropagation(); openAddEpisodeModal(season, s.title)">+ Ep</button>
+                        </div>
+
+                        <!-- Episodes dropdown -->
+                        <ng-container *ngIf="seriesExpandedSeasonId === season.id">
+                          <div *ngFor="let ep of season.episodes"
+                            class="flex items-start gap-3 px-6 py-2 border-b border-slate-800/50 hover:bg-slate-800/20">
+                            <span class="text-fuchsia-500 font-mono text-xs w-5 shrink-0 mt-0.5">{{ ep.episodeNumber }}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-slate-200 text-xs font-medium">{{ ep.title }}</p>
+                              <p class="text-slate-500 text-xs mt-0.5 line-clamp-1">{{ ep.description }}</p>
+                            </div>
+                            <span class="text-slate-500 text-xs shrink-0">{{ ep.durationMinutes }}m</span>
+                            <button class="admin-tbl-btn admin-tbl-btn--primary shrink-0" style="font-size:0.65rem;padding:0.15rem 0.4rem" title="Edit Episode" (click)="openEditEpisode(ep, season.id)">✏️</button>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+              <tr *ngIf="seriesList.length === 0"><td colspan="10" class="admin-empty">No series found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
 
       <!-- RENTALS -->
       <ng-container *ngIf="viewMode === 'rental'">
@@ -352,5 +440,188 @@
 <div *ngIf="showTrailer" class="admin-modal-backdrop" (click)="showTrailer=''">
   <div style="max-width:720px;width:100%;aspect-ratio:16/9">
     <iframe [src]="showTrailer | safeUrl" style="width:100%;height:100%;border-radius:12px;border:none" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- ===== SERIES ADD/EDIT MODAL ===== -->
+<div *ngIf="showSeriesForm" class="admin-modal-backdrop">
+  <div class="admin-modal" style="max-width:680px;max-height:90vh;overflow-y:auto">
+
+    <!-- STEP 1: Details -->
+    <ng-container *ngIf="seriesFormStep === 'details'">
+      <div class="admin-modal__header">
+        <h3 class="admin-modal__title">{{ isSeriesEdit ? 'Edit Series' : 'Add Series — Step 1: Details' }}</h3>
+        <button class="admin-modal__close" (click)="cancelSeriesForm()">✕</button>
+      </div>
+      <div class="admin-modal__body" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Title *</label><input [(ngModel)]="seriesForm.title" placeholder="Series title" class="admin-field__input" /></div>
+        <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Description</label><textarea [(ngModel)]="seriesForm.description" rows="3" class="admin-field__textarea" placeholder="About the series..."></textarea></div>
+        <div class="admin-field"><label class="admin-field__label">Language</label><input [(ngModel)]="seriesForm.language" placeholder="e.g. English" class="admin-field__input" /></div>
+        <div class="admin-field"><label class="admin-field__label">Director</label><input [(ngModel)]="seriesForm.director" placeholder="Director name" class="admin-field__input" /></div>
+        <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Cast (comma-separated)</label><input [(ngModel)]="seriesForm.cast" placeholder="Actor 1, Actor 2..." class="admin-field__input" /></div>
+        <div class="admin-field"><label class="admin-field__label">Content Rating</label><input [(ngModel)]="seriesForm.contentRating" placeholder="e.g. TV-MA" class="admin-field__input" /></div>
+        <div class="admin-field"><label class="admin-field__label">Content Advisory</label><input [(ngModel)]="seriesForm.contentAdvisory" placeholder="e.g. Violence, Language" class="admin-field__input" /></div>
+        <div class="admin-field"><label class="admin-field__label">Rental Price (₹/day)</label><input type="number" [(ngModel)]="seriesForm.rentalPrice" class="admin-field__input" /></div>
+        <div class="admin-field" style="display:flex;align-items:center;gap:0.5rem;padding-top:1.5rem">
+          <input type="checkbox" [(ngModel)]="seriesForm.isAvailable" id="seriesAvail" />
+          <label for="seriesAvail" class="admin-field__label" style="margin:0">Available</label>
+        </div>
+        <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Poster URL</label><input [(ngModel)]="seriesForm.posterPath" placeholder="https://..." class="admin-field__input" /></div>
+        <div class="admin-field" style="grid-column:1/-1"><label class="admin-field__label">Trailer URL</label><input [(ngModel)]="seriesForm.trailerUrl" placeholder="https://youtube.com/..." class="admin-field__input" /></div>
+
+        <!-- Genre multi-select -->
+        <div class="admin-field" style="grid-column:1/-1;position:relative">
+          <label class="admin-field__label">Genres</label>
+          <button type="button" class="admin-field__input" style="text-align:left;cursor:pointer" (click)="seriesGenreDropdownOpen=!seriesGenreDropdownOpen">
+            {{ seriesSelectedGenreNames }}
+          </button>
+          <div *ngIf="seriesGenreDropdownOpen" style="position:absolute;z-index:50;top:100%;left:0;right:0;background:#1e293b;border:1px solid #334155;border-radius:8px;max-height:180px;overflow-y:auto;padding:0.5rem">
+            <label *ngFor="let g of allGenres" style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0.5rem;cursor:pointer;border-radius:4px" class="hover:bg-slate-700">
+              <input type="checkbox" [checked]="isSeriesGenreSelected(g.id)" (change)="toggleSeriesGenre(g.id)" />
+              <span style="font-size:0.85rem;color:#e2e8f0">{{ g.name }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Season count (only for new series) -->
+        <div *ngIf="!isSeriesEdit" class="admin-field" style="grid-column:1/-1">
+          <label class="admin-field__label">Number of Seasons</label>
+          <input type="number" min="1" max="20" [(ngModel)]="seriesSeasonCount" class="admin-field__input" style="width:100px" />
+        </div>
+      </div>
+      <div class="admin-modal__footer" style="display:flex;justify-content:flex-end;gap:0.5rem;padding:1rem 1.5rem">
+        <button class="admin-btn" (click)="cancelSeriesForm()">Cancel</button>
+        <button class="admin-btn admin-btn--primary" (click)="seriesDetailsNext()">{{ isSeriesEdit ? 'Save Changes' : 'Next: Seasons →' }}</button>
+      </div>
+    </ng-container>
+
+    <!-- STEP 2: Seasons & Episodes -->
+    <ng-container *ngIf="seriesFormStep === 'seasons'">
+      <div class="admin-modal__header">
+        <h3 class="admin-modal__title">Add Series — Step 2: Seasons & Episodes</h3>
+        <button class="admin-modal__close" (click)="cancelSeriesForm()">✕</button>
+      </div>
+      <div class="admin-modal__body">
+        <div *ngFor="let season of seriesSeasons; let si = index" style="margin-bottom:1.5rem;border:1px solid #334155;border-radius:10px;padding:1rem">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+            <span style="color:#a78bfa;font-weight:700;font-size:0.9rem">Season {{ season.seasonNumber }}</span>
+            <input [(ngModel)]="season.title" placeholder="Season title" class="admin-field__input" style="flex:1" />
+            <input type="number" [(ngModel)]="season.releaseYear" placeholder="Year" class="admin-field__input" style="width:80px" />
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+            <label class="admin-field__label" style="margin:0;white-space:nowrap">Episodes:</label>
+            <input type="number" min="1" max="50" [(ngModel)]="season.episodeCount" class="admin-field__input" style="width:70px" />
+            <button class="admin-btn admin-btn--primary" style="font-size:0.75rem;padding:0.3rem 0.75rem" (click)="buildEpisodeForms(si)">Set</button>
+          </div>
+          <div *ngFor="let ep of season.episodes; let ei = index" style="display:grid;grid-template-columns:40px 1fr 1fr 80px;gap:0.5rem;margin-bottom:0.5rem;align-items:start">
+            <span style="color:#818cf8;font-size:0.8rem;padding-top:0.5rem;text-align:center">E{{ ep.episodeNumber }}</span>
+            <input [(ngModel)]="ep.title" placeholder="Episode title" class="admin-field__input" style="font-size:0.8rem" />
+            <input [(ngModel)]="ep.description" placeholder="Description" class="admin-field__input" style="font-size:0.8rem" />
+            <input type="number" [(ngModel)]="ep.durationMinutes" placeholder="Min" class="admin-field__input" style="font-size:0.8rem" />
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal__footer" style="display:flex;justify-content:space-between;padding:1rem 1.5rem">
+        <button class="admin-btn" (click)="seriesFormStep='details'">← Back</button>
+        <button class="admin-btn admin-btn--primary" (click)="saveSeries()">Save Series</button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>
+
+<!-- ===== EDIT SEASON MODAL ===== -->
+<div *ngIf="showEditSeasonModal" class="admin-modal-backdrop">
+  <div class="admin-modal" style="max-width:420px">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">Edit Season</h3><button class="admin-modal__close" (click)="showEditSeasonModal=false">✕</button></div>
+    <div class="admin-modal__body" *ngIf="editingSeasonData">
+      <div class="admin-field"><label class="admin-field__label">Season Title</label><input [(ngModel)]="editingSeasonData.title" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Release Year</label><input type="number" [(ngModel)]="editingSeasonData.releaseYear" class="admin-field__input" /></div>
+    </div>
+    <div class="admin-modal__footer" style="display:flex;justify-content:flex-end;gap:0.5rem;padding:1rem 1.5rem">
+      <button class="admin-btn" (click)="showEditSeasonModal=false">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveEditSeason()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT EPISODE MODAL ===== -->
+<div *ngIf="showEditEpisodeModal" class="admin-modal-backdrop">
+  <div class="admin-modal" style="max-width:480px">
+    <div class="admin-modal__header"><h3 class="admin-modal__title">Edit Episode</h3><button class="admin-modal__close" (click)="showEditEpisodeModal=false">✕</button></div>
+    <div class="admin-modal__body" *ngIf="editingEpisodeData">
+      <div class="admin-field"><label class="admin-field__label">Episode Title</label><input [(ngModel)]="editingEpisodeData.title" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Description</label><textarea [(ngModel)]="editingEpisodeData.description" rows="3" class="admin-field__textarea"></textarea></div>
+      <div class="admin-field"><label class="admin-field__label">Duration (minutes)</label><input type="number" [(ngModel)]="editingEpisodeData.durationMinutes" class="admin-field__input" /></div>
+    </div>
+    <div class="admin-modal__footer" style="display:flex;justify-content:flex-end;gap:0.5rem;padding:1rem 1.5rem">
+      <button class="admin-btn" (click)="showEditEpisodeModal=false">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveEditEpisode()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD SEASON MODAL ===== -->
+<div *ngIf="showAddSeasonModal" class="admin-modal-backdrop">
+  <div class="admin-modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
+    <div class="admin-modal__header">
+      <h3 class="admin-modal__title">Add New Season</h3>
+      <button class="admin-modal__close" (click)="showAddSeasonModal=false">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:1rem">
+        <div class="admin-field">
+          <label class="admin-field__label">Season Number</label>
+          <input type="number" [(ngModel)]="addSeasonForm.seasonNumber" class="admin-field__input" />
+        </div>
+        <div class="admin-field">
+          <label class="admin-field__label">Title</label>
+          <input [(ngModel)]="addSeasonForm.title" class="admin-field__input" placeholder="Season title" />
+        </div>
+        <div class="admin-field">
+          <label class="admin-field__label">Release Year</label>
+          <input type="number" [(ngModel)]="addSeasonForm.releaseYear" class="admin-field__input" />
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+        <label class="admin-field__label" style="margin:0;white-space:nowrap">Number of Episodes:</label>
+        <input type="number" min="1" max="50" [(ngModel)]="addSeasonForm.episodeCount" class="admin-field__input" style="width:70px" />
+        <button class="admin-btn admin-btn--primary" style="font-size:0.75rem;padding:0.3rem 0.75rem" (click)="buildAddSeasonEpisodes()">Set</button>
+      </div>
+
+      <div *ngFor="let ep of addSeasonForm.episodes; let i = index"
+        style="display:grid;grid-template-columns:36px 1fr 1fr 70px;gap:0.5rem;margin-bottom:0.5rem;align-items:start">
+        <span style="color:#818cf8;font-size:0.8rem;padding-top:0.5rem;text-align:center">E{{ ep.episodeNumber }}</span>
+        <input [(ngModel)]="ep.title" placeholder="Episode title" class="admin-field__input" style="font-size:0.8rem" />
+        <input [(ngModel)]="ep.description" placeholder="Description" class="admin-field__input" style="font-size:0.8rem" />
+        <input type="number" [(ngModel)]="ep.durationMinutes" placeholder="Min" class="admin-field__input" style="font-size:0.8rem" />
+      </div>
+    </div>
+    <div class="admin-modal__footer" style="display:flex;justify-content:flex-end;gap:0.5rem;padding:1rem 1.5rem">
+      <button class="admin-btn" (click)="showAddSeasonModal=false">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveAddSeason()">Add Season</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD EPISODE MODAL ===== -->
+<div *ngIf="showAddEpisodeModal" class="admin-modal-backdrop">
+  <div class="admin-modal" style="max-width:480px">
+    <div class="admin-modal__header">
+      <h3 class="admin-modal__title">Add Episode</h3>
+      <button class="admin-modal__close" (click)="showAddEpisodeModal=false">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:1rem">{{ addEpisodeSeriesTitle }} — {{ addEpisodeSeasonTitle }}</p>
+      <div class="admin-field"><label class="admin-field__label">Episode Number</label><input type="number" [(ngModel)]="addEpisodeForm.episodeNumber" class="admin-field__input" /></div>
+      <div class="admin-field"><label class="admin-field__label">Title</label><input [(ngModel)]="addEpisodeForm.title" class="admin-field__input" placeholder="Episode title" /></div>
+      <div class="admin-field"><label class="admin-field__label">Description</label><textarea [(ngModel)]="addEpisodeForm.description" rows="3" class="admin-field__textarea" placeholder="Episode description..."></textarea></div>
+      <div class="admin-field"><label class="admin-field__label">Duration (minutes)</label><input type="number" [(ngModel)]="addEpisodeForm.durationMinutes" class="admin-field__input" /></div>
+    </div>
+    <div class="admin-modal__footer" style="display:flex;justify-content:flex-end;gap:0.5rem;padding:1rem 1.5rem">
+      <button class="admin-btn" (click)="showAddEpisodeModal=false">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveAddEpisode()">Add Episode</button>
+    </div>
   </div>
 </div>
