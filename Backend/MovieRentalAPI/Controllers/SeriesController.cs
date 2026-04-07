@@ -83,5 +83,21 @@ namespace MovieRentalAPI.Controllers
             try { return Ok(await _seriesService.GetSuggestedSeries(userId)); }
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
+
+        [HttpPost("season")]
+        public async Task<IActionResult> AddSeason(AddSeasonRequestDto request)
+        {
+            try { return Ok(await _seriesService.AddSeason(request)); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
+
+        [HttpPost("episode")]
+        public async Task<IActionResult> AddEpisode(AddEpisodeRequestDto request)
+        {
+            try { return Ok(await _seriesService.AddEpisode(request)); }
+            catch (NotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
     }
 }

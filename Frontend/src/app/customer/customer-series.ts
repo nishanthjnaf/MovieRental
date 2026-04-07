@@ -10,7 +10,8 @@ import { catchError, of } from 'rxjs';
   selector: 'app-customer-series',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './customer-series.html'
+  templateUrl: './customer-series.html',
+  styleUrl: './customer-movies.css'
 })
 export class CustomerSeries implements OnInit {
   allSeries: any[] = [];
@@ -19,10 +20,16 @@ export class CustomerSeries implements OnInit {
   selectedGenreIds = new Set<number>();
   selectedLanguages = new Set<string>();
   availableLanguages: string[] = [];
+
   q = '';
   loading = true;
-  hoveredSeriesId: number | null = null;
-  hoveredSeasonId: number | null = null;
+  sortOption = '';
+  minPrice?: number;
+  maxPrice?: number;
+  minSeasons?: number;
+  maxSeasons?: number;
+  priceSliderMin = 0;
+  priceSliderMax = 500;
 
   constructor(
     private seriesService: SeriesService,
@@ -40,7 +47,12 @@ export class CustomerSeries implements OnInit {
     this.loading = true;
     this.seriesService.getAll().pipe(catchError(() => of([]))).subscribe(list => {
       this.allSeries = list || [];
-      this.availableLanguages = [...new Set(this.allSeries.map(s => s.language).filter(Boolean))];
+      this.availableLanguages = [...new Set(this.allSeries.map(s => s.language).filter(Boolean))].sort();
+      const prices = this.allSeries.map(s => s.rentalPrice).filter(p => p > 0);
+      if (prices.length) {
+        this.priceSliderMin = Math.floor(Math.min(...prices));
+        this.priceSliderMax = Math.ceil(Math.max(...prices));
+      }
       this.applyFilters();
       this.loading = false;
       this.cdr.detectChanges();
@@ -49,18 +61,39 @@ export class CustomerSeries implements OnInit {
 
   applyFilters() {
     let result = [...this.allSeries];
+
     if (this.q.trim()) {
       const q = this.q.trim().toLowerCase();
-      result = result.filter(s => s.title?.toLowerCase().includes(q) || s.director?.toLowerCase().includes(q));
+      result = result.filter(s =>
+        s.title?.toLowerCase().includes(q) ||
+        s.director?.toLowerCase().includes(q) ||
+        (Array.isArray(s.cast) ? s.cast.join(' ') : s.cast || '').toLowerCase().includes(q)
+      );
     }
+
     if (this.selectedGenreIds.size > 0) {
-      result = result.filter(s => (s.genres || []).some((g: string) =>
-        this.genres.filter(gn => this.selectedGenreIds.has(gn.id)).map(gn => gn.name).includes(g)
-      ));
+      const selectedNames = this.genres.filter(g => this.selectedGenreIds.has(g.id)).map(g => g.name);
+      result = result.filter(s => (s.genres || []).some((g: string) => selectedNames.includes(g)));
     }
+
     if (this.selectedLanguages.size > 0) {
       result = result.filter(s => this.selectedLanguages.has(s.language));
     }
+
+    if (this.minPrice != null) result = result.filter(s => s.rentalPrice >= this.minPrice!);
+    if (this.maxPrice != null) result = result.filter(s => s.rentalPrice <= this.maxPrice!);
+    if (this.minSeasons != null) result = result.filter(s => (s.seasons?.length ?? 0) >= this.minSeasons!);
+    if (this.maxSeasons != null) result = result.filter(s => (s.seasons?.length ?? 0) <= this.maxSeasons!);
+
+    // Sort
+    if (this.sortOption === 'price-asc') result.sort((a, b) => a.rentalPrice - b.rentalPrice);
+    else if (this.sortOption === 'price-desc') result.sort((a, b) => b.rentalPrice - a.rentalPrice);
+    else if (this.sortOption === 'rating-desc') result.sort((a, b) => this.getAverageRating(b) - this.getAverageRating(a));
+    else if (this.sortOption === 'rating-asc') result.sort((a, b) => this.getAverageRating(a) - this.getAverageRating(b));
+    else if (this.sortOption === 'seasons-desc') result.sort((a, b) => (b.seasons?.length ?? 0) - (a.seasons?.length ?? 0));
+    else if (this.sortOption === 'seasons-asc') result.sort((a, b) => (a.seasons?.length ?? 0) - (b.seasons?.length ?? 0));
+    else if (this.sortOption === 'rentals-desc') result.sort((a, b) => (b.rentalCount ?? 0) - (a.rentalCount ?? 0));
+
     this.visibleSeries = result;
     this.cdr.detectChanges();
   }
@@ -77,30 +110,44 @@ export class CustomerSeries implements OnInit {
     this.applyFilters();
   }
 
-  open(id: number) {
-    this.router.navigate(['/dashboard/series', id]);
+  clearFilters() {
+    this.selectedGenreIds.clear();
+    this.selectedLanguages.clear();
+    this.q = '';
+    this.sortOption = '';
+    this.minPrice = undefined;
+    this.maxPrice = undefined;
+    this.minSeasons = undefined;
+    this.maxSeasons = undefined;
+    this.applyFilters();
   }
+
+  get activeFilterCount(): number {
+    return this.selectedGenreIds.size + this.selectedLanguages.size +
+      (this.minPrice != null ? 1 : 0) + (this.maxPrice != null ? 1 : 0) +
+      (this.minSeasons != null ? 1 : 0) + (this.maxSeasons != null ? 1 : 0) +
+      (this.sortOption ? 1 : 0);
+  }
+
+  getPriceMinPct(): number {
+    const range = this.priceSliderMax - this.priceSliderMin || 1;
+    return Math.min(100, Math.max(0, (((this.minPrice ?? this.priceSliderMin) - this.priceSliderMin) / range) * 100));
+  }
+
+  getPriceMaxPct(): number {
+    const range = this.priceSliderMax - this.priceSliderMin || 1;
+    return Math.min(100, Math.max(0, (((this.maxPrice ?? this.priceSliderMax) - this.priceSliderMin) / range) * 100));
+  }
+
+  open(id: number) { this.router.navigate(['/dashboard/series', id]); }
 
   getAverageRating(series: any): number {
     if (!series.seasons?.length) return 0;
-    const ratings = series.seasons
-      .filter((s: any) => s.averageRating > 0)
-      .map((s: any) => s.averageRating);
+    const ratings = series.seasons.filter((s: any) => s.averageRating > 0).map((s: any) => s.averageRating);
     return ratings.length ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : 0;
   }
 
-  setHoveredSeries(seriesId: number | null) {
-    this.hoveredSeriesId = seriesId;
-    if (!seriesId) this.hoveredSeasonId = null;
-    this.cdr.detectChanges();
-  }
-
-  setHoveredSeason(seasonId: number | null) {
-    this.hoveredSeasonId = seasonId;
-    this.cdr.detectChanges();
-  }
-
-  getHoveredSeries(): any {
-    return this.allSeries.find(s => s.id === this.hoveredSeriesId);
+  hasNewSeason(series: any): boolean {
+    return (series.seasons || []).some((s: any) => s.isNewSeason);
   }
 }

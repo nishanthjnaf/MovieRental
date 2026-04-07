@@ -78,6 +78,14 @@ export class SeriesService {
     return this.http.delete(`${this.watchlistUrl}/${id}`, { responseType: 'text' });
   }
 
+  addSeason(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/season`, data);
+  }
+
+  addEpisode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/episode`, data);
+  }
+
   // ── Season Reviews ──
   addSeasonReview(data: { userId: number; seasonId: number; rating: number; comment: string }): Observable<any> {
     return this.http.post(this.reviewUrl, data);

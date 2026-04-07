@@ -6,6 +6,8 @@ namespace MovieRentalAPI.Models.DTOs
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int DurationMinutes { get; set; }
+        // Optional override; if not provided, auto-set to today
+        public DateTime? AirDate { get; set; }
     }
 
     public class EpisodeResponseDto
@@ -16,5 +18,6 @@ namespace MovieRentalAPI.Models.DTOs
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int DurationMinutes { get; set; }
+        public DateTime AirDate { get; set; }
     }
 }

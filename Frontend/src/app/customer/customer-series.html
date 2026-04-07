@@ -1,95 +1,155 @@
-<!-- Header -->
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-white">Series</h1>
-  <span class="text-slate-400 text-sm">{{ visibleSeries.length }} series</span>
-</div>
+<div class="movies-page">
 
-<!-- Search + Filters -->
-<div class="flex flex-wrap gap-3 mb-6">
-  <div class="relative flex-1 min-w-48">
-    <input [(ngModel)]="q" (ngModelChange)="applyFilters()" placeholder="Search series..."
-      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 outline-none focus:border-fuchsia-500" />
-  </div>
-</div>
+  <!-- ── FILTER SIDEBAR ── -->
+  <aside class="movies-sidebar">
+    <div class="movies-sidebar__header">
+      <span class="movies-sidebar__title">Filters</span>
+      <button class="movies-sidebar__clear" (click)="clearFilters()" *ngIf="activeFilterCount > 0">
+        Reset ({{ activeFilterCount }})
+      </button>
+      <button class="movies-sidebar__clear" (click)="clearFilters()" *ngIf="activeFilterCount === 0">Reset</button>
+    </div>
 
-<!-- Genre chips -->
-<div class="flex flex-wrap gap-2 mb-4">
-  <button *ngFor="let g of genres"
-    class="px-3 py-1 rounded-full text-xs border transition-colors"
-    [class.bg-fuchsia-600]="selectedGenreIds.has(g.id)"
-    [class.border-fuchsia-600]="selectedGenreIds.has(g.id)"
-    [class.text-white]="selectedGenreIds.has(g.id)"
-    [class.border-slate-600]="!selectedGenreIds.has(g.id)"
-    [class.text-slate-400]="!selectedGenreIds.has(g.id)"
-    (click)="toggleGenre(g.id)">
-    {{ g.name }}
-  </button>
-</div>
+    <!-- Genre -->
+    <div class="filter-group">
+      <p class="filter-group__label">Genre</p>
+      <div class="filter-chips">
+        <button *ngFor="let g of genres"
+          class="filter-chip"
+          [class.filter-chip--active]="selectedGenreIds.has(g.id)"
+          (click)="toggleGenre(g.id)">
+          {{ g.name }}
+        </button>
+      </div>
+    </div>
 
-<!-- Language chips -->
-<div class="flex flex-wrap gap-2 mb-6">
-  <button *ngFor="let lang of availableLanguages"
-    class="px-3 py-1 rounded-full text-xs border transition-colors"
-    [class.bg-amber-600]="selectedLanguages.has(lang)"
-    [class.border-amber-600]="selectedLanguages.has(lang)"
-    [class.text-white]="selectedLanguages.has(lang)"
-    [class.border-slate-600]="!selectedLanguages.has(lang)"
-    [class.text-slate-400]="!selectedLanguages.has(lang)"
-    (click)="toggleLanguage(lang)">
-    {{ lang }}
-  </button>
-</div>
+    <!-- Language -->
+    <div class="filter-group">
+      <p class="filter-group__label">Language</p>
+      <div class="filter-chips">
+        <button *ngFor="let lang of availableLanguages"
+          class="filter-chip"
+          [class.filter-chip--active]="selectedLanguages.has(lang)"
+          (click)="toggleLanguage(lang)">
+          {{ lang }}
+        </button>
+      </div>
+    </div>
 
-<!-- Skeleton -->
-<div *ngIf="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-  <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="rounded-xl overflow-hidden">
-    <div class="aspect-[2/3] skeleton"></div>
-    <div class="p-2"><div class="h-3 rounded skeleton w-3/4 mb-1"></div><div class="h-3 rounded skeleton w-1/2"></div></div>
-  </div>
-</div>
-
-<!-- Grid -->
-<div *ngIf="!loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-  <article *ngFor="let s of visibleSeries"
-    class="group relative rounded-xl overflow-hidden cursor-pointer bg-slate-900 border border-slate-800 hover:border-fuchsia-600 transition-all"
-    (click)="open(s.id)"
-    (mouseenter)="setHoveredSeries(s.id)"
-    (mouseleave)="setHoveredSeries(null)">
-
-    <!-- Poster -->
-    <div class="aspect-[2/3] relative overflow-hidden">
-      <img [src]="s.posterPath || 'https://placehold.co/400x600'" [alt]="s.title"
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-
-      <!-- Hover overlay with season ratings -->
-      <div class="absolute inset-0 bg-slate-950/85 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-        <p class="text-white text-sm font-semibold mb-2">{{ s.title }}</p>
-        <div class="space-y-1 max-h-40 overflow-y-auto">
-          <div *ngFor="let season of s.seasons"
-            class="flex items-center justify-between text-xs px-2 py-1 rounded bg-slate-800/80">
-            <span class="text-slate-300">S{{ season.seasonNumber }}: {{ season.title }}</span>
-            <span *ngIf="season.averageRating > 0" class="text-amber-400">★ {{ season.averageRating | number:'1.1-1' }}</span>
-            <span *ngIf="season.averageRating === 0" class="text-slate-600">—</span>
-          </div>
+    <!-- Price Range -->
+    <div class="filter-group">
+      <p class="filter-group__label">Rental Price (₹/day)</p>
+      <div class="filter-range mb-3">
+        <input type="number" [(ngModel)]="minPrice" (ngModelChange)="applyFilters()"
+          [min]="priceSliderMin" [max]="priceSliderMax" placeholder="Min" class="filter-range__input" />
+        <span class="filter-range__sep">–</span>
+        <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="applyFilters()"
+          [min]="priceSliderMin" [max]="priceSliderMax" placeholder="Max" class="filter-range__input" />
+      </div>
+      <div class="price-range-slider">
+        <div class="slider-track" [style.--min-pct]="getPriceMinPct() + '%'" [style.--max-pct]="getPriceMaxPct() + '%'">
+          <input type="range" [min]="priceSliderMin" [max]="priceSliderMax" [step]="1"
+            [ngModel]="minPrice ?? priceSliderMin" (ngModelChange)="minPrice=$event; applyFilters()"
+            class="slider-input slider-input-min" />
+          <input type="range" [min]="priceSliderMin" [max]="priceSliderMax" [step]="1"
+            [ngModel]="maxPrice ?? priceSliderMax" (ngModelChange)="maxPrice=$event; applyFilters()"
+            class="slider-input slider-input-max" />
         </div>
       </div>
+    </div>
 
-      <!-- Availability badge -->
-      <div class="absolute top-2 right-2">
-        <span *ngIf="!s.isAvailable" class="px-1.5 py-0.5 rounded text-xs bg-slate-800/80 text-slate-500">Unavailable</span>
+    <!-- Seasons Range -->
+    <div class="filter-group">
+      <p class="filter-group__label">Number of Seasons</p>
+      <div class="filter-range">
+        <input type="number" [(ngModel)]="minSeasons" (ngModelChange)="applyFilters()"
+          min="1" placeholder="Min" class="filter-range__input" />
+        <span class="filter-range__sep">–</span>
+        <input type="number" [(ngModel)]="maxSeasons" (ngModelChange)="applyFilters()"
+          min="1" placeholder="Max" class="filter-range__input" />
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="movies-main">
+
+    <!-- Header + Sort -->
+    <div class="movies-main__header">
+      <h1 class="movies-main__title">Browse Series</h1>
+      <p class="movies-main__count" *ngIf="!loading">{{ visibleSeries.length }} series</p>
+      <div class="movies-sort">
+        <select [(ngModel)]="sortOption" (ngModelChange)="applyFilters()" class="movies-sort__select">
+          <option value="">Sort: Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating-desc">Rating: High to Low</option>
+          <option value="rating-asc">Rating: Low to High</option>
+          <option value="seasons-desc">Seasons: Most First</option>
+          <option value="seasons-asc">Seasons: Fewest First</option>
+          <option value="rentals-desc">Most Rented</option>
+        </select>
       </div>
     </div>
 
-    <!-- Info -->
-    <div class="p-3">
-      <h3 class="text-slate-200 text-sm font-medium truncate">{{ s.title }}</h3>
-      <div class="flex items-center justify-between mt-1">
-        <span class="text-slate-500 text-xs">{{ s.seasons?.length }} Season{{ s.seasons?.length !== 1 ? 's' : '' }}</span>
-        <span *ngIf="getAverageRating(s) > 0" class="text-amber-400 text-xs">★ {{ getAverageRating(s) | number:'1.1-1' }}</span>
-      </div>
-      <p class="text-fuchsia-400 text-xs mt-1">₹{{ s.rentalPrice }}/day</p>
+    <!-- Search bar -->
+    <div class="relative mb-5">
+      <input [(ngModel)]="q" (ngModelChange)="applyFilters()" placeholder="Search by title, director, cast..."
+        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 outline-none focus:border-fuchsia-500" />
+      <button *ngIf="q" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-sm" (click)="q=''; applyFilters()">✕</button>
     </div>
-  </article>
+
+    <!-- Skeleton -->
+    <div class="movies-grid" *ngIf="loading">
+      <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="movies-card-skeleton">
+        <div class="movies-card-skeleton__img skeleton"></div>
+        <div class="movies-card-skeleton__body">
+          <div class="h-3 rounded skeleton w-3/4 mb-1"></div>
+          <div class="h-3 rounded skeleton w-1/2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Series grid -->
+    <div class="movies-grid" *ngIf="!loading">
+      <article *ngFor="let s of visibleSeries"
+        class="mcard"
+        [class.mcard--unavailable]="!s.isAvailable"
+        (click)="open(s.id)">
+        <div class="mcard__poster">
+          <img [src]="s.posterPath || 'https://placehold.co/400x600'" [alt]="s.title" />
+          <div class="mcard__overlay">
+            <div class="mcard__genres">
+              <span *ngFor="let g of (s.genres || []).slice(0,2)" class="mcard__genre">{{ g }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="mcard__rating" *ngIf="getAverageRating(s) > 0">★ {{ getAverageRating(s) | number:'1.1-1' }}</span>
+              <span class="text-xs text-slate-400">{{ s.seasons?.length }} S</span>
+            </div>
+            <!-- Season ratings on hover -->
+            <div class="mt-1 space-y-0.5 max-h-24 overflow-y-auto">
+              <div *ngFor="let season of s.seasons"
+                class="flex items-center justify-between text-xs px-1.5 py-0.5 rounded bg-slate-900/70">
+                <span class="text-slate-400">S{{ season.seasonNumber }}</span>
+                <span *ngIf="season.averageRating > 0" class="text-amber-400">★ {{ season.averageRating | number:'1.1-1' }}</span>
+                <span *ngIf="season.averageRating === 0" class="text-slate-600">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mcard__info">
+          <h3 class="mcard__title">{{ s.title }}</h3>
+          <div class="mcard__meta">
+            <span>{{ s.seasons?.length }} Season{{ s.seasons?.length !== 1 ? 's' : '' }}</span>
+            <span class="mcard__dot"></span>
+            <span>{{ s.language }}</span>
+            <span class="mcard__price">₹{{ s.rentalPrice }}/day</span>
+          </div>
+          <span *ngIf="hasNewSeason(s)" class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-emerald-900/70 text-emerald-300 border border-emerald-700">New Season</span>
+        </div>
+      </article>
+    </div>
+
+    <p *ngIf="!loading && visibleSeries.length === 0" class="movies-empty">No series found matching your filters.</p>
+  </div>
 </div>
-
-<p *ngIf="!loading && visibleSeries.length === 0" class="text-slate-500 text-center py-16">No series found.</p>
