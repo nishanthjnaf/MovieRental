@@ -13,7 +13,7 @@
 
   <!-- ── HERO ── -->
   <div class="detail-hero">
-    <img [src]="movie.posterPath || 'https://placehold.co/1400x500'" class="detail-hero__bg" [alt]="movie.title" />
+    <img [src]="movie.landscapePosterPath || movie.posterPath || 'https://placehold.co/1400x500'" class="detail-hero__bg" [alt]="movie.title" />
     <div class="detail-hero__scrim"></div>
 
     <div class="detail-hero__content">

@@ -86,13 +86,13 @@
           <button class="admin-filter-reset" (click)="resetInventory()">Reset</button>
         </div>
         <div class="admin-table-wrap"><table class="admin-table">
-          <thead><tr><th>ID</th><th>Movie ID</th><th>Movie Name</th><th>Price/day</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>ID</th><th>Movie Name</th><th>Price/day</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
-            <tr *ngFor="let i of inventories"><td>{{ i.id }}</td><td>{{ i.movieId }}</td><td>{{ i.movieName }}</td><td>₹{{ i.rentalPrice }}</td>
+            <tr *ngFor="let i of inventories"><td>{{ i.id }}</td><td>{{ i.movieName }}</td><td>₹{{ i.rentalPrice }}</td>
               <td><span class="admin-badge" [class.admin-badge--green]="i.isAvailable" [class.admin-badge--red]="!i.isAvailable">{{ i.isAvailable ? 'Available' : 'Unavailable' }}</span></td>
               <td><div class="admin-tbl-actions"><button class="admin-tbl-btn admin-tbl-btn--primary" title="Edit" (click)="editInventory(i)">✏️</button><button class="admin-tbl-btn admin-tbl-btn--danger" title="Delete" (click)="deleteInventory(i.id)">🗑️</button><button class="admin-tbl-btn admin-tbl-btn--info" title="Toggle" (click)="toggleAvailability(i.id)">🔄</button></div></td>
             </tr>
-            <tr *ngIf="inventories.length === 0"><td colspan="6" class="admin-empty">No inventory items found.</td></tr>
+            <tr *ngIf="inventories.length === 0"><td colspan="5" class="admin-empty">No inventory items found.</td></tr>
           </tbody>
         </table></div>
       </ng-container>
@@ -215,7 +215,7 @@
       <ng-container *ngIf="viewMode === 'rental'">
         <div class="admin-page-header"><h2 class="admin-page-title">Rental Management</h2></div>
         <div class="admin-filter-bar">
-          <div class="admin-filter-group"><span class="admin-filter-label">User ID</span><input type="number" [(ngModel)]="rentalSearchUserId" (ngModelChange)="searchRental()" placeholder="User ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Username</span><input [(ngModel)]="rentalSearchUsername" (ngModelChange)="searchRental()" placeholder="Username" class="admin-filter-input" style="width:140px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="rentalStatusFilter" (ngModelChange)="searchRental()" class="admin-filter-select" style="width:160px"><option value="">All Status</option><option value="0">Payment Pending</option><option value="1">Available</option><option value="2">Payment Declined</option><option value="3">Payment Not Done</option></select></div>
           <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="rentalDateFrom" [max]="rentalDateTo || todayStr" (ngModelChange)="onRentalDateFromChange($any($event)); searchRental()" class="admin-filter-input" style="width:140px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">To</span><input type="date" [(ngModel)]="rentalDateTo" [min]="rentalDateFrom" [max]="todayStr" (ngModelChange)="onRentalDateToChange($any($event)); searchRental()" class="admin-filter-input" style="width:140px" /></div>
@@ -223,9 +223,9 @@
           <button class="admin-filter-reset" (click)="resetRental()">Reset</button>
         </div>
         <div class="admin-table-wrap"><table class="admin-table">
-          <thead><tr><th>ID</th><th>User ID</th><th>Date</th><th>Status</th><th>Total</th><th>Items</th></tr></thead>
+          <thead><tr><th>ID</th><th>Username</th><th>Date</th><th>Status</th><th>Total</th><th>Items</th></tr></thead>
           <tbody>
-            <tr *ngFor="let r of rentals"><td>{{ r.id }}</td><td>{{ r.userId }}</td><td>{{ r.rentalDate | date:'MMM d, y' }}</td>
+            <tr *ngFor="let r of rentals"><td>{{ r.id }}</td><td>{{ r.userName || r.userId }}</td><td>{{ r.rentalDate | date:'MMM d, y' }}</td>
               <td><span class="admin-badge" [class.admin-badge--yellow]="r.status===0" [class.admin-badge--green]="r.status===1" [class.admin-badge--red]="r.status===2||r.status===3">{{ getStatusText(r.status) }}</span></td>
               <td>₹{{ r.totalAmount }}</td><td><button class="admin-tbl-btn admin-tbl-btn--info" title="View items" (click)="openRentalItems(r.id)">📂</button></td>
             </tr>
@@ -239,7 +239,7 @@
         <div class="admin-page-header"><h2 class="admin-page-title">Payment Management</h2></div>
         <div class="admin-filter-bar">
           <div class="admin-filter-group"><span class="admin-filter-label">Rental ID</span><input type="number" [(ngModel)]="paymentSearchRentalId" (ngModelChange)="searchPayment()" placeholder="Rental ID" class="admin-filter-input" style="width:90px" /></div>
-          <div class="admin-filter-group"><span class="admin-filter-label">User ID</span><input type="number" [(ngModel)]="paymentSearchUserId" (ngModelChange)="searchPayment()" placeholder="User ID" class="admin-filter-input" style="width:90px" /></div>
+          <div class="admin-filter-group"><span class="admin-filter-label">Username</span><input [(ngModel)]="paymentSearchUsername" (ngModelChange)="searchPayment()" placeholder="Username" class="admin-filter-input" style="width:140px" /></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Method</span><select [(ngModel)]="paymentMethodFilter" (ngModelChange)="searchPayment()" class="admin-filter-select" style="width:130px"><option value="">All Methods</option><option value="0">Debit Card</option><option value="1">Credit Card</option><option value="2">Net Banking</option><option value="3">UPI</option></select></div>
           <div class="admin-filter-group"><span class="admin-filter-label">Status</span><select [(ngModel)]="paymentStatusFilter" (ngModelChange)="searchPayment()" class="admin-filter-select" style="width:120px"><option value="">All Status</option><option value="0">Success</option><option value="1">Failed</option><option value="2">Refunded</option></select></div>
           <div class="admin-filter-group"><span class="admin-filter-label">From</span><input type="date" [(ngModel)]="paymentDateFrom" [max]="paymentDateTo || todayStr" (ngModelChange)="onPaymentDateFromChange($any($event)); searchPayment()" class="admin-filter-input" style="width:140px" /></div>
@@ -248,7 +248,7 @@
           <button class="admin-filter-reset" (click)="resetPayment()">Reset</button>
         </div>
         <div class="admin-table-wrap"><table class="admin-table">
-          <thead><tr><th>Rental ID</th><th>User</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th><th>Status</th><th>Payment ID</th></tr></thead>
+          <thead><tr><th>Rental ID</th><th>Username</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th><th>Status</th><th>Payment ID</th></tr></thead>
           <tbody>
             <tr *ngFor="let p of payments"><td>{{ p.rentalId }}</td><td>{{ p.userName || p.userId }}</td><td>₹{{ p.amount }}</td>
               <td><span class="admin-badge" [class.admin-badge--fuchsia]="p.paymentType===1" [class.admin-badge--slate]="p.paymentType===0">{{ p.paymentType === 1 ? 'Refund' : 'Purchase' }}</span></td>
@@ -417,15 +417,14 @@
     <div class="admin-modal__header"><h3 class="admin-modal__title">Rental #{{ selectedRentalId }} — Items</h3><button class="admin-modal__close" (click)="closeRentalItems()">✕</button></div>
     <div class="admin-modal__body" style="padding:0">
       <table class="admin-table">
-        <thead><tr><th>Item ID</th><th>Movie ID</th><th>Price/day</th><th>Start</th><th>End</th><th>Active</th><th>Action</th></tr></thead>
+        <thead><tr><th>Item ID</th><th>Movie Name</th><th>Price/day</th><th>Start</th><th>End</th><th>Active</th></tr></thead>
         <tbody>
           <tr *ngFor="let item of rentalItems">
-            <td>{{ item.id }}</td><td>{{ item.movieId }}</td><td>₹{{ item.pricePerDay }}</td>
+            <td>{{ item.id }}</td><td>{{ item.movieName || item.movieId }}</td><td>₹{{ item.pricePerDay }}</td>
             <td>{{ item.startDate | date:'MMM d, y' }}</td><td>{{ item.endDate | date:'MMM d, y' }}</td>
             <td><span class="admin-badge" [class.admin-badge--green]="item.isActive" [class.admin-badge--red]="!item.isActive">{{ item.isActive ? 'Active' : 'Ended' }}</span></td>
-            <td><button *ngIf="item.isActive" class="admin-tbl-btn admin-tbl-btn--danger" title="End rental" (click)="endRentalItem(item)">⏹</button></td>
           </tr>
-          <tr *ngIf="rentalItems.length === 0"><td colspan="7" class="admin-empty">No items found.</td></tr>
+          <tr *ngIf="rentalItems.length === 0"><td colspan="6" class="admin-empty">No items found.</td></tr>
         </tbody>
       </table>
     </div>

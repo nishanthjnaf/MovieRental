@@ -36,6 +36,10 @@ export class CustomerHome implements OnInit, OnDestroy {
 
   // Hero slideshow
   heroMovies: any[] = [];
+  heroSlides: any[] = [];
+  private heroSeriesPool: any[] = [];
+  private heroMoviesReady = false;
+  private heroSeriesReady = false;
   heroIndex = 0;
   private heroTimer: any;
   rentedMovieIds = new Set<number>();
@@ -66,7 +70,7 @@ export class CustomerHome implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onResize() {
     const w = window.innerWidth;
-    this.visibleCount = w < 640 ? 1 : w < 1024 ? 2 : 3;
+    this.visibleCount = w < 640 ? 1 : w < 1024 ? 2 : 4;
     this.cdr.detectChanges();
   }
 
@@ -122,7 +126,9 @@ export class CustomerHome implements OnInit, OnDestroy {
         const available = (movies || []).filter(m => this.availableMovieIds.has(m.id));
         const sortedByAdded = [...available].sort((a, b) => (b.id || 0) - (a.id || 0));
         this.newMovies = sortedByAdded.slice(0, 10);
-        this.heroMovies = sortedByAdded.slice(0, 3);
+        this.heroMovies = sortedByAdded.slice(0, 3).map(m => ({ ...m, _type: 'movie' }));
+        this.heroMoviesReady = true;
+        this.buildHeroSlides();
         this.startHeroTimer();
       }
     });
@@ -156,7 +162,12 @@ export class CustomerHome implements OnInit, OnDestroy {
     this.seriesService.getNew(10).pipe(
       timeout(10000), catchError(() => of([])), finalize(done)
     ).subscribe({
-      next: (res) => { this.newSeries = res || []; }
+      next: (res) => {
+        this.newSeries = res || [];
+        this.heroSeriesPool = (res || []).slice(0, 2).map((s: any) => ({ ...s, _type: 'series' }));
+        this.heroSeriesReady = true;
+        this.buildHeroSlides();
+      }
     });
 
     // dummy 5th pending resolver
@@ -167,10 +178,25 @@ export class CustomerHome implements OnInit, OnDestroy {
     this.stopHeroTimer();
   }
 
+  private buildHeroSlides() {
+    // Build 5 slides: 3 movies + 2 series, interleaved as: movie, movie, series, movie, series
+    const movies = this.heroMovies.slice(0, 3);
+    const series = this.heroSeriesPool.slice(0, 2);
+    if (movies.length === 0) return;
+    const slides: any[] = [];
+    slides.push(movies[0] ?? null);
+    slides.push(movies[1] ?? null);
+    slides.push(series[0] ?? null);
+    slides.push(movies[2] ?? null);
+    slides.push(series[1] ?? null);
+    this.heroSlides = slides.filter(Boolean);
+    this.cdr.detectChanges();
+  }
+
   private startHeroTimer() {
     this.stopHeroTimer();
     this.heroTimer = setInterval(() => {
-      this.heroIndex = (this.heroIndex + 1) % Math.max(1, this.heroMovies.length);
+      this.heroIndex = (this.heroIndex + 1) % Math.max(1, this.heroSlides.length);
       this.cdr.detectChanges();
     }, 5000);
   }
@@ -189,11 +215,13 @@ export class CustomerHome implements OnInit, OnDestroy {
     return this.rentedMovieIds.has(movieId);
   }
 
-  heroAction(movie: any) {
-    if (this.isRented(movie.id)) {
-      this.router.navigate(['/dashboard/watch', movie.id]);
+  heroAction(item: any) {
+    if (item._type === 'series') {
+      this.router.navigate(['/dashboard/series', item.id]);
+    } else if (this.isRented(item.id)) {
+      this.router.navigate(['/dashboard/watch', item.id]);
     } else {
-      this.router.navigate(['/dashboard/movie', movie.id]);
+      this.router.navigate(['/dashboard/movie', item.id]);
     }
   }
 

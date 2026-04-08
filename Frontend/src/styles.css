@@ -671,9 +671,10 @@ html.light-theme .home-cinehero__sub { color: #64748b; }
 
 .movie-card__poster {
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 2/3;
   overflow: hidden;
   background: #1e293b;
+  border-radius: 6px;
 }
 .movie-card__poster img {
   width: 100%;
@@ -1228,7 +1229,7 @@ html.light-theme .detail-review-form .detail-review__comment { background: #f8fa
 
 /* Skeleton card */
 .movies-card-skeleton { }
-.movies-card-skeleton__img { aspect-ratio: 16/9; border-radius: 6px; }
+.movies-card-skeleton__img { aspect-ratio: 2/3; border-radius: 6px; }
 .movies-card-skeleton__body { padding: 0.5rem 0; }
 
 /* ── Movie card ── */
@@ -1240,7 +1241,7 @@ html.light-theme .detail-review-form .detail-review__comment { background: #f8fa
 
 .mcard__poster {
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 2/3;
   overflow: hidden;
   background: #1e293b;
   border-radius: 6px;
@@ -1390,7 +1391,7 @@ html.light-theme .mcard__poster { background: #e2e8f0; }
 
 /* Skeleton */
 .rental-card-skeleton { border-radius: 10px; overflow: hidden; background: rgba(15,23,42,0.5); }
-.rental-card-skeleton__poster { aspect-ratio: 16/9; }
+.rental-card-skeleton__poster { aspect-ratio: 2/3; }
 .rental-card-skeleton__body { padding: 1rem; }
 
 /* ── Rental Card ── */
@@ -1407,7 +1408,7 @@ html.light-theme .mcard__poster { background: #e2e8f0; }
 
 .rental-card__poster {
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 2/3;
   overflow: hidden;
   cursor: pointer;
   background: #1e293b;
@@ -1910,7 +1911,7 @@ html.light-theme .txn-filter-divider { background: #e2e8f0; }
 
 /* Skeleton */
 .wl-card-skeleton { border-radius: 10px; overflow: hidden; background: rgba(15,23,42,0.5); }
-.wl-card-skeleton__poster { aspect-ratio: 16/9; }
+.wl-card-skeleton__poster { aspect-ratio: 2/3; }
 .wl-card-skeleton__body { padding: 0.875rem; }
 
 /* Card */
@@ -1926,7 +1927,7 @@ html.light-theme .txn-filter-divider { background: #e2e8f0; }
 /* Poster */
 .wl-card__poster {
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 2/3;
   overflow: hidden;
   cursor: pointer;
   background: #1e293b;
@@ -2063,7 +2064,7 @@ html.light-theme .wl-card__poster { background: #e2e8f0; }
   background: rgba(15,23,42,0.5);
   border-radius: 10px;
 }
-.mr-card-skeleton__poster { width: 120px; aspect-ratio: 16/9; border-radius: 6px; flex-shrink: 0; }
+.mr-card-skeleton__poster { width: 80px; aspect-ratio: 2/3; border-radius: 6px; flex-shrink: 0; }
 .mr-card-skeleton__body { flex: 1; }
 .mr-card-skeleton__score { width: 64px; height: 48px; border-radius: 8px; flex-shrink: 0; }
 
@@ -2083,8 +2084,8 @@ html.light-theme .wl-card__poster { background: #e2e8f0; }
 /* Poster */
 .mr-card__poster {
   position: relative;
-  width: 130px;
-  aspect-ratio: 16/9;
+  width: 80px;
+  aspect-ratio: 2/3;
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
@@ -2778,8 +2779,8 @@ html.light-theme .notif-page-item__title--unread { color: #0f172a; }
 .cart-item:hover { border-color: rgba(148,163,184,0.15); }
 
 .cart-item__poster {
-  width: 100px;
-  aspect-ratio: 16/9;
+  width: 70px;
+  aspect-ratio: 2/3;
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;

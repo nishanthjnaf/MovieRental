@@ -115,6 +115,7 @@ export class Admin implements OnInit {
   rentals: any[] = [];
   private allRentals: any[] = [];
   rentalSearchUserId: any;
+  rentalSearchUsername = '';
   rentalDateFrom = '';
   rentalDateTo = '';
   rentalStatusFilter = '';
@@ -132,6 +133,7 @@ export class Admin implements OnInit {
   private allPayments: any[] = [];
   paymentSearchRentalId: any;
   paymentSearchUserId: any;
+  paymentSearchUsername = '';
   paymentMethodFilter = '';
   paymentStatusFilter = '';
   paymentDateFrom = '';
@@ -541,7 +543,10 @@ export class Admin implements OnInit {
 
   searchRental() {
     let list = [...this.allRentals];
-    if (this.rentalSearchUserId) list = list.filter((r: any) => r.userId === Number(this.rentalSearchUserId));
+    if (this.rentalSearchUsername.trim()) {
+      const term = this.rentalSearchUsername.trim().toLowerCase();
+      list = list.filter((r: any) => r.userName?.toLowerCase().includes(term));
+    }
     if (this.rentalStatusFilter !== '') list = list.filter((r: any) => r.status === Number(this.rentalStatusFilter));
     if (this.rentalDateFrom) { const from = new Date(this.rentalDateFrom); list = list.filter((r: any) => new Date(r.rentalDate) >= from); }
     if (this.rentalDateTo) { const to = new Date(this.rentalDateTo); to.setHours(23,59,59); list = list.filter((r: any) => new Date(r.rentalDate) <= to); }
@@ -552,7 +557,7 @@ export class Admin implements OnInit {
   }
 
   resetRental() {
-    this.rentalSearchUserId = null; this.rentalDateFrom = ''; this.rentalDateTo = '';
+    this.rentalSearchUserId = null; this.rentalSearchUsername = ''; this.rentalDateFrom = ''; this.rentalDateTo = '';
     this.rentalStatusFilter = ''; this.rentalSortDate = '';
     this.rentals = [...this.allRentals]; this.cdr.detectChanges();
   }
@@ -623,7 +628,10 @@ export class Admin implements OnInit {
   searchPayment() {
     let list = [...this.allPayments];
     if (this.paymentSearchRentalId) list = list.filter((p: any) => p.rentalId === Number(this.paymentSearchRentalId));
-    if (this.paymentSearchUserId) list = list.filter((p: any) => p.userId === Number(this.paymentSearchUserId));
+    if (this.paymentSearchUsername.trim()) {
+      const term = this.paymentSearchUsername.trim().toLowerCase();
+      list = list.filter((p: any) => (p.userName || p.username)?.toLowerCase().includes(term));
+    }
     if (this.paymentMethodFilter !== '') list = list.filter((p: any) => (p.method ?? p.paymentMethod) === Number(this.paymentMethodFilter));
     if (this.paymentStatusFilter !== '') list = list.filter((p: any) => (p.status ?? p.paymentStatus) === Number(this.paymentStatusFilter));
     if (this.paymentDateFrom) { const from = new Date(this.paymentDateFrom); list = list.filter((p: any) => new Date(p.paymentDate) >= from); }
@@ -635,7 +643,7 @@ export class Admin implements OnInit {
   }
 
   resetPayment() {
-    this.paymentSearchRentalId = null; this.paymentSearchUserId = null;
+    this.paymentSearchRentalId = null; this.paymentSearchUserId = null; this.paymentSearchUsername = '';
     this.paymentMethodFilter = ''; this.paymentStatusFilter = '';
     this.paymentDateFrom = ''; this.paymentDateTo = ''; this.paymentSortDate = '';
     this.payments = [...this.allPayments]; this.cdr.detectChanges();

@@ -61,6 +61,7 @@ namespace MovieRentalAPI.Controllers
                     Genres = base_movie.Genres,
                     ContentAdvisory = base_movie.ContentAdvisory,
                     PosterPath = base_movie.PosterPath,
+                    LandscapePosterPath = base_movie.LandscapePosterPath,
                     TrailerUrl = base_movie.TrailerUrl,
                     AverageUserRating = Math.Round(avgRating, 1),
                     TotalRentals = totalRentals,

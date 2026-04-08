@@ -54,6 +54,7 @@ namespace MovieRentalAPI.Services
                 ContentAdvisory = request.ContentAdvisory?.Trim() ?? string.Empty,
                 Genres = new List<Genre>(),
                 PosterPath = request.PosterPath,
+                LandscapePosterPath = request.LandscapePosterPath,
                 TrailerUrl = request.TrailerUrl,
                 RentalCount = 0
             };
@@ -136,6 +137,7 @@ namespace MovieRentalAPI.Services
             existingMovie.DurationMinutes = request.DurationMinutes;
             existingMovie.Language = request.Language;
             existingMovie.PosterPath = request.PosterPath;
+            existingMovie.LandscapePosterPath = request.LandscapePosterPath;
             existingMovie.TrailerUrl = request.TrailerUrl;
             existingMovie.Director = request.Director ?? string.Empty;
             existingMovie.Cast = request.Cast?.Trim() ?? string.Empty;
@@ -249,6 +251,7 @@ namespace MovieRentalAPI.Services
                     ReleaseYear = m.ReleaseYear,
                     Language = m.Language,
                     PosterPath = m.PosterPath,
+                    LandscapePosterPath = m.LandscapePosterPath,
                     TrailerUrl = m.TrailerUrl,
                     Genres = m.Genres?.Select(g => g.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList() ?? new List<string>(),
                     Rating = avgByMovieId.TryGetValue(m.Id, out var avg) ? avg : 0
@@ -357,6 +360,7 @@ namespace MovieRentalAPI.Services
                 Genres = movie.Genres?.Select(g => g.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList() ?? new List<string>(),
                 ContentAdvisory = SplitCsv(movie.ContentAdvisory),
                 PosterPath = movie.PosterPath,
+                LandscapePosterPath = movie.LandscapePosterPath,
                 TrailerUrl = movie.TrailerUrl,
                 RentalCount = movie.RentalCount
             };

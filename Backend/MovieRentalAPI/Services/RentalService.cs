@@ -144,10 +144,14 @@ namespace MovieRentalAPI.Services
                 }
             }
 
+            var users = await _userRepository.GetAll();
+            var userMap = users?.ToDictionary(u => u.Id, u => u.Username ?? u.Name ?? "") ?? new Dictionary<int, string>();
+
             return rentals.Select(r => new RentalResponseDto
             {
                 Id = r.Id,
                 UserId = r.UserId,
+                UserName = userMap.TryGetValue(r.UserId, out var uname) ? uname : null,
                 RentalDate = r.RentalDate,
                 Status = (PaymentStatus)r.Status,
                 TotalAmount = r.TotalAmount
@@ -301,9 +305,13 @@ namespace MovieRentalAPI.Services
             if (items == null || items.Count == 0)
                 throw new NotFoundException("No items found for this rental");
 
+            var movies = await _movieRepository.GetAll();
+            var movieMap = movies?.ToDictionary(m => m.Id, m => m.Title ?? "") ?? new Dictionary<int, string>();
+
             return items.Select(i => new RentalItemResponseDto
             {
                 MovieId = i.MovieId,
+                MovieName = movieMap.TryGetValue(i.MovieId, out var mname) ? mname : null,
                 PricePerDay = i.PricePerDay,
                 StartDate = i.StartDate,
                 EndDate = i.EndDate,

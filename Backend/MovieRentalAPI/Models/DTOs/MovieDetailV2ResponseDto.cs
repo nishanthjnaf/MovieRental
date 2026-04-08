@@ -19,6 +19,7 @@ namespace MovieRentalAPI.Models.DTOs
         public List<string> Genres { get; set; } = new();
         public List<string> ContentAdvisory { get; set; } = new();
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
 
         // ── V2 enriched fields ───────────────────────────────────────────────

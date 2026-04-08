@@ -9,6 +9,7 @@ namespace MovieRentalAPI.Models.DTOs
         public string Language { get; set; } = String.Empty;
         public List<int>? GenreIds { get; set; }
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
 
         // Movie metadata required by the customer/detail UI

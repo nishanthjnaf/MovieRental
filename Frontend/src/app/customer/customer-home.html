@@ -8,13 +8,13 @@
 </app-preferences-setup>
 
 <!-- ── CINEMATIC HERO ── -->
-<div class="home-cinehero" *ngIf="!loading && heroMovies.length > 0">
+<div class="home-cinehero" *ngIf="!loading && heroSlides.length > 0">
 
   <!-- Slides -->
-  <div *ngFor="let m of heroMovies; let i = index"
+  <div *ngFor="let m of heroSlides; let i = index"
     class="home-cinehero__slide"
     [class.home-cinehero__slide--active]="i === heroIndex"
-    [class.home-cinehero__slide--prev]="i < heroIndex || (heroIndex === 0 && i === heroMovies.length - 1)">
+    [class.home-cinehero__slide--prev]="i < heroIndex || (heroIndex === 0 && i === heroSlides.length - 1)">
     <div class="home-cinehero__bg">
       <img [src]="m.posterPath || 'https://placehold.co/1400x600'" [alt]="m.title" />
     </div>
@@ -22,7 +22,7 @@
   </div>
 
   <!-- Content (always on top) -->
-  <div class="home-cinehero__content" *ngIf="heroMovies[heroIndex] as m">
+  <div class="home-cinehero__content" *ngIf="heroSlides[heroIndex] as m">
     <div class="home-cinehero__eyebrow">Welcome back</div>
     <h1 class="home-cinehero__title">
       What are you watching<br>
@@ -32,7 +32,7 @@
     <div class="home-cinehero__actions">
       <button class="home-cinehero__btn home-cinehero__btn--primary" (click)="heroAction(m)">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        {{ isRented(m.id) ? 'Watch Now' : 'Rent Now' }}
+        {{ m._type === 'series' ? 'View Series' : (isRented(m.id) ? 'Watch Now' : 'Rent Now') }}
       </button>
       <button class="home-cinehero__btn home-cinehero__btn--secondary" [routerLink]="['/dashboard/movies']">
         Browse All
@@ -41,20 +41,23 @@
   </div>
 
   <!-- Featured info bottom-right -->
-  <div class="home-cinehero__featured" *ngIf="heroMovies[heroIndex] as m">
-    <span class="home-cinehero__featured-label">{{ isRented(m.id) ? 'Currently Renting' : 'Now Available' }}</span>
+  <div class="home-cinehero__featured" *ngIf="heroSlides[heroIndex] as m">
+    <span class="home-cinehero__featured-label">
+      {{ m._type === 'series' ? 'Series' : (isRented(m.id) ? 'Currently Renting' : 'Now Available') }}
+    </span>
     <p class="home-cinehero__featured-title">{{ m.title }}</p>
     <div class="home-cinehero__featured-meta">
-      <span>{{ m.releaseYear }}</span>
+      <span>{{ m.releaseYear || m.language }}</span>
       <span class="home-cinehero__featured-dot"></span>
       <span>{{ m.language }}</span>
-      <span *ngIf="m.rating" class="home-cinehero__featured-rating">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
+      <span *ngIf="m._type === 'series' && m.seasons?.length" class="home-cinehero__featured-rating">{{ m.seasons.length }} Seasons</span>
+      <span *ngIf="m._type !== 'series' && m.rating" class="home-cinehero__featured-rating">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
     </div>
   </div>
 
   <!-- Dot indicators -->
   <div class="home-cinehero__dots">
-    <button *ngFor="let m of heroMovies; let i = index"
+    <button *ngFor="let m of heroSlides; let i = index"
       class="home-cinehero__dot"
       [class.home-cinehero__dot--active]="i === heroIndex"
       (click)="setHeroIndex(i)">

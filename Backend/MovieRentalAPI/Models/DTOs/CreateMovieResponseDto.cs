@@ -15,6 +15,7 @@ namespace MovieRentalAPI.Models.DTOs
         public List<string> Genres { get; set; } = new List<string>();
         public List<string> ContentAdvisory { get; set; } = new List<string>();
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
         public int RentalCount { get; set; }
     }

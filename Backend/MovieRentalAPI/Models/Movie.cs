@@ -20,6 +20,7 @@ namespace MovieRentalAPI.Models
         public int RentalCount { get; set; } = 0;
         public int MyProperty { get; set; }
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
         public required List<Genre> Genres { get; set; }
         public ICollection<Inventory>? Inventories { get; set; }

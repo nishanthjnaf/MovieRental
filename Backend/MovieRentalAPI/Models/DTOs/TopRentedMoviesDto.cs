@@ -8,6 +8,7 @@
         public int ReleaseYear { get; set; }
         public string Language { get; set; } = string.Empty;
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
         public List<string> Genres { get; set; } = new();
         public double Rating { get; set; }

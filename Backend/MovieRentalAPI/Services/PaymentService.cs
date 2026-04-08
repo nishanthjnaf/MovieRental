@@ -345,7 +345,7 @@ namespace MovieRentalAPI.Services
                 PaymentType = p.PaymentType,
                 PaymentDate = p.PaymentDate,
                 UserId = p.UserId,
-                UserName = p.User?.Name ?? "N/A",
+                UserName = p.User?.Username ?? p.User?.Name ?? "N/A",
                 PaymentId = p.PaymentId,
                 RefundAmount = p.RefundAmount,
                 RefundedAt = p.RefundedAt
