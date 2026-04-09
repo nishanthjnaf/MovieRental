@@ -34,6 +34,8 @@ export class CustomerMovieDetail implements OnInit {
   genreNames: string[] = [];
   isInWatchlist = false;
   existingReview: any = null;   // null = not rated yet
+  movieReviews: any[] = [];
+  showAllReviews = false;
   private movieId = 0;
 
   constructor(
@@ -52,6 +54,15 @@ export class CustomerMovieDetail implements OnInit {
     private cdr: ChangeDetectorRef,
     private sanitizer: DomSanitizer
   ) {}
+
+  get visibleReviews(): any[] {
+    return this.showAllReviews ? this.movieReviews : this.movieReviews.slice(0, 3);
+  }
+
+  get avgReviewScore(): number {
+    if (!this.movieReviews.length) return 0;
+    return this.movieReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / this.movieReviews.length;
+  }
 
   get rentalCountdown(): string | null {
     if (!this.rentalEndDate) return null;
@@ -86,6 +97,8 @@ export class CustomerMovieDetail implements OnInit {
       this.loading = true;
       this.isAlreadyRented = false;
       this.isInWatchlist = false;
+      this.movieReviews = [];
+      this.showAllReviews = false;
 
       const userId = this.currentUser.currentUserId || this.currentUser.decodedUserId;
       let pending = userId ? 3 : 2;
@@ -105,6 +118,13 @@ export class CustomerMovieDetail implements OnInit {
           this.movie = m;
           const genres = Array.isArray(m?.genres) ? m.genres : [];
           this.genreNames = genres.map((g: any) => (typeof g === 'string' ? g : g?.name)).filter((g: any) => !!g);
+          // Load movie reviews
+          this.reviewService.getByMovie(this.movieId).pipe(catchError(() => of([]))).subscribe((reviews: any[]) => {
+            this.movieReviews = (reviews || []).sort((a: any, b: any) =>
+              new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime()
+            );
+            this.cdr.detectChanges();
+          });
           // Check watchlist
           if (userId) {
             this.watchlistService.getByUser(userId).pipe(catchError(() => of([]))).subscribe((list: any[]) => {

@@ -133,6 +133,55 @@
             </div>
           </div>
         </div>
+
+        <!-- ── AUDIENCE REVIEWS (below Cast & Crew) ── -->
+        <div class="detail-reviews" *ngIf="movieReviews.length > 0">
+          <div class="detail-reviews__header">
+            <div>
+              <h2 class="detail-reviews__title">Audience Reviews</h2>
+              <p class="detail-reviews__sub">{{ movieReviews.length }} review{{ movieReviews.length === 1 ? '' : 's' }}</p>
+            </div>
+            <div class="detail-reviews__avg">
+              <span class="detail-reviews__avg-star">★</span>
+              <span class="detail-reviews__avg-score">{{ avgReviewScore | number:'1.1-1' }}</span>
+              <span class="detail-reviews__avg-max">/ 10</span>
+            </div>
+          </div>
+
+          <div class="detail-reviews__grid">
+            <div *ngFor="let r of visibleReviews" class="detail-review-card">
+              <div class="detail-review-card__top">
+                <div class="detail-review-card__avatar">{{ (r.userName || 'U').charAt(0).toUpperCase() }}</div>
+                <div class="detail-review-card__meta">
+                  <span class="detail-review-card__user">{{ r.userName || 'Anonymous' }}</span>
+                  <span class="detail-review-card__date">{{ r.reviewDate | date:'MMM d, y' }}</span>
+                </div>
+                <div class="detail-review-card__score">
+                  <span class="detail-review-card__score-star">★</span>
+                  <span class="detail-review-card__score-num">{{ r.rating | number:'1.1-1' }}</span>
+                  <span class="detail-review-card__score-denom">/10</span>
+                </div>
+              </div>
+              <div class="detail-review-card__bar">
+                <div class="detail-review-card__bar-fill" [style.width.%]="r.rating * 10"></div>
+              </div>
+              <p class="detail-review-card__comment" *ngIf="r.comment">"{{ r.comment }}"</p>
+              <p class="detail-review-card__comment detail-review-card__comment--empty" *ngIf="!r.comment">No comment left.</p>
+            </div>
+          </div>
+
+          <div class="detail-reviews__footer" *ngIf="movieReviews.length > 3">
+            <button class="detail-reviews__toggle" (click)="showAllReviews = !showAllReviews">
+              <span>{{ showAllReviews ? 'Show Less' : 'Read All ' + movieReviews.length + ' Reviews' }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"
+                [style.transform]="showAllReviews ? 'rotate(180deg)' : 'rotate(0deg)'"
+                style="transition: transform 0.3s ease">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- RIGHT: Trailer -->
@@ -148,6 +197,7 @@
       </div>
 
     </div>
+
   </div>
 
 </div>
