@@ -20,6 +20,11 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return true;
   }
 
-  router.navigate(['/dashboard']);
+  // Admin trying to access customer dashboard → send to admin panel
+  if (userRole === 'Admin') {
+    router.navigate(['/admin']);
+  } else {
+    router.navigate(['/dashboard']);
+  }
   return false;
 };

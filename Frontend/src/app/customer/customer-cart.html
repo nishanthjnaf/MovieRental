@@ -8,8 +8,11 @@
 <div *ngIf="items.length === 0" class="cart-empty">
   <svg xmlns="http://www.w3.org/2000/svg" class="cart-empty__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM7.2 14.8l.1.2H19c.6 0 1-.4 1-1s-.4-1-1-1H7.4L5.5 5H3c-.6 0-1 .4-1 1s.4 1 1 1h1l2.2 7.8z"/></svg>
   <p class="cart-empty__text">Your cart is empty</p>
-  <p class="cart-empty__sub">Browse movies and add them to your cart to rent</p>
-  <button class="cart-empty__btn" (click)="goToMovies()">Browse Movies</button>
+  <p class="cart-empty__sub">Browse movies and series and add them to your cart to rent</p>
+  <div class="flex gap-3 justify-center">
+    <button class="cart-empty__btn" (click)="goToMovies()">Browse Movies</button>
+    <button class="cart-empty__btn" style="background:rgba(124,58,237,0.15);color:#a78bfa;border:1px solid rgba(124,58,237,0.3)" (click)="goToSeries()">Browse Series</button>
+  </div>
 </div>
 
 <!-- Cart layout -->
@@ -61,19 +64,25 @@
     <div *ngIf="showUpsell5" class="cart-upsell cart-upsell--5">
       <span class="cart-upsell__icon">🎬</span>
       <div class="cart-upsell__body">
-        <p class="cart-upsell__title">Add 1 more movie — get <strong>5% OFF</strong></p>
-        <p class="cart-upsell__sub">Rent 2 movies and save on your total</p>
+        <p class="cart-upsell__title">Add 1 more item — get <strong>5% OFF</strong></p>
+        <p class="cart-upsell__sub">Rent 2 movies or series and save on your total</p>
       </div>
-      <button class="cart-upsell__btn" (click)="goToMovies()">Browse</button>
+      <div class="flex gap-2">
+        <button class="cart-upsell__btn" (click)="goToMovies()">Movies</button>
+        <button class="cart-upsell__btn" style="background:rgba(124,58,237,0.2);border-color:rgba(124,58,237,0.4)" (click)="goToSeries()">Series</button>
+      </div>
     </div>
 
     <div *ngIf="showUpsell10" class="cart-upsell cart-upsell--10">
       <span class="cart-upsell__icon">🔥</span>
       <div class="cart-upsell__body">
-        <p class="cart-upsell__title">Add 1 more movie — get <strong>10% OFF</strong></p>
-        <p class="cart-upsell__sub">Rent 3 movies and unlock the best deal</p>
+        <p class="cart-upsell__title">Add 1 more item — get <strong>10% OFF</strong></p>
+        <p class="cart-upsell__sub">Rent 3 movies or series and unlock the best deal</p>
       </div>
-      <button class="cart-upsell__btn" (click)="goToMovies()">Browse</button>
+      <div class="flex gap-2">
+        <button class="cart-upsell__btn" (click)="goToMovies()">Movies</button>
+        <button class="cart-upsell__btn" style="background:rgba(124,58,237,0.2);border-color:rgba(124,58,237,0.4)" (click)="goToSeries()">Series</button>
+      </div>
     </div>
 
     <!-- Promo coupons -->
@@ -92,7 +101,7 @@
               <p class="cart-coupon__code">{{ p.code }}</p>
               <p class="cart-coupon__desc">{{ p.description }}</p>
               <p *ngIf="!isPromoEligible(p)" class="cart-coupon__req">
-                Add {{ p.minItems - items.length }} more movie{{ p.minItems - items.length === 1 ? '' : 's' }} to unlock
+                Add {{ p.minItems - items.length }} more item{{ p.minItems - items.length === 1 ? '' : 's' }} to unlock
               </p>
             </div>
           </div>

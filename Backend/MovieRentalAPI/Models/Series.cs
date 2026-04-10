@@ -13,6 +13,7 @@ namespace MovieRentalAPI.Models
         public string ContentRating { get; set; } = string.Empty;
         public string ContentAdvisory { get; set; } = string.Empty;
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
         public int RentalCount { get; set; } = 0;
         public float RentalPrice { get; set; } = 0;

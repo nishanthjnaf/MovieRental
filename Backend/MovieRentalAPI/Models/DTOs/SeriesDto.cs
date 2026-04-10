@@ -10,6 +10,7 @@ namespace MovieRentalAPI.Models.DTOs
         public string? ContentRating { get; set; }
         public string? ContentAdvisory { get; set; }
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
         public float RentalPrice { get; set; }
         public bool IsAvailable { get; set; } = true;
@@ -28,6 +29,7 @@ namespace MovieRentalAPI.Models.DTOs
         public string ContentRating { get; set; } = string.Empty;
         public List<string> ContentAdvisory { get; set; } = new();
         public string? PosterPath { get; set; }
+        public string? LandscapePosterPath { get; set; }
         public string? TrailerUrl { get; set; }
         public float RentalPrice { get; set; }
         public bool IsAvailable { get; set; }

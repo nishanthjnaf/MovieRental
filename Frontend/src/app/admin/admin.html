@@ -248,11 +248,11 @@
           <button class="admin-filter-reset" (click)="resetPayment()">Reset</button>
         </div>
         <div class="admin-table-wrap"><table class="admin-table">
-          <thead><tr><th>Rental ID</th><th>Username</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th><th>Status</th><th>Payment ID</th></tr></thead>
+          <thead><tr><th>Rental ID</th><th>Username</th><th>Amount</th><th>Type</th><th>Method</th><th>Date & Time</th><th>Status</th><th>Payment ID</th></tr></thead>
           <tbody>
             <tr *ngFor="let p of payments"><td>{{ p.rentalId }}</td><td>{{ p.userName || p.userId }}</td><td>₹{{ p.amount }}</td>
               <td><span class="admin-badge" [class.admin-badge--fuchsia]="p.paymentType===1" [class.admin-badge--slate]="p.paymentType===0">{{ p.paymentType === 1 ? 'Refund' : 'Purchase' }}</span></td>
-              <td>{{ getPaymentMethod(p.method) }}</td><td>{{ p.paymentDate | date:'MMM d, y' }}</td>
+              <td>{{ getPaymentMethod(p.method) }}</td><td style="white-space:nowrap">{{ p.paymentDate | date:'MMM d, y, h:mm a' }}</td>
               <td><span class="admin-badge" [class.admin-badge--green]="p.status===0" [class.admin-badge--red]="p.status===1" [class.admin-badge--fuchsia]="p.status===2">{{ getPaymentStatus(p.status) }}</span></td>
               <td style="font-size:0.7rem;color:#64748b">{{ p.paymentId }}</td>
             </tr>

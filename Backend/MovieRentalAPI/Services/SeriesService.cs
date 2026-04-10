@@ -34,6 +34,7 @@ namespace MovieRentalAPI.Services
                 ContentRating = request.ContentRating ?? string.Empty,
                 ContentAdvisory = request.ContentAdvisory?.Trim() ?? string.Empty,
                 PosterPath = request.PosterPath,
+                LandscapePosterPath = request.LandscapePosterPath,
                 TrailerUrl = request.TrailerUrl,
                 RentalPrice = request.RentalPrice,
                 IsAvailable = request.IsAvailable,
@@ -125,6 +126,7 @@ namespace MovieRentalAPI.Services
             series.ContentRating = request.ContentRating ?? string.Empty;
             series.ContentAdvisory = request.ContentAdvisory?.Trim() ?? string.Empty;
             series.PosterPath = request.PosterPath;
+            series.LandscapePosterPath = request.LandscapePosterPath;
             series.TrailerUrl = request.TrailerUrl;
             series.RentalPrice = request.RentalPrice;
             series.IsAvailable = request.IsAvailable;
@@ -319,6 +321,7 @@ namespace MovieRentalAPI.Services
                     ? new List<string>()
                     : s.ContentAdvisory.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToList(),
                 PosterPath = s.PosterPath,
+                LandscapePosterPath = s.LandscapePosterPath,
                 TrailerUrl = s.TrailerUrl,
                 RentalPrice = s.RentalPrice,
                 IsAvailable = s.IsAvailable,

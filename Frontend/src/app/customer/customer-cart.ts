@@ -249,5 +249,6 @@ export class CustomerCart implements OnInit {
   }
 
   goToMovies() { this.router.navigate(['/dashboard/movies']); }
+  goToSeries() { this.router.navigate(['/dashboard/series']); }
   openMovie(movieId: number) { this.router.navigate(['/dashboard/movie', movieId]); }
 }

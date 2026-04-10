@@ -40,10 +40,7 @@
     <div class="mr-card__poster" (click)="openItem(r)">
       <img [src]="r.movie?.posterPath || 'https://placehold.co/640x360'" [alt]="r.movieName || r._seasonTitle" />
       <div class="mr-card__poster-overlay">
-        <div class="mcard__genres">
-          <span *ngFor="let g of (r.movie?.genres || []).slice(0,2)" class="mcard__genre">{{ g }}</span>
-        </div>
-        <span class="text-xs px-1.5 py-0.5 rounded mt-1"
+        <span class="text-xs px-1.5 py-0.5 rounded"
           [class.bg-fuchsia-900]="r._isSeries" [class.text-fuchsia-300]="r._isSeries"
           [class.bg-blue-900]="!r._isSeries" [class.text-blue-300]="!r._isSeries">
           {{ r._isSeries ? 'Season' : 'Movie' }}
