@@ -183,10 +183,12 @@ export class CustomerMovies implements OnInit, AfterViewInit, OnDestroy {
       if (!this.selectedLanguages.size && !this.q) {
         this.refreshAvailableLanguages(list);
       }
-      // When browsing (no search), hide unavailable movies entirely
+      // When browsing (no search), show all movies but sort unavailable to the bottom
       // When searching, keep them but mark as unavailable (greyed out)
       if (!this.q) {
-        list = list.filter(m => this.availableMovieIds.has(m.id));
+        const available = list.filter(m => this.availableMovieIds.has(m.id));
+        const unavailable = list.filter(m => !this.availableMovieIds.has(m.id));
+        list = [...available, ...unavailable];
       }
       this.allMovies = list;
       this.resetVisible();

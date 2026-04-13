@@ -117,7 +117,7 @@
               <span *ngFor="let g of (m.genres || []).slice(0,2)" class="mcard__genre">{{ g }}</span>
             </div>
             <span class="mcard__rating">★ {{ (m.rating || 0) | number:'1.1-1' }}</span>
-            <span *ngIf="q && !isAvailable(m.id)" class="mcard__unavailable-badge">Unavailable</span>
+            <span *ngIf="!isAvailable(m.id)" class="mcard__unavailable-badge">Unavailable</span>
           </div>
         </div>
         <div class="mcard__info">

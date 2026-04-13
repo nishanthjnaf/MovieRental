@@ -261,10 +261,10 @@
       <div class="rental-popup__row"><span class="rental-popup__label">Amount Paid</span><span class="rental-popup__value">₹ {{ selectedRentalDetails?.amountPaid | number:'1.2-2' }}</span></div>
       <div class="rental-popup__row"><span class="rental-popup__label">Purchase Date</span><span class="rental-popup__value">{{ selectedRentalDetails?.purchaseDate | date:'medium' }}</span></div>
       <div class="rental-popup__row"><span class="rental-popup__label">Expiry Date</span><span class="rental-popup__value">{{ selectedRentalDetails?.expiryDate | date:'medium' }}</span></div>
-      <ng-container *ngIf="selectedRentalDetails?.refundedAt">
+      <ng-container *ngIf="selectedRentalDetails?.refundedAt && !selectedRentalDetails?.isActive">
         <div class="rental-popup__row"><span class="rental-popup__label">Returned At</span><span class="rental-popup__value">{{ selectedRentalDetails.refundedAt | date:'medium' }}</span></div>
       </ng-container>
-      <ng-container *ngIf="selectedRentalDetails?.refundAmount != null">
+      <ng-container *ngIf="selectedRentalDetails?.refundAmount != null && !selectedRentalDetails?.isActive">
         <div class="rental-popup__divider"></div>
         <div class="rental-popup__row"><span class="rental-popup__label">Refunded</span><span class="rental-popup__value rental-popup__value--green">₹ {{ selectedRentalDetails.refundAmount | number:'1.2-2' }}</span></div>
         <div class="rental-popup__row"><span class="rental-popup__label">Returned At</span><span class="rental-popup__value">{{ selectedRentalDetails.refundedAt | date:'medium' }}</span></div>
@@ -297,46 +297,4 @@
   </div>
 </div>
 
-<!-- ── RENEW POPUP ── -->
-<div *ngIf="showRenewPopup" class="rental-popup-backdrop">
-  <div class="rental-popup">
-    <ng-container *ngIf="renewStep === 1">
-      <div class="rental-popup__header">
-        <h3 class="rental-popup__title">Renew Rental</h3>
-        <button class="rental-popup__close" (click)="closeRenew()">✕</button>
-      </div>
-      <p class="rental-popup__subtitle">{{ selectedRentalForRenew?.movieTitle }}</p>
-      <div class="rental-popup__body">
-        <label class="rental-popup__label">Days to renew</label>
-        <input type="number" min="1" [(ngModel)]="renewDays" class="rental-popup__input" />
-      </div>
-      <div class="rental-popup__footer">
-        <button class="rental-btn rental-btn--close" (click)="closeRenew()">Cancel</button>
-        <button class="rental-btn rental-btn--renew" (click)="renewContinue()">Continue</button>
-      </div>
-    </ng-container>
-
-    <ng-container *ngIf="renewStep === 2">
-      <div class="rental-popup__header">
-        <h3 class="rental-popup__title">Order Summary</h3>
-        <button class="rental-popup__close" (click)="closeRenew()">✕</button>
-      </div>
-      <div class="rental-popup__body">
-        <div class="rental-popup__row"><span class="rental-popup__label">{{ selectedRentalForRenew?.movieTitle }}</span><span class="rental-popup__value">{{ renewDays }} day(s)</span></div>
-        <div class="rental-popup__divider"></div>
-        <div class="rental-popup__row"><span class="rental-popup__label font-semibold">Total</span><span class="rental-popup__value rental-popup__value--amber">₹ {{ renewTotal | number:'1.2-2' }}</span></div>
-        <label class="rental-popup__label mt-3 block">Payment Method</label>
-        <select [(ngModel)]="renewPaymentMethod" class="rental-popup__input">
-          <option [ngValue]="0">Debit Card</option>
-          <option [ngValue]="1">Credit Card</option>
-          <option [ngValue]="2">Net Banking</option>
-          <option [ngValue]="3">UPI</option>
-        </select>
-      </div>
-      <div class="rental-popup__footer">
-        <button class="rental-btn rental-btn--close" (click)="renewStep = 1">Back</button>
-        <button class="rental-btn rental-btn--watch" (click)="renewProceed()">Proceed to Pay</button>
-      </div>
-    </ng-container>
-  </div>
-</div>
+<!-- ── RENEW POPUP removed: Renew now adds to cart directly ── -->

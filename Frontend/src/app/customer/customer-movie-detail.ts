@@ -25,6 +25,7 @@ import { catchError, of, timeout } from 'rxjs';
 export class CustomerMovieDetail implements OnInit {
   movie: any = null;
   isAlreadyRented = false;
+  hasExpiredRental = false;
   rentalEndDate: string | null = null;
   isAvailableToRent = true;
   rentalPrice: number | null = null;
@@ -157,6 +158,9 @@ export class CustomerMovieDetail implements OnInit {
             const activeRental = (items || []).find((i: any) => i.movieId === this.movieId && i.isActive);
             this.isAlreadyRented = !!activeRental;
             this.rentalEndDate = activeRental?.endDate ?? null;
+            // Check if user has an expired/returned rental for this movie
+            this.hasExpiredRental = !this.isAlreadyRented &&
+              (items || []).some((i: any) => i.movieId === this.movieId && !i.isActive);
             // Check existing review for this movie
             this.reviewService.getByUser(userId).pipe(catchError(() => of([]))).subscribe((reviews: any[]) => {
               const found = (reviews || []).find((r: any) => r.movieId === this.movieId);
@@ -208,6 +212,27 @@ export class CustomerMovieDetail implements OnInit {
         } else {
           // reload() is called inside add() via tap — just show success
           this.toastr.success('Added to cart');
+        }
+      },
+      error: () => this.toastr.error('Could not add to cart')
+    });
+  }
+
+  renewFromDetail() {
+    if (!this.movie?.id || !this.isAvailableToRent) {
+      this.toastr.error('This movie is currently unavailable and cannot be renewed');
+      return;
+    }
+    this.cartState.addRenewal(this.movie.id).subscribe({
+      next: (res) => {
+        if (res === 'exists') {
+          this.toastr.info('Already in cart — head to cart to complete renewal');
+          this.router.navigate(['/dashboard/cart']);
+        } else if (res === null) {
+          this.toastr.error('Could not add to cart');
+        } else {
+          this.toastr.success('Added to cart as Renewal');
+          this.router.navigate(['/dashboard/cart']);
         }
       },
       error: () => this.toastr.error('Could not add to cart')

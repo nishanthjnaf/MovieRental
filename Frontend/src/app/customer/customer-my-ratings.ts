@@ -66,15 +66,19 @@ export class CustomerMyRatings implements OnInit {
       next: (res) => {
         const list = res || [];
         if (!list.length) { done(); return; }
+        let p = list.length;
         list.forEach((r: any) => {
-          this.ratings = [...this.ratings.filter(x => !(x._isSeries && x.id === r.id)), {
-            ...r,
-            movie: { title: r.seriesTitle },
-            _isSeries: true,
-            _displayTitle: `${r.seriesTitle}: Season ${r.seasonNumber}`
-          }];
+          // Fetch series to get posterPath
+          this.seriesService.getById(r.seriesId).pipe(catchError(() => of(null))).subscribe(series => {
+            this.ratings = [...this.ratings.filter(x => !(x._isSeries && x.id === r.id)), {
+              ...r,
+              movie: { title: r.seriesTitle, posterPath: series?.posterPath ?? null },
+              _isSeries: true,
+              _displayTitle: `${r.seriesTitle}: Season ${r.seasonNumber}`
+            }];
+            p--; if (p <= 0) done();
+          });
         });
-        done();
       },
       error: () => done()
     });

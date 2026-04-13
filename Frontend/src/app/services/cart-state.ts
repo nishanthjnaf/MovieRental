@@ -48,6 +48,22 @@ export class CartStateService {
     );
   }
 
+  // Add a movie to cart as a renewal
+  addRenewal(movieId: number) {
+    if (!movieId) return of(null);
+
+    return this.currentUser.loadCurrentUser().pipe(
+      switchMap(() => {
+        const uid = this.getUserId();
+        if (!uid) return of(null);
+        const exists = this.items.some(m => !m.isSeries && (m.movieId ?? m.id) === movieId);
+        if (exists) return of('exists');
+        return this.http.post(`${this.baseUrl}/${uid}/add`, { movieId, rentalDays: 7, isRenewal: true }, { responseType: 'text' })
+          .pipe(tap(() => this.fetchCart(uid)), catchError(() => of(null)));
+      })
+    );
+  }
+
   // Add a series to cart
   addSeries(series: any) {
     const seriesId = series?.id ?? series?.seriesId;

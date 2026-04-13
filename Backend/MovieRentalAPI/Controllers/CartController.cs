@@ -25,7 +25,7 @@ namespace MovieRentalAPI.Controllers
                     .Include(c => c.Movie)
                     .Select(c => new
                     {
-                        c.Id, c.MovieId, c.RentalDays,
+                        c.Id, c.MovieId, c.RentalDays, c.IsRenewal,
                         c.Movie!.Title, c.Movie.PosterPath,
                         c.Movie.ReleaseYear, c.Movie.Language, c.Movie.Rating,
                         IsSeries = false,
@@ -75,7 +75,8 @@ namespace MovieRentalAPI.Controllers
                 {
                     UserId = userId,
                     MovieId = req.MovieId,
-                    RentalDays = req.RentalDays > 0 ? req.RentalDays : 7
+                    RentalDays = req.RentalDays > 0 ? req.RentalDays : 7,
+                    IsRenewal = req.IsRenewal
                 });
                 await _context.SaveChangesAsync();
                 return Ok();
@@ -187,7 +188,7 @@ namespace MovieRentalAPI.Controllers
         }
     }
 
-    public class CartAddRequest { public int MovieId { get; set; } public int RentalDays { get; set; } = 7; }
+    public class CartAddRequest { public int MovieId { get; set; } public int RentalDays { get; set; } = 7; public bool IsRenewal { get; set; } = false; }
     public class CartUpdateDaysRequest { public int MovieId { get; set; } public int RentalDays { get; set; } }
     public class SeriesCartAddRequest { public int SeriesId { get; set; } public int RentalDays { get; set; } = 7; }
     public class SeriesCartUpdateDaysRequest { public int SeriesId { get; set; } public int RentalDays { get; set; } }

@@ -32,6 +32,9 @@
             [class.bg-blue-900]="!m.isSeries" [class.text-blue-300]="!m.isSeries">
             {{ m.isSeries ? 'Series' : 'Movie' }}
           </span>
+          <span *ngIf="m.isRenewal" class="text-xs px-1.5 py-0.5 rounded shrink-0 bg-amber-900 text-amber-300">
+            Renewal
+          </span>
         </div>
         <p class="cart-item__meta">{{ m.releaseYear || '' }} {{ m.language ? '· ' + m.language : '' }}</p>
         <p class="cart-item__price">₹{{ m.isSeries ? m.rentalPrice : (priceByMovieId[m.movieId] ?? '—') }} / day</p>

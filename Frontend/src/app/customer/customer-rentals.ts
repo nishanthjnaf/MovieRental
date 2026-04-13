@@ -9,6 +9,9 @@ import { ToastrService } from 'ngx-toastr';
 import { PaymentService } from '../services/payment';
 import { NotificationService } from '../services/notification';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CartStateService } from '../services/cart-state';
+import { InventoryService } from '../services/inventory';
+import { catchError, of } from 'rxjs';
 @Component({
   selector: 'app-customer-rentals',
   standalone: true,
@@ -76,7 +79,9 @@ export class CustomerRentals implements OnInit, AfterViewInit {
     private toastr: ToastrService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private cartState: CartStateService,
+    private inventoryService: InventoryService
   ) {}
 
   ngOnInit(): void {
@@ -168,11 +173,35 @@ export class CustomerRentals implements OnInit, AfterViewInit {
   }
 
   openRenew(item: any) {
-    this.selectedRentalForRenew = item;
-    this.renewDays = 1;
-    this.renewStep = 1;
-    this.renewPaymentMethod = 1;
-    this.showRenewPopup = true;
+    const movieId = item?.movieId;
+    if (!movieId) return;
+
+    // Check inventory availability before allowing renewal
+    this.inventoryService.getByMovie(movieId).pipe(
+      catchError(() => of([]))
+    ).subscribe((inv: any[]) => {
+      const list = Array.isArray(inv) ? inv : [inv];
+      const isAvailable = list.some((i: any) => i?.isAvailable);
+      if (!isAvailable) {
+        this.toastr.error('This movie is currently unavailable and cannot be renewed');
+        return;
+      }
+      // Add to cart as renewal
+      this.cartState.addRenewal(movieId).subscribe({
+        next: (res) => {
+          if (res === 'exists') {
+            this.toastr.info('Already in cart — head to cart to complete renewal');
+            this.router.navigate(['/dashboard/cart']);
+          } else if (res === null) {
+            this.toastr.error('Could not add to cart');
+          } else {
+            this.toastr.success('Added to cart as Renewal');
+            this.router.navigate(['/dashboard/cart']);
+          }
+        },
+        error: () => this.toastr.error('Could not add to cart')
+      });
+    });
   }
 
   closeRenew() {
@@ -294,7 +323,8 @@ export class CustomerRentals implements OnInit, AfterViewInit {
               expiryDate: item.endDate,
               paymentMethod: this.getPaymentMethod(payment?.paymentMethod ?? payment?.method),
               refundAmount: refund?.refundAmount ?? null,
-              refundedAt: refund?.refundedAt ?? null
+              refundedAt: refund?.refundedAt ?? null,
+              isActive: item.isActive
             };
             this.showDetailsPopup = true;
             this.cdr.detectChanges();
@@ -308,7 +338,8 @@ export class CustomerRentals implements OnInit, AfterViewInit {
               expiryDate: item.endDate,
               paymentMethod: this.getPaymentMethod(payment?.paymentMethod ?? payment?.method),
               refundAmount: null,
-              refundedAt: null
+              refundedAt: null,
+              isActive: item.isActive
             };
             this.showDetailsPopup = true;
             this.cdr.detectChanges();
@@ -323,7 +354,8 @@ export class CustomerRentals implements OnInit, AfterViewInit {
           expiryDate: item.endDate,
           paymentMethod: '-',
           refundAmount: null,
-          refundedAt: null
+          refundedAt: null,
+          isActive: item.isActive
         };
         this.showDetailsPopup = true;
         this.cdr.detectChanges();

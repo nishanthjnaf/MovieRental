@@ -248,6 +248,12 @@ namespace MovieRentalAPI.Services
             if (item == null)
                 throw new NotFoundException("Rental item not found");
 
+            // Check inventory availability before allowing renewal
+            var inventoryList = await _inventoryRepository.GetAll();
+            var inventory = inventoryList?.FirstOrDefault(i => i.MovieId == item.MovieId && i.IsAvailable);
+            if (inventory == null)
+                throw new ConflictException("Movie is currently unavailable and cannot be renewed");
+
             var utcNow = IstDateTime.Now;
 
             var wasExpired = item.EndDate <= utcNow;
