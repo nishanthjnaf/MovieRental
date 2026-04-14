@@ -456,14 +456,14 @@ html.light-theme .carousel-arrow:hover:not(:disabled) {
   height: 100%;
   object-fit: cover;
   object-position: center 20%;
-  filter: brightness(0.35);
+  filter: brightness(0.65);
 }
 .home-cinehero__scrim {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to right, rgba(7,9,15,0.85) 0%, rgba(7,9,15,0.3) 60%, transparent 100%),
-    linear-gradient(to top, rgba(7,9,15,0.9) 0%, transparent 50%);
+    linear-gradient(to right, rgba(7,9,15,0.55) 0%, rgba(7,9,15,0.1) 55%, transparent 100%),
+    linear-gradient(to top, rgba(7,9,15,0.7) 0%, transparent 50%);
 }
 .home-cinehero__content {
   position: relative;
@@ -579,7 +579,7 @@ html.light-theme .carousel-arrow:hover:not(:disabled) {
 .home-sections { }
 
 /* Light theme hero */
-html.light-theme .home-cinehero__bg img { filter: brightness(0.25); }
+html.light-theme .home-cinehero__bg img { filter: brightness(0.55); }
 html.light-theme .home-cinehero__scrim {
   background:
     linear-gradient(to right, rgba(241,245,249,0.9) 0%, rgba(241,245,249,0.4) 60%, transparent 100%),
@@ -1713,6 +1713,8 @@ html.light-theme .mcard__poster { background: #e2e8f0; }
 .rental-btn--renew:hover { background: rgba(249,115,22,0.25); }
 .rental-btn--end { background: rgba(239,68,68,0.12); color: #f87171; border-color: rgba(239,68,68,0.25); }
 .rental-btn--end:hover { background: rgba(239,68,68,0.22); }
+.rental-btn--end:disabled { background: rgba(100,116,139,0.1); color: #475569; border-color: rgba(100,116,139,0.2); cursor: not-allowed; opacity: 0.5; }
+.rental-btn--end:disabled:hover { background: rgba(100,116,139,0.1); }
 .rental-btn--info { background: rgba(148,163,184,0.08); color: #94a3b8; border-color: rgba(148,163,184,0.15); }
 .rental-btn--info:hover { background: rgba(148,163,184,0.15); color: #e2e8f0; }
 .rental-btn--close { background: rgba(148,163,184,0.1); color: #94a3b8; border-color: rgba(148,163,184,0.2); }
@@ -2990,6 +2992,8 @@ html.light-theme .notif-page-item__title--unread { color: #0f172a; }
 .cart-item__poster {
   width: 70px;
   aspect-ratio: 2/3;
+  position: relative;
+  overflow: hidden;
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
@@ -3051,6 +3055,17 @@ html.light-theme .notif-page-item__title--unread { color: #0f172a; }
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .cart-item__remove:hover { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.25); }
+
+.cart-item--unavailable { opacity: 0.6; }
+.cart-item--unavailable .cart-item__poster { position: relative; }
+.cart-item__unavailable-overlay {
+  position: absolute; inset: 0;
+  background: rgba(15,23,42,0.65);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #f87171;
+  border-radius: inherit;
+}
 
 .cart-notice { font-size: 0.72rem; color: #334155; padding: 0.25rem 0; }
 

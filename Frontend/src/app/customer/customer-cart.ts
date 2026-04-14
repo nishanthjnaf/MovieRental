@@ -123,12 +123,9 @@ export class CustomerCart implements OnInit {
 
   get subtotal(): number {
     return this.items.reduce((sum, m) => {
+      if (!this.isItemAvailable(m)) return sum;
       const days = Math.max(3, Number(m?.rentalDays || 3));
-      if (m.isSeries) {
-        return sum + Number(m.rentalPrice || 0) * days;
-      }
-      const price = Number(this.priceByMovieId[m.movieId] || 0);
-      return sum + price * days;
+      return sum + this.getItemPrice(m) * days;
     }, 0);
   }
 
@@ -146,6 +143,19 @@ export class CustomerCart implements OnInit {
       const days = Number(m?.rentalDays);
       return !days || days < 3;
     });
+  }
+
+  get hasUnavailableItems(): boolean {
+    return this.items.some(m => m.isAvailable === false);
+  }
+
+  isItemAvailable(m: any): boolean {
+    return m.isAvailable !== false;
+  }
+
+  getItemPrice(m: any): number {
+    if (!this.isItemAvailable(m)) return 0;
+    return m.isSeries ? Number(m.rentalPrice || 0) : Number(this.priceByMovieId[m.movieId] || 0);
   }
 
   // ── Upsell helpers ─────────────────────────────────────────────────────────
@@ -186,6 +196,10 @@ export class CustomerCart implements OnInit {
 
   openCheckout() {
     if (!this.currentUser.currentUserId || this.items.length === 0) return;
+    if (this.hasUnavailableItems) {
+      this.toastr.error('Remove unavailable items before proceeding');
+      return;
+    }
     this.showPaymentPopup = true;
   }
 

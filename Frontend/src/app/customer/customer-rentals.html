@@ -292,7 +292,7 @@
     </div>
     <div class="rental-popup__footer">
       <button class="rental-btn rental-btn--close" (click)="closeRefundPopup()">Cancel</button>
-      <button class="rental-btn rental-btn--end" (click)="confirmEndRental()">{{ refundPercent > 0 ? 'Proceed with Refund' : 'Return Rental' }}</button>
+      <button class="rental-btn rental-btn--end" [disabled]="refundPercent === 0" (click)="confirmEndRental()">{{ refundPercent > 0 ? 'Proceed with Refund' : 'Return Rental' }}</button>
     </div>
   </div>
 </div>

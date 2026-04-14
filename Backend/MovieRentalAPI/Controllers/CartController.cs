@@ -23,13 +23,15 @@ namespace MovieRentalAPI.Controllers
                 var movieItems = await _context.CartItems
                     .Where(c => c.UserId == userId)
                     .Include(c => c.Movie)
+                    .ThenInclude(m => m!.Inventories)
                     .Select(c => new
                     {
                         c.Id, c.MovieId, c.RentalDays, c.IsRenewal,
                         c.Movie!.Title, c.Movie.PosterPath,
                         c.Movie.ReleaseYear, c.Movie.Language, c.Movie.Rating,
                         IsSeries = false,
-                        SeriesId = (int?)null
+                        SeriesId = (int?)null,
+                        IsAvailable = c.Movie.Inventories.Any(i => i.IsAvailable)
                     })
                     .ToListAsync();
 
@@ -41,6 +43,7 @@ namespace MovieRentalAPI.Controllers
                         c.Id,
                         MovieId = (int?)null,
                         c.RentalDays,
+                        IsRenewal = false,
                         c.Series!.Title,
                         c.Series.PosterPath,
                         ReleaseYear = (int?)null,
@@ -48,7 +51,8 @@ namespace MovieRentalAPI.Controllers
                         Rating = (double?)null,
                         IsSeries = true,
                         SeriesId = (int?)c.SeriesId,
-                        RentalPrice = c.Series.RentalPrice
+                        RentalPrice = c.Series.RentalPrice,
+                        IsAvailable = c.Series.IsAvailable
                     })
                     .ToListAsync();
 

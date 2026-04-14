@@ -16,14 +16,14 @@
     [class.home-cinehero__slide--active]="i === heroIndex"
     [class.home-cinehero__slide--prev]="i < heroIndex || (heroIndex === 0 && i === heroSlides.length - 1)">
     <div class="home-cinehero__bg">
-      <img [src]="m.posterPath || 'https://placehold.co/1400x600'" [alt]="m.title" />
+      <img [src]="m.landscapePosterPath || m.posterPath || 'https://placehold.co/1400x600'" [alt]="m.title" />
     </div>
     <div class="home-cinehero__scrim"></div>
   </div>
 
   <!-- Content (always on top) -->
   <div class="home-cinehero__content" *ngIf="heroSlides[heroIndex] as m">
-    <div class="home-cinehero__eyebrow">Welcome back</div>
+    <div class="home-cinehero__eyebrow">{{ m._heroLabel || 'Featured' }}</div>
     <h1 class="home-cinehero__title">
       What are you watching<br>
       <span class="home-cinehero__accent">tonight?</span>
@@ -128,7 +128,7 @@
   <section class="home-section mb-12" *ngIf="!loading">
     <div class="home-section__header">
       <div class="home-section__title-group">
-        <h2 class="home-section__title">New Movies</h2>
+        <h2 class="home-section__title">Recently Added Movies</h2>
         <span class="home-section__tag home-section__tag--amber">Latest</span>
       </div>
       <div class="home-section__arrows">
@@ -163,7 +163,7 @@
   <section class="home-section mb-12" *ngIf="!loading && newSeries.length > 0">
     <div class="home-section__header">
       <div class="home-section__title-group">
-        <h2 class="home-section__title">New Series</h2>
+        <h2 class="home-section__title">Recently Added Series</h2>
         <span class="home-section__tag home-section__tag--fuchsia">Series</span>
       </div>
       <div class="home-section__arrows">

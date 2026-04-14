@@ -20,9 +20,12 @@
 
   <!-- Items list -->
   <div class="cart-items">
-    <div *ngFor="let m of items" class="cart-item">
+    <div *ngFor="let m of items" class="cart-item" [class.cart-item--unavailable]="!isItemAvailable(m)">
       <div class="cart-item__poster" (click)="m.isSeries ? router.navigate(['/dashboard/series', m.seriesId]) : openMovie(m.movieId)">
         <img [src]="m.posterPath || 'https://placehold.co/640x360'" [alt]="m.title" />
+        <div *ngIf="!isItemAvailable(m)" class="cart-item__unavailable-overlay">
+          <span>Unavailable</span>
+        </div>
       </div>
       <div class="cart-item__body">
         <div class="flex items-center gap-2 mb-1">
@@ -35,25 +38,31 @@
           <span *ngIf="m.isRenewal" class="text-xs px-1.5 py-0.5 rounded shrink-0 bg-amber-900 text-amber-300">
             Renewal
           </span>
+          <span *ngIf="!isItemAvailable(m)" class="text-xs px-1.5 py-0.5 rounded shrink-0 bg-red-900 text-red-300">
+            Unavailable
+          </span>
         </div>
         <p class="cart-item__meta">{{ m.releaseYear || '' }} {{ m.language ? '· ' + m.language : '' }}</p>
-        <p class="cart-item__price">₹{{ m.isSeries ? m.rentalPrice : (priceByMovieId[m.movieId] ?? '—') }} / day</p>
+        <p class="cart-item__price" [class.line-through]="!isItemAvailable(m)" [class.text-slate-500]="!isItemAvailable(m)">
+          {{ isItemAvailable(m) ? ('₹' + (m.isSeries ? m.rentalPrice : (priceByMovieId[m.movieId] ?? '—')) + ' / day') : '₹0 / day — not available' }}
+        </p>
       </div>
-      <div class="cart-item__days">
+      <div class="cart-item__days" [class.opacity-40]="!isItemAvailable(m)">
         <label class="cart-item__days-label">Rental Days</label>
         <input type="number" min="3" max="30"
           [ngModel]="m.rentalDays || 7"
           (ngModelChange)="setDays(m, $event)"
           class="cart-item__days-input"
-          [class.cart-item__days-input--error]="(m.rentalDays || 7) < 3" />
-        <p class="cart-item__days-hint" [class.cart-item__days-hint--error]="(m.rentalDays || 7) < 3">
-          {{ (m.rentalDays || 7) < 3 ? 'Min 3 days required' : 'days' }}
+          [disabled]="!isItemAvailable(m)"
+          [class.cart-item__days-input--error]="isItemAvailable(m) && (m.rentalDays || 7) < 3" />
+        <p class="cart-item__days-hint" [class.cart-item__days-hint--error]="isItemAvailable(m) && (m.rentalDays || 7) < 3">
+          {{ isItemAvailable(m) ? ((m.rentalDays || 7) < 3 ? 'Min 3 days required' : 'days') : '—' }}
         </p>
       </div>
       <div class="cart-item__subtotal">
         <span class="cart-item__subtotal-label">Subtotal</span>
-        <span class="cart-item__subtotal-value">
-          ₹{{ ((m.isSeries ? (m.rentalPrice || 0) : (priceByMovieId[m.movieId] || 0)) * (m.rentalDays || 7)) | number:'1.2-2' }}
+        <span class="cart-item__subtotal-value" [class.text-slate-500]="!isItemAvailable(m)">
+          {{ isItemAvailable(m) ? ('₹' + ((getItemPrice(m)) * (m.rentalDays || 7) | number:'1.2-2')) : '₹0.00' }}
         </span>
       </div>
       <button class="cart-item__remove" (click)="remove(m)" title="Remove">
@@ -126,8 +135,12 @@
 
     <div class="cart-summary__lines">
       <div *ngFor="let m of items" class="cart-summary__line">
-        <span class="cart-summary__line-name">{{ m.title }}</span>
-        <span class="cart-summary__line-val">₹{{ ((m.isSeries ? (m.rentalPrice || 0) : (priceByMovieId[m.movieId] || 0)) * (m.rentalDays || 7)) | number:'1.2-2' }}</span>
+        <span class="cart-summary__line-name" [class.text-slate-500]="!isItemAvailable(m)">
+          {{ m.title }}{{ !isItemAvailable(m) ? ' (unavailable)' : '' }}
+        </span>
+        <span class="cart-summary__line-val" [class.text-slate-500]="!isItemAvailable(m)">
+          {{ isItemAvailable(m) ? ('₹' + ((getItemPrice(m)) * (m.rentalDays || 7) | number:'1.2-2')) : '₹0.00' }}
+        </span>
       </div>
     </div>
 
@@ -154,12 +167,13 @@
     </div>
 
     <button class="cart-summary__btn"
-      [disabled]="loading || hasInvalidDays"
+      [disabled]="loading || hasInvalidDays || hasUnavailableItems"
       (click)="openCheckout()">
       {{ loading ? 'Processing...' : 'Proceed to Checkout' }}
     </button>
 
     <p *ngIf="hasInvalidDays" class="cart-summary__warn">Fix rental days before proceeding</p>
+    <p *ngIf="hasUnavailableItems" class="cart-summary__warn">Remove unavailable items to proceed</p>
   </div>
 
 </div>
